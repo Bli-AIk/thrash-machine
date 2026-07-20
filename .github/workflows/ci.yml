@@ -1,0 +1,58 @@
+name: Verify Template
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq love luajit luarocks rsync unzip xvfb zip
+          luarocks --lua-version=5.1 install fennel 1.6.1-1
+          echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
+      - name: Check Fennel source and documentation
+        run: make test
+      - name: Build standalone packages
+        run: ./build_standalone.sh
+      - name: Build Mod package
+        run: ./.github/scripts/build_mod.sh
+      - name: Run Kristal smoke test
+        run: KRISTAL="$PWD/.build/Kristal" make test-kristal
+      - name: Verify release assets
+        run: |
+          set -euo pipefail
+          files=(
+            dist/thrash-machine-release.love
+            dist/thrash-machine-debug.love
+            dist/thrash-machine-release-win64.zip
+            dist/thrash-machine-debug-win64.zip
+            dist/thrash-machine-mod.zip
+          )
+          for file in "${files[@]}"; do
+            test -s "$file"
+            unzip -t "$file" >/dev/null
+          done
+          unzip -Z1 dist/thrash-machine-mod.zip | grep -Fx mod.json >/dev/null
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/object-editor/' || true)"
+      - name: Generate and verify SHA-256 manifest
+        run: |
+          .github/scripts/generate_sha256sums.sh dist
+          test "$(wc -l < dist/SHA256SUMS)" -eq 5
+          (cd dist && sha256sum -c SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: thrash-machine-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
