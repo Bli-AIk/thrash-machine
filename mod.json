@@ -7,7 +7,7 @@
     "subtitle": "Kristal Fennel template",
 
     // The version of your project.
-    "version": "v0.0.0", // x-release-please-version
+    "version": "v1.0.0", // x-release-please-version
     // What version of the engine your project was made with.
     "engineVer": "v0.10.0",
 
