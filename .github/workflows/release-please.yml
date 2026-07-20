@@ -40,7 +40,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y jq love luajit luarocks rsync unzip xvfb zip
-          luarocks --lua-version=5.1 install fennel 1.6.1-1
+          luarocks --lua-version=5.1 install --local fennel 1.6.1-1
           echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
       - name: Verify source
         run: make test
