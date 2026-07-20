@@ -1,0 +1,15 @@
+[submodule "libraries/object-editor"]
+	path = libraries/object-editor
+	url = https://github.com/Bli-AIk/object-editor.git
+[submodule "libraries/langLib_zh_hans"]
+	path = libraries/langLib_zh_hans
+	url = https://github.com/Bli-AIk/kristal-langlib-zh-hans.git
+[submodule "libraries/fumos"]
+	path = libraries/fumos
+	url = https://github.com/Bli-AIk/fumos.git
+[submodule ".emacs"]
+	path = .emacs
+	url = https://github.com/Bli-AIk/kristal-emacs-config.git
+[submodule ".helix"]
+	path = .helix
+	url = https://github.com/Bli-AIk/kristal-helix-config.git
