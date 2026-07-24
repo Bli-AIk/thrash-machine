@@ -10,6 +10,7 @@
 [submodule ".emacs"]
 	path = .emacs
 	url = https://github.com/Bli-AIk/kristal-emacs-config.git
+	branch = experimental/fumos
 [submodule ".helix"]
 	path = .helix
 	url = https://github.com/Bli-AIk/kristal-helix-config.git
