@@ -1,59 +1,41 @@
 # 开发说明
 
-## Fennel 结构
+## Lua 结构
 
-FUMOS 会加载以下作者维护的文件：
+这是标准 Kristal Lua Mod 结构：
 
 | 路径 | 用途 |
 | --- | --- |
-| `mod.fnl` | Mod 生命周期方法。 |
-| `fnl/**/*.fnl` | 普通 Fennel 模块。 |
-| `fnl/**/*.fnlm` | 宏模块。 |
-| `scripts/**/*.fnl` | Kristal Registry 发现的脚本。 |
+| mod.lua | Mod 生命周期方法和全局事件注册。 |
+| scripts/**/*.lua | Kristal Registry 自动发现的战斗、世界和数据脚本。 |
+| libraries/langLib_zh_hans | 语言资源与本地化 hooks。 |
+| libraries/object-editor | 仅开发模式启用的对象编辑器。 |
 
-`flsproject.fnl` 是 Fennel CLI、fennel-ls 和 FUMOS 共用的搜索路径配置。不要为同一个作者脚本同时维护 `.lua` 与 `.fnl`；FUMOS 会拒绝生命周期方法冲突，`make test` 也会检查作者目录是否残留 Lua。
+Kristal 会按路径加载 Lua 文件。不要把作者脚本同时保存为多个源语言版本，避免重复注册。
 
-## Emacs
+## 编辑器
 
-项目 `.emacs` 是 `kristal-emacs-config` 子模块。安装固定 Fennel LSP：
+项目 .emacs 和 .helix 是 kristal-emacs-config、kristal-helix-config 子模块，负责 LuaLS、Kristal API 路径和启动快捷键。
 
-```sh
-sh .emacs/tools/install-fennel-ls.sh
-```
+确保 lua-language-server 在 PATH 中，并设置 Kristal 路径：
 
-载入 `.emacs/init.el` 后，启动开发模式 Kristal，再执行 `M-x fumos-connect`。常用标准键位为：
+    command -v lua-language-server
+    export KRISTAL_ROOT=/path/to/Kristal
 
-| 键位 | 操作 |
-| --- | --- |
-| `C-x C-e` | 求值 point 前的表达式。 |
-| `C-M-x` | 异步求值当前顶层 form。 |
-| `C-c C-r` | 求值 region。 |
-| `C-c C-k` | 重载已保存的当前文件。 |
-| `C-c C-z` | 显示 FUMOS REPL。 |
+Helix：
 
-Doom 用户可使用 `SPC m e e`、`SPC m c c`、`SPC m r i`。求值、重载和中断均需显式触发；保存永远不会改变游戏状态。
+    hx --health lua
 
-## Helix
-
-项目 `.helix` 是 `kristal-helix-config` 子模块，负责 LuaLS、Kristal 路径和启动快捷键。Helix 自带 Fennel language definition，但需要在 `PATH` 中找到 `fennel-ls`：
-
-```sh
-command -v fennel-ls
-hx --health fennel
-```
-
-若使用 `.emacs` 的固定安装器，其输出目录不会自动写入 shell `PATH`；可自行安装发行版提供的 `fennel-ls`，或将安装器输出的 `bin/` 目录加入环境变量。`hx --health fennel` 应显示 parser、formatter 和 language server 均可用。
+Emacs：加载 .emacs/init.el，然后从项目根目录启动 Kristal。LuaLS 会使用项目配置和 Kristal 的 Lua API 文档。
 
 ## 子模块升级
 
 先在依赖仓库完成测试和发布，再更新本仓库的 gitlink：
 
-```sh
-git submodule update --init --recursive
-git -C libraries/fumos fetch origin
-git -C libraries/fumos checkout --detach origin/main
-git add libraries/fumos
-git commit -m "build: pin FUMOS runtime"
-```
+    git submodule update --init --recursive
+    git -C libraries/langLib_zh_hans fetch origin
+    git -C libraries/langLib_zh_hans checkout --detach origin/main
+    git add libraries/langLib_zh_hans
+    git commit -m "build: pin localization library"
 
-不要在生产包中保留 `.emacs`、`.helix` 或 `libraries/object-editor`。构建脚本已执行这些排除规则。
+main 使用 .emacs 的 stable/lua 分支；实验分支使用同一子模块仓库的 experimental/fumos 分支。生产包会排除 .emacs、.helix 和 libraries/object-editor。
