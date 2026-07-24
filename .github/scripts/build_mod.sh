@@ -33,7 +33,6 @@ rsync -a \
     --exclude='/build_standalone.py' \
     --exclude='/release-please-config.json' \
     --exclude='/.release-please-manifest.json' \
-    --exclude='/libraries/fumos/test/' \
     --exclude='/.gitmodules' \
     --exclude='/.gitignore' \
     --exclude='*.tiled-project' \

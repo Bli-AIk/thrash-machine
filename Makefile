@@ -1,4 +1,3 @@
-FENNEL ?= fennel
 KRISTAL ?=
 
 .PHONY: test test-static test-docs test-kristal
@@ -6,11 +5,11 @@ KRISTAL ?=
 test: test-static test-docs
 
 test-static:
-	sh tests/assert-pure-fennel.sh
+	sh tests/assert-lua-template.sh
 	find . -path ./.git -prune -o -path ./.emacs -prune -o -path ./.helix -prune -o \
 		-path ./libraries -prune -o -path ./.build -prune -o -path ./dist -prune -o \
-		-path ./.worktrees -prune -o -type f \( -name '*.fnl' -o -name '*.fnlm' \) -print0 | \
-		xargs -0 -r -n1 $(FENNEL) --compile >/dev/null
+		-path ./.worktrees -prune -o -type f -name '*.lua' -exec \
+		luajit -b {} /dev/null \;
 
 test-docs:
 	sh tests/docs-smoke.sh

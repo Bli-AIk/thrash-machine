@@ -36,12 +36,16 @@ jobs:
         with:
           ref: ${{ needs.release.outputs.tag_name }}
           submodules: recursive
+      - name: Verify required submodules
+        run: |
+          set -euo pipefail
+          git submodule status --recursive
+          test -s libraries/langLib_zh_hans/lib.lua
+          test -s libraries/object-editor/lib.lua
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq love luajit luarocks rsync unzip xvfb zip
-          luarocks --lua-version=5.1 install --local fennel 1.6.1-1
-          echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y jq love luajit rsync unzip xvfb zip
       - name: Verify source
         run: make test
       - name: Validate release version

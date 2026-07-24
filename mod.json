@@ -4,7 +4,7 @@
     // Displays on the main menu.
     "name": "Thrash Machine",
     // Displays underneath the name. Optional.
-    "subtitle": "Kristal Fennel template",
+    "subtitle": "Kristal Lua template",
 
     // The version of your project.
     "version": "v0.0.0", // x-release-please-version

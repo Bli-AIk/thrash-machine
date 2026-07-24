@@ -8,8 +8,8 @@ done
 
 for needle in \
     'git submodule update --init --recursive' \
-    'FUMOS' \
-    'fennel-ls' \
+    'Lua' \
+    'lua-language-server' \
     'just build'
 do
     grep -Fqs -- "$needle" "$root/README.md" "$root/docs/development.zh-hans.md"
