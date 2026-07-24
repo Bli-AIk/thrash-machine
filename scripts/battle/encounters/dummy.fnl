@@ -2,7 +2,7 @@
 
 (fn Dummy.init [self]
   (super.init self)
-  (set self.text "* The tutorial begins...?")
+  (set self.text (: Game :loc "* The tutorial begins...?" "encounter_dummy_start"))
   (set self.music "battle")
   (set self.background true)
   (: self :addEnemy "dummy"))

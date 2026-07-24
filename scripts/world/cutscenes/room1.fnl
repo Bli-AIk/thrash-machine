@@ -1,12 +1,14 @@
 {:wall
  (fn [cutscene event]
-   (: cutscene :text "* The wall seems cracked.")
+   (: cutscene :text "* The wall seems cracked." nil nil
+      {:id "world_room1_wall_cracked"})
    (let [susie (: cutscene :getCharacter "susie")]
      (when susie
        (: cutscene :detachCamera)
        (: cutscene :detachFollowers)
        (: cutscene :setSpeaker susie)
-       (: cutscene :text "* Hey,[wait:5] think I can break\nthis wall?" "smile")
+       (: cutscene :text "* Hey,[wait:5] think I can break\nthis wall?" "smile" nil
+          {:id "world_room1_wall_susie_break"})
        (let [x (+ event.x (/ event.width 2))
              y (+ event.y (/ event.height 2))]
          (: cutscene :walkTo susie x (+ y 40) 0.75 "up")
@@ -27,7 +29,8 @@
          (: susie :shake 4)
          (Assets.playSound "wing")
          (: cutscene :wait 1)
-         (: cutscene :text "* Guess not." "nervous")
+         (: cutscene :text "* Guess not." "nervous" nil
+            {:id "world_room1_wall_guess_not"})
          (: susie :resetSprite)
          (: cutscene :attachCamera)
          (: cutscene :alignFollowers)

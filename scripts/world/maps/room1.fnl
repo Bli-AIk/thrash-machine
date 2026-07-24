@@ -9,7 +9,8 @@
  :tileheight 40
  :nextlayerid 6
  :nextobjectid 37
- :properties {:name "Test Map - Room 1"}
+ :properties {:name "Test Map - Room 1"
+              :name_id "map_room1_name"}
  :tilesets
  [{:name "castle"
    :firstgid 1
@@ -187,13 +188,17 @@
      :visible true
      :properties
      {:actor "starwalker"
+      :id1 "world_room1_starwalker_1"
+      :id2 "world_room1_starwalker_2"
       :text1 "* These [color:yellow]stairs[color:reset] are [color:yellow]Pissing[color:reset] me\noff..."
       :text2 "* I'm the original   [color:yellow]Starwalker[color:reset]"}}
     {:id 27 :name "savepoint" :type "" :shape "rectangle"
      :x 80 :y 210 :width 40 :height 40 :rotation 0
      :visible true
      :properties
-     {:text1 "* Silence echoes in the darkness\nof this familiar-yet-different\nscenery."
+     {:id1 "world_room1_savepoint_1"
+      :id2 "world_room1_savepoint_2"
+      :text1 "* Silence echoes in the darkness\nof this familiar-yet-different\nscenery."
       :text2 "* The power of avoiding copying\nofficial music shines within\nyou."}}
     {:id 28 :name "squeak" :type "" :shape "rectangle"
      :x 680 :y 600 :width 40 :height 40 :rotation 0
@@ -210,6 +215,7 @@
      :properties
      {:actor "wall"
       :flagcheck "wall_hit"
+      :id1 "world_room1_wall_guardian_1"
       :text1 "* I Am the Wall Guardian.[wait:5]\n* This Wall is Off Limits for you\nno-good wall slammers."}}]}
   {:type "objectgroup"
    :draworder "topdown"

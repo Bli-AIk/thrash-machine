@@ -9,7 +9,8 @@
  :tileheight 40
  :nextlayerid 6
  :nextobjectid 12
- :properties {:name "Test Map - Room 2"}
+ :properties {:name "Test Map - Room 2"
+              :name_id "map_room2_name"}
  :tilesets
  [{:name "castle"
    :firstgid 1
