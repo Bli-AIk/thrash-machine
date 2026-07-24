@@ -11,3 +11,6 @@
 [submodule ".helix"]
 	path = .helix
 	url = https://github.com/Bli-AIk/kristal-helix-config.git
+[submodule "libraries/terminal-cli"]
+	path = libraries/terminal-cli
+	url = https://github.com/Bli-AIk/kristal-terminal-cli.git

@@ -20,6 +20,7 @@ test -f "$root/mod.lua"
 test -f "$root/scripts/world/maps/room1.lua"
 test -f "$root/libraries/langLib_zh_hans/lib.lua"
 test -f "$root/libraries/object-editor/lib.lua"
+test -f "$root/libraries/terminal-cli/lib.lua"
 test ! -e "$root/libraries/fumos"
 test ! -e "$root/flsproject.fnl"
 if git -C "$root" config -f .gitmodules --get submodule.libraries/fumos.url >/dev/null 2>&1; then

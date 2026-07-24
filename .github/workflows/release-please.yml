@@ -42,6 +42,7 @@ jobs:
           git submodule status --recursive
           test -s libraries/langLib_zh_hans/lib.lua
           test -s libraries/object-editor/lib.lua
+          test -s libraries/terminal-cli/lib.lua
       - name: Install build dependencies
         run: |
           sudo apt-get update

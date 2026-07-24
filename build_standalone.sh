@@ -97,6 +97,7 @@ copy_mod() {
 
     if [ "$variant" = "release" ]; then
         rm -rf "$stage_mod/libraries/object-editor"
+        rm -rf "$stage_mod/libraries/terminal-cli"
     fi
 }
 

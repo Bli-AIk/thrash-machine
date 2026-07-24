@@ -5,7 +5,7 @@
 
 > 当前状态：可作为新 Kristal Mod 的开发模板使用。
 
-**Thrash Machine** 是一个标准 Lua Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将简体中文语言库、开发期 object-editor、Emacs 和 Helix 配置组织为可更新的子模块。
+**Thrash Machine** 是一个标准 Lua Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将简体中文语言库、开发期 object-editor、terminal-cli、Emacs 和 Helix 配置组织为可更新的子模块。
 
 | 简体中文 | English |
 | --- | --- |
@@ -16,6 +16,7 @@
 - 作者维护的 Mod 代码使用 Kristal 原生 Lua 文件。
 - langLib_zh_hans 预置英文/简体中文和系统语言自动选择。
 - object-editor 仅在开发模式启用，生产包自动禁用并移除。
+- terminal-cli 在开发模式下把 Kristal 调试控制台连接到当前终端，生产包自动移除。
 - .emacs 和 .helix 提供项目级 Kristal/LuaLS 配置。
 - release-please、Mod ZIP、release/debug .love、Windows x64 包和 SHA-256 清单。
 
@@ -45,7 +46,7 @@
     make test
     KRISTAL_ROOT=/path/to/Kristal just run
 
-just run 也会查找常见的本地 Kristal 路径。要在独立的干净 Kristal checkout 中跑启动 smoke test：
+just run 也会查找常见的本地 Kristal 路径；开发模式下可直接在当前终端输入 Lua 调试命令。要在独立的干净 Kristal checkout 中跑启动 smoke test：
 
     KRISTAL=/path/to/Kristal make test-kristal
 
@@ -62,7 +63,7 @@ just run 也会查找常见的本地 Kristal 路径。要在独立的干净 Kris
 
 just build 固定使用 Kristal v0.10.0，生成 release/debug .love、Windows x64 包；它仅修改暂存引擎副本的目标 Mod、自动启动、窗口标识和 release/debug 标志。just build-mod 生成可放入 Kristal mods/ 的生产 Mod ZIP。
 
-生产资产会保留语言库，禁用并剔除 object-editor、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/main 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 SHA256SUMS。
+生产资产会保留语言库，禁用并剔除 object-editor、terminal-cli、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/main 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 SHA256SUMS。
 
 ## 提交规范
 

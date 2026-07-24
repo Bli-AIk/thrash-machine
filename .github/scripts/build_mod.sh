@@ -40,6 +40,7 @@ rsync -a \
     "$ROOT/" "$STAGE_DIR/"
 
 rm -rf "$STAGE_DIR/libraries/object-editor"
+rm -rf "$STAGE_DIR/libraries/terminal-cli"
 python3 "$ROOT/build_standalone.py" patch-mod-manifest "$STAGE_DIR/mod.json" false false
 rm -f "$THRASH_MACHINE_OUTPUT_FILE"
 (cd "$STAGE_DIR" && zip -9 -q -r "$THRASH_MACHINE_OUTPUT_FILE" .)

@@ -2,7 +2,7 @@
 
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE)
 
-**Thrash Machine** is a standard Lua Kristal v0.10 template. It keeps a playable starter map, Dummy battle, and object event while wiring together Simplified Chinese localization, a development-only object editor, and project-local Emacs and Helix configuration.
+**Thrash Machine** is a standard Lua Kristal v0.10 template. It keeps a playable starter map, Dummy battle, and object event while wiring together Simplified Chinese localization, development-only object editing and terminal debugging, and project-local Emacs and Helix configuration.
 
 [简体中文](README.md)
 
@@ -22,6 +22,7 @@ The template uses thrash-machine as its Mod ID. Change the ID, display name, ver
 - LuaJIT for syntax checks and runtime support.
 - langLib_zh_hans for English and Simplified Chinese localization.
 - object-editor for development-only scene editing; release packages exclude it.
+- terminal-cli for interactive Lua debugging in the development terminal; release packages exclude it.
 - .emacs and .helix for LuaLS, Kristal paths, and launch helpers.
 
 ## Builds
@@ -29,7 +30,7 @@ The template uses thrash-machine as its Mod ID. Change the ID, display name, ver
     just build
     just build-mod
 
-The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags. Production packages keep localization, disable the object editor, and exclude development files.
+The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags. Production packages keep localization, disable the object editor, exclude terminal-cli, and omit development files.
 
 ## License
 

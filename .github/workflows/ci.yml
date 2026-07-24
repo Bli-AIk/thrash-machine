@@ -22,6 +22,7 @@ jobs:
           git submodule status --recursive
           test -s libraries/langLib_zh_hans/lib.lua
           test -s libraries/object-editor/lib.lua
+          test -s libraries/terminal-cli/lib.lua
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -50,6 +51,7 @@ jobs:
           done
           unzip -Z1 dist/thrash-machine-mod.zip | grep -Fx mod.json >/dev/null
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/object-editor/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
       - name: Generate and verify SHA-256 manifest
         run: |
           .github/scripts/generate_sha256sums.sh dist
