@@ -5,6 +5,13 @@ run *args:
     #!/usr/bin/env bash
     set -euo pipefail
     mod_root=$(pwd -P)
+    mod_id=""
+    if [ -f "$mod_root/mod.json" ]; then
+      mod_id=$(sed -n 's/^[[:space:]]*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*$/\1/p' "$mod_root/mod.json" | head -n 1)
+    fi
+    if [ -z "$mod_id" ]; then
+      mod_id=$(basename "$mod_root")
+    fi
     engine_root="${KRISTAL_ROOT:-}"
     if [ -z "$engine_root" ]; then
       for candidate in "$mod_root/../../Kristal" "$mod_root/../Kristal" "$HOME/Projects/LuaProjects/Kristal" "$HOME/Projects/Kristal" "$HOME/Kristal"; do
@@ -18,7 +25,7 @@ run *args:
       printf '%s\n' 'Kristal was not found; set KRISTAL_ROOT=/path/to/Kristal.' >&2
       exit 1
     fi
-    exec love "$engine_root" --mod thrash-machine --auto-mod-start {{args}}
+    exec love "$engine_root" --mod "$mod_id" --auto-mod-start {{args}}
 
 test:
     @make test

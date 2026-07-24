@@ -4,7 +4,13 @@ set -eu
 : "${KRISTAL:?set KRISTAL to a clean Kristal v0.10 checkout}"
 
 root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd -P)
-mod_id=thrash-machine
+mod_id=""
+if [ -f "$root/mod.json" ]; then
+    mod_id=$(sed -n 's/^[[:space:]]*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*$/\1/p' "$root/mod.json" | head -n 1)
+fi
+if [ -z "$mod_id" ]; then
+    mod_id=$(basename "$root")
+fi
 mod_path="$KRISTAL/mods/$mod_id"
 log=$(mktemp)
 sandbox=$(mktemp -d)

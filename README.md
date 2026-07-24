@@ -30,7 +30,7 @@ cd thrash-machine
 git submodule update --init --recursive
 ```
 
-模板在 `mod.json` 中使用 ID `thrash-machine`。从 GitHub 的 **Use this template** 创建新仓库后，应先修改该 ID、显示名称、版本和 README 徽章地址。
+本实验分支在 `mod.json` 中默认使用 ID `thrash-machine-experimental-fumos`，以便与纯 Lua 分支在同一个 Kristal mods 目录中并存。从 GitHub 的 **Use this template** 创建新仓库后，应先修改该 ID、显示名称、版本和 README 徽章地址。
 
 ### 依赖
 

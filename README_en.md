@@ -16,7 +16,7 @@ make test
 KRISTAL_ROOT=/path/to/Kristal just run
 ```
 
-The template uses `thrash-machine` as its Mod ID. Change the ID, display name, version, and README badge URLs after creating a repository from the GitHub template.
+This experimental branch uses `thrash-machine-experimental-fumos` as its default Mod ID so it can coexist with the Lua branch in one Kristal mods directory. Change the ID, display name, version, and README badge URLs after creating a repository from the GitHub template.
 
 ## Tooling
 
