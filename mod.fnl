@@ -2,6 +2,101 @@
   (fn [id]
     (.. "map_" (string.gsub (tostring id) "[^%w_]" "_") "_name")))
 
+(local power-stat-labels {})
+(tset power-stat-labels "Guts:" "guts_stat")
+(tset power-stat-labels "Rudeness" "rudeness_stat")
+(tset power-stat-labels "Fluffiness" "fluffiness_stat")
+(tset power-stat-labels "Coldness" "coldness_stat")
+(tset power-stat-labels "Boldness" "boldness_stat")
+
+(local item-bonus-names {})
+(tset item-bonus-names "GrazeTime" "graze_time_bonus")
+
+(local noelle-special-title-keys {})
+(tset noelle-special-title-keys "Ice Trancer" "chara_noelle_title_ice_trancer")
+(tset noelle-special-title-keys "Frostmancer" "chara_noelle_title_frostmancer")
+
+(local hook-power-stat-labels
+  (fn [party-member]
+    (when party-member
+      (HookSystem.hook party-member "drawPowerStat"
+        (fn [orig self index x y menu]
+          (if (not= (: Game :getLanguage) "zh_hans")
+              (orig self index x y menu)
+              (let [original-print love.graphics.print]
+                (set love.graphics.print
+                  (fn [text ...]
+                    (let [key (. power-stat-labels text)
+                          translated-text (if key (: Game :loc text key) text)]
+                      (original-print translated-text ...))))
+                (let [(ok result) (xpcall
+                                    (fn [] (orig self index x y menu))
+                                    debug.traceback)]
+                  (set love.graphics.print original-print)
+                  (if (not ok)
+                      (error result)
+                      result)))))))))
+
+(local hook-item-bonus-names
+  (fn []
+    (HookSystem.hook Item "getBonusName"
+      (fn [orig item ...]
+        (let [bonus-name (orig item ...)]
+          (if (not= (: Game :getLanguage) "zh_hans")
+              bonus-name
+              (let [key (. item-bonus-names bonus-name)]
+                (if key
+                    (: Game :loc bonus-name key)
+                    bonus-name))))))))
+
+(local localize-victory-text
+  (fn [text]
+    (if (or (not= (: Game :getLanguage) "zh_hans")
+            (not= (type text) "string"))
+        text
+        (let [(xp money currency)
+              (string.match text "^%* You won!\n%* Got (.-) EXP and (.-) (.-)%.$")]
+          (if xp
+              (: Game :loc "* You won!\n* Got [var:xp] EXP and [var:money] [var:currency]."
+                 "battle_victory_with_exp"
+                 {:xp xp :money money :currency currency})
+              (let [(stronger-money stronger-currency stronger)
+                    (string.match text "^%* You won!\n%* Got (.-) (.-)%.\n%* (.-) became stronger%.$")]
+                (if stronger-money
+                    (let [translated-stronger (if (= stronger "You") "你" stronger)]
+                      (: Game :loc "* You won!\n* Got [var:money] [var:currency].\n* [var:stronger] became stronger."
+                         "battle_victory_stronger"
+                         {:money stronger-money :currency stronger-currency :stronger translated-stronger}))
+                    text)))))))
+
+(local hook-victory-text
+  (fn []
+    (HookSystem.hook Battle "battleText"
+      (fn [orig battle text ...]
+        (orig battle (localize-victory-text text) ...)))))
+
+(local hook-noelle-title
+  (fn []
+    (let [noelle (Registry.getPartyMember "noelle")]
+      (when noelle
+        (HookSystem.hook noelle "getTitle"
+          (fn [orig self ...]
+            (let [title (orig self ...)]
+              (if (or (not= (: Game :getLanguage) "zh_hans")
+                      (not= (type title) "string"))
+                  title
+                  (do
+                    (var translated nil)
+                    (each [english-title key (pairs noelle-special-title-keys)]
+                      (when (and (not translated)
+                                 (title:find english-title 1 true))
+                        (set translated
+                          (: Game :loc "LV[var:lv] [var:title]" "chara_getTitle"
+                             {:lv (: self :getLevel)
+                              :title (: Game :loc
+                                       (title:gsub "^LV%d+ " "") key)}))))
+                    (or translated title))))))))))
+
 (local update-map-name
   (fn [_self]
     (when (and Game.world Game.world.map Game.world.map.id Game.loc)
@@ -20,6 +115,12 @@
 
 {:init
  (fn [self]
+   (hook-item-bonus-names)
+   (hook-victory-text)
+   (hook-noelle-title)
+   (each [_ id (ipairs ["kris" "susie" "ralsei" "noelle"])]
+     (hook-power-stat-labels (Registry.getPartyMember id)))
+
    (let [bridge (assert (self.libs.fumos.require "thrash_machine.bridge"))]
      (print (bridge.describe "Thrash Machine")))
 
