@@ -97,6 +97,15 @@
                                        (title:gsub "^LV%d+ " "") key)}))))
                     (or translated title))))))))))
 
+(local hook-frozen-enemy-text
+  (fn []
+    (HookSystem.hook Interactable "onInteract"
+      (fn [orig self ...]
+        (when (and self.text (= (. self.text 1) "* (It's frozen solid...)"))
+          (set self.text_id (or self.text_id {}))
+          (tset self.text_id 1 "frozen_enemy_text"))
+        (orig self ...)))))
+
 (local update-map-name
   (fn [_self]
     (when (and Game.world Game.world.map Game.world.map.id Game.loc)
@@ -118,6 +127,7 @@
    (hook-item-bonus-names)
    (hook-victory-text)
    (hook-noelle-title)
+   (hook-frozen-enemy-text)
    (each [_ id (ipairs ["kris" "susie" "ralsei" "noelle"])]
      (hook-power-stat-labels (Registry.getPartyMember id)))
 
