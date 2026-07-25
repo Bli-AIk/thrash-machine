@@ -23,10 +23,11 @@ jobs:
           test -s libraries/langLib_zh_hans/lib.lua
           test -s libraries/object-editor/lib.lua
           test -s libraries/terminal-cli/lib.lua
+          test -s libraries/kristal-debug-tools/lib.lua
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq love luajit rsync unzip xvfb zip
+          sudo apt-get install -y just jq love luajit rsync unzip xvfb zip
       - name: Check Lua source and documentation
         run: make test
       - name: Build standalone packages
@@ -52,6 +53,7 @@ jobs:
           unzip -Z1 dist/thrash-machine-mod.zip | grep -Fx mod.json >/dev/null
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/object-editor/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
       - name: Generate and verify SHA-256 manifest
         run: |
           .github/scripts/generate_sha256sums.sh dist

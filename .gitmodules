@@ -14,3 +14,6 @@
 [submodule "libraries/terminal-cli"]
 	path = libraries/terminal-cli
 	url = https://github.com/Bli-AIk/kristal-terminal-cli.git
+[submodule "libraries/kristal-debug-tools"]
+	path = libraries/kristal-debug-tools
+	url = https://github.com/Bli-AIk/kristal-debug-tools.git

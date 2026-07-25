@@ -17,6 +17,7 @@
 - langLib_zh_hans 预置英文/简体中文和系统语言自动选择。
 - object-editor 仅在开发模式启用，生产包自动禁用并移除。
 - terminal-cli 在开发模式下把 Kristal 调试控制台连接到当前终端，生产包自动移除。
+- kristal-debug-tools 提供可复用的战斗启动调试参数，生产包自动移除。
 - .emacs 和 .helix 提供项目级 Kristal/LuaLS 配置。
 - release-please、Mod ZIP、release/debug .love、Windows x64 包和 SHA-256 清单。
 
@@ -39,6 +40,7 @@
 | Kristal v0.10.0 | 本地运行与独立包基线。 |
 | LuaJIT | Lua 语法检查和运行时。 |
 | rsync、zip、unzip、Python 3 | 构建发行包。 |
+| just | 运行共享 Kristal 调试启动器。 |
 | Emacs 30+ 或 Helix、lua-language-server | 可选编辑器支持。 |
 
 ### 开发
@@ -47,6 +49,14 @@
     KRISTAL_ROOT=/path/to/Kristal just run
 
 just run 也会查找常见的本地 Kristal 路径；开发模式下可直接在当前终端输入 Lua 调试命令。要在独立的干净 Kristal checkout 中跑启动 smoke test：
+
+直接调试战斗时可以使用共享 `kristal-debug-tools` 子模块：
+
+    just run --encounter
+    just run --wave 2 --tp 50 --mercy 100
+    just run --wave-force 3
+
+`--wave` 使用敌人 wave 列表的从 1 开始的编号，也接受 wave ID；`--wave-force` 会在每轮重复该 wave。其他项目只需引用 `libraries/kristal-debug-tools` 并配置自己的 `default_encounter`。
 
     KRISTAL=/path/to/Kristal make test-kristal
 

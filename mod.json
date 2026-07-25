@@ -85,6 +85,13 @@
             "enabled": true,
             "only_dev": true,
             "max_commands_per_frame": 8
+        },
+        "kristal-debug-tools": {
+            "enabled": true,
+            "only_dev": true,
+            "default_encounter": "dummy",
+            "initial_tp": null,
+            "initial_mercy": null
         }
     },
 

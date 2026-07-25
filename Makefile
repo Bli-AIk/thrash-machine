@@ -1,8 +1,8 @@
 KRISTAL ?=
 
-.PHONY: test test-static test-docs test-kristal
+.PHONY: test test-static test-docs test-debug-tools test-kristal
 
-test: test-static test-docs
+test: test-static test-docs test-debug-tools
 
 test-static:
 	sh tests/assert-lua-template.sh
@@ -13,6 +13,9 @@ test-static:
 
 test-docs:
 	sh tests/docs-smoke.sh
+
+test-debug-tools:
+	sh tests/justfile-smoke.sh
 
 test-kristal:
 	KRISTAL="$(KRISTAL)" sh tests/run-kristal.sh

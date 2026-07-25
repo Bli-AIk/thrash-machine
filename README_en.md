@@ -14,6 +14,12 @@
     make test
     KRISTAL_ROOT=/path/to/Kristal just run
 
+Battle startup debugging is provided by the `kristal-debug-tools` library submodule:
+
+    just run --encounter
+    just run --wave 2 --tp 50 --mercy 100
+    just run --wave-force 3
+
 The template uses thrash-machine as its Mod ID. Change the ID, display name, version, and README badge URLs after creating a repository from the GitHub template.
 
 ## Tooling
@@ -23,6 +29,7 @@ The template uses thrash-machine as its Mod ID. Change the ID, display name, ver
 - langLib_zh_hans for English and Simplified Chinese localization.
 - object-editor for development-only scene editing; release packages exclude it.
 - terminal-cli for interactive Lua debugging in the development terminal; release packages exclude it.
+- kristal-debug-tools for reusable battle startup debugging; release packages exclude it.
 - .emacs and .helix for LuaLS, Kristal paths, and launch helpers.
 
 ## Builds
