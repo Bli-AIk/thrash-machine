@@ -80,6 +80,13 @@
             "wheel_scale_step": 0.1,
             "wheel_rotate_step": 5,
             "max_undo": 64
+        },
+        "kristal-debug-tools": {
+            "enabled": true,
+            "only_dev": true,
+            "default_encounter": "dummy",
+            "initial_tp": null,
+            "initial_mercy": null
         }
     },
 

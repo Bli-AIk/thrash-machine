@@ -21,6 +21,7 @@ test -f "$root/fnl/thrash_machine/bridge.fnl"
 test -f "$root/libraries/fumos/lib.lua"
 test -f "$root/libraries/langLib_zh_hans/lib.lua"
 test -f "$root/libraries/object-editor/lib.lua"
+test -f "$root/libraries/kristal-debug-tools/lib.lua"
 test -f "$root/.emacs/init.el"
 test -f "$root/.helix/languages.toml"
 test "$(git -C "$root" config -f .gitmodules --get submodule.libraries/fumos.url)" = \

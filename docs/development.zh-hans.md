@@ -44,6 +44,18 @@ hx --health fennel
 
 若使用 `.emacs` 的固定安装器，其输出目录不会自动写入 shell `PATH`；可自行安装发行版提供的 `fennel-ls`，或将安装器输出的 `bin/` 目录加入环境变量。`hx --health fennel` 应显示 parser、formatter 和 language server 均可用。
 
+## 战斗调试
+
+`libraries/kristal-debug-tools` 是可复用于其他 Kristal 项目的调试子模块。配置 `mod.json` 中的 `default_encounter` 后，可以直接启动战斗并设置初始参数：
+
+```sh
+just run --encounter
+just run --wave 2 --tp 50 --mercy 100
+just run --wave-force 3
+```
+
+该库只在开发模式启用；生产包构建会移除它。它通过 Kristal 现有的 Mod option 和战斗 Hook API 工作，不需要修改 Kristal 框架源码。
+
 ## 子模块升级
 
 先在依赖仓库完成测试和发布，再更新本仓库的 gitlink：

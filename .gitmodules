@@ -14,3 +14,6 @@
 [submodule ".helix"]
 	path = .helix
 	url = https://github.com/Bli-AIk/kristal-helix-config.git
+[submodule "libraries/kristal-debug-tools"]
+	path = libraries/kristal-debug-tools
+	url = https://github.com/Bli-AIk/kristal-debug-tools.git

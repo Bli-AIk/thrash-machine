@@ -16,6 +16,14 @@ make test
 KRISTAL_ROOT=/path/to/Kristal just run
 ```
 
+Battle startup debugging is provided by the `kristal-debug-tools` library submodule:
+
+```sh
+just run --encounter
+just run --wave 2 --tp 50 --mercy 100
+just run --wave-force 3
+```
+
 This experimental branch uses `thrash-machine-experimental-fumos` as its default Mod ID so it can coexist with the Lua branch in one Kristal mods directory. Change the ID, display name, version, and README badge URLs after creating a repository from the GitHub template.
 
 ## Tooling
@@ -23,6 +31,7 @@ This experimental branch uses `thrash-machine-experimental-fumos` as its default
 - Kristal v0.10.0 and LÖVE 11.5 for local runs and standalone builds.
 - Fennel 1.6.1 and LuaJIT for static checks and editor tooling.
 - FUMOS loads author-owned `.fnl` files directly in Kristal and provides a development-only local REPL for Emacs.
+- `kristal-debug-tools` provides reusable battle startup debugging and is excluded from production packages.
 - `.emacs` provides FUMOS/Emacs integration. `.helix` provides Kristal/Lua project settings; install `fennel-ls` on `PATH` for Fennel LSP support.
 
 ## Builds
@@ -32,7 +41,7 @@ just build
 just build-mod
 ```
 
-Production packages preserve FUMOS and localization, while disabling and excluding `object-editor`. The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags.
+Production packages preserve FUMOS and localization, while disabling and excluding `object-editor` and `kristal-debug-tools`. The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags.
 
 ## License
 

@@ -16,6 +16,7 @@
 - 作者维护的 Mod 代码全部使用 `.fnl`；FUMOS 在 Kristal 中直接加载 Fennel。
 - `langLib_zh_hans` 预置英文/简体中文和系统语言自动选择。
 - `object-editor` 仅在开发模式启用，生产包自动禁用并移除。
+- `kristal-debug-tools` 提供可复用的战斗启动调试参数，生产包自动移除。
 - `.emacs` 提供 FUMOS live REPL、Fennel LSP 和 Kristal LuaLS 集成。
 - `.helix` 提供项目级 Kristal/Lua 配置；Helix 内置 Fennel grammar 可直接使用 `fennel-ls`。
 - release-please、Mod ZIP、release/debug `.love`、Windows x64 包和 SHA-256 清单。
@@ -41,6 +42,7 @@ git submodule update --init --recursive
 | Kristal v0.10.0 | 本地运行与独立包基线。 |
 | Fennel 1.6.1、LuaJIT | 静态检查和 Fennel 工具链。 |
 | `rsync`、`zip`、`unzip`、Python 3 | 构建发行包。 |
+| `just` | 运行共享 Kristal 调试启动器。 |
 | Emacs 30+ 或 Helix、`fennel-ls` | 可选编辑器支持。 |
 
 FUMOS 自带运行时编译器；系统 Fennel CLI 仅用于 `make test` 和编辑器工具。
@@ -53,6 +55,16 @@ KRISTAL_ROOT=/path/to/Kristal just run
 ```
 
 `just run` 也会查找常见的本地 Kristal 路径。要在独立的干净 Kristal checkout 中跑启动 smoke test：
+
+直接调试战斗时可以使用共享 `kristal-debug-tools` 子模块：
+
+```sh
+just run --encounter
+just run --wave 2 --tp 50 --mercy 100
+just run --wave-force 3
+```
+
+`--wave` 使用敌人 wave 列表的从 1 开始的编号，也接受 wave ID；`--wave-force` 会在每轮重复该 wave。其他项目只需引用 `libraries/kristal-debug-tools` 并配置自己的 `default_encounter`。
 
 ```sh
 KRISTAL=/path/to/Kristal make test-kristal
@@ -77,7 +89,7 @@ just build-mod
 
 `just build` 固定使用 Kristal `v0.10.0`，生成 release/debug `.love`、Windows x64 包；它仅修改暂存引擎副本的目标 Mod、自动启动、窗口标识和 release/debug 标志。`just build-mod` 生成可放入 Kristal `mods/` 的生产 Mod ZIP。
 
-生产资产会保留 FUMOS 和语言库，禁用并剔除 object-editor、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/`main` 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 `SHA256SUMS`。
+生产资产会保留 FUMOS 和语言库，禁用并剔除 object-editor、kristal-debug-tools、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/`main` 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 `SHA256SUMS`。
 
 ## 提交规范
 
