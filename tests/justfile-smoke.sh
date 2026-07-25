@@ -2,7 +2,14 @@
 set -eu
 
 root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd -P)
-engine_root=${KRISTAL_ROOT:-$root/.build/Kristal}
+fake_engine=$(mktemp -d)
+touch "$fake_engine/main.lua"
+cleanup() {
+    rm -f "$fake_engine/main.lua"
+    rmdir "$fake_engine"
+}
+trap cleanup EXIT HUP INT TERM
+engine_root=${KRISTAL_ROOT:-$fake_engine}
 
 run_dry() {
     KRISTAL_ROOT="$engine_root" \
