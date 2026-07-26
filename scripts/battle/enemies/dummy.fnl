@@ -19,7 +19,7 @@
   (local old-check self.act_check)
   (local old-smile self.act_smile)
   (local old-tell-story self.act_tell_story)
-  (set self.name (: Game :loc "Dummy" "enemy_dummy_name"))
+  (set self.name (: Game :loc "[name:dummy]"))
   (set self.check (: Game :loc
                          "AT 4 DF 0\n* Cotton heart and button eye\n* Looks just like a fluffy guy."
                          "enemy_dummy_check"))
