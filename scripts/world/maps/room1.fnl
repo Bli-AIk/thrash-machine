@@ -191,7 +191,7 @@
       :id1 "world_room1_starwalker_1"
       :id2 "world_room1_starwalker_2"
       :text1 "* These [color:yellow]stairs[color:reset] are [color:yellow]Pissing[color:reset] me\noff..."
-      :text2 "* I'm the original   [color:yellow]Starwalker[color:reset]"}}
+      :text2 "* I'm the original   [color:yellow][name:starwalker][color:reset]"}}
     {:id 27 :name "savepoint" :type "" :shape "rectangle"
      :x 80 :y 210 :width 40 :height 40 :rotation 0
      :visible true
@@ -216,7 +216,7 @@
      {:actor "wall"
       :flagcheck "wall_hit"
       :id1 "world_room1_wall_guardian_1"
-      :text1 "* I Am the Wall Guardian.[wait:5]\n* This Wall is Off Limits for you\nno-good wall slammers."}}]}
+      :text1 "* I Am the [name:wall] Guardian.[wait:5]\n* This [name:wall] is Off Limits for you\nno-good wall slammers."}}]}
   {:type "objectgroup"
    :draworder "topdown"
    :id 5
