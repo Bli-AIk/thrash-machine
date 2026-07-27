@@ -14,7 +14,7 @@
 ## 特性
 
 - 作者维护的 Mod 代码全部使用 `.fnl`；FUMOS 在 Kristal 中直接加载 Fennel。
-- `langLib_zh_hans` 预置英文/简体中文和系统语言自动选择。
+- `kristal-i18n` 预置英文/简体中文和系统语言自动选择。
 - `object-editor` 仅在开发模式启用，生产包自动禁用并移除。
 - `kristal-debug-tools` 提供可复用的战斗启动调试参数，生产包自动移除。
 - `.emacs` 提供 FUMOS live REPL、Fennel LSP 和 Kristal LuaLS 集成。

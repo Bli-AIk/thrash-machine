@@ -6,7 +6,7 @@ This repository contains a Kristal starter project and ships dependencies throug
 | --- | --- | --- |
 | [Kristal](https://github.com/KristalTeam/Kristal) starter content and standalone engine | BSD-3-Clause | Starter assets/source and staged standalone builds. |
 | [FUMOS](https://github.com/Bli-AIk/fumos) | MIT | Runtime submodule and production packages. |
-| [langLib_zh_hans](https://github.com/Bli-AIk/kristal-langlib-zh-hans) | MIT or Apache-2.0 | Runtime submodule and production packages. |
+| [kristal-i18n](https://github.com/Bli-AIk/kristal-i18n) | MIT or Apache-2.0 | Runtime submodule and production packages. |
 | [object-editor](https://github.com/Bli-AIk/object-editor) | MIT or Apache-2.0 | Development-only submodule; excluded from production packages. |
 | [kristal-emacs-config](https://github.com/Bli-AIk/kristal-emacs-config) | Mixed; see its repository | Development-only submodule; excluded from production packages. |
 | [kristal-helix-config](https://github.com/Bli-AIk/kristal-helix-config) | MIT or Apache-2.0 | Development-only submodule; excluded from production packages. |
