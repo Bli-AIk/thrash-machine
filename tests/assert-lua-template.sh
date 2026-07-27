@@ -18,7 +18,7 @@ test -z "$found" || {
 
 test -f "$root/mod.lua"
 test -f "$root/scripts/world/maps/room1.lua"
-test -f "$root/libraries/langLib_zh_hans/lib.lua"
+test -f "$root/libraries/kristal-i18n/lib.lua"
 test -f "$root/libraries/object-editor/lib.lua"
 test -f "$root/libraries/terminal-cli/lib.lua"
 test -f "$root/libraries/kristal-debug-tools/lib.lua"

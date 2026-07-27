@@ -26,7 +26,7 @@ The template uses thrash-machine as its Mod ID. Change the ID, display name, ver
 
 - Kristal v0.10.0 and LÖVE 11.5 for local runs and standalone builds.
 - LuaJIT for syntax checks and runtime support.
-- langLib_zh_hans for English and Simplified Chinese localization.
+- kristal-i18n for English and Simplified Chinese localization.
 - object-editor for development-only scene editing; release packages exclude it.
 - terminal-cli for interactive Lua debugging in the development terminal; release packages exclude it.
 - kristal-debug-tools for reusable battle startup debugging; release packages exclude it.

@@ -14,7 +14,7 @@
 ## 特性
 
 - 作者维护的 Mod 代码使用 Kristal 原生 Lua 文件。
-- langLib_zh_hans 预置英文/简体中文和系统语言自动选择。
+- kristal-i18n 预置英文/简体中文和系统语言自动选择。
 - object-editor 仅在开发模式启用，生产包自动禁用并移除。
 - terminal-cli 在开发模式下把 Kristal 调试控制台连接到当前终端，生产包自动移除。
 - kristal-debug-tools 提供可复用的战斗启动调试参数，生产包自动移除。
