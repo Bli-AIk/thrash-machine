@@ -1,4 +1,4 @@
 {:run
  (fn []
-   (print "THRASH_MACHINE_SMOKE=PASS")
+   (print "KRISTAL_MOD_SMOKE=PASS")
    (love.event.quit))}

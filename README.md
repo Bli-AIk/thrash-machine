@@ -78,8 +78,6 @@ Emacs：加载项目 `.emacs/init.el`，执行 `sh .emacs/tools/install-fennel-l
 
 Helix：安装 `fennel-ls` 并确保其在 `PATH` 中。项目的 `.helix` 子模块保留 Kristal/LuaLS 配置，Helix 的 Fennel language definition 会自动发现该 LSP。
 
-完整操作见 [开发说明](docs/development.zh-hans.md)。
-
 ## 构建与发行
 
 ```sh

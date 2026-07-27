@@ -3,14 +3,9 @@ set -eu
 
 : "${KRISTAL:?set KRISTAL to a clean Kristal v0.10 checkout}"
 
-root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd -P)
-mod_id=""
-if [ -f "$root/mod.json" ]; then
-    mod_id=$(sed -n 's/^[[:space:]]*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*$/\1/p' "$root/mod.json" | head -n 1)
-fi
-if [ -z "$mod_id" ]; then
-    mod_id=$(basename "$root")
-fi
+root=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd -P)
+mod_id=$(sed -n 's/^[[:space:]]*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*$/\1/p' "$root/mod.json" | head -n 1)
+test -n "$mod_id"
 mod_path="$KRISTAL/mods/$mod_id"
 log=$(mktemp)
 sandbox=$(mktemp -d)
@@ -43,9 +38,9 @@ timeout --kill-after=5s 45s xvfb-run -a env \
     SDL_AUDIODRIVER=dummy \
     ALSOFT_DRIVERS=null \
     LIBGL_ALWAYS_SOFTWARE=1 \
-    THRASH_MACHINE_SMOKE=1 \
+    KRISTAL_MOD_SMOKE=1 \
     love "$KRISTAL" --mod "$mod_id" --auto-mod-start >"$log" 2>&1 || {
         cat "$log" >&2
         exit 1
     }
-grep -F 'THRASH_MACHINE_SMOKE=PASS' "$log"
+grep -F 'KRISTAL_MOD_SMOKE=PASS' "$log"

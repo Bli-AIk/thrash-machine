@@ -1,22 +1,19 @@
 FENNEL ?= fennel
 KRISTAL ?=
 
-.PHONY: test test-static test-docs test-debug-tools test-kristal
+.PHONY: test test-static test-debug-tools test-kristal
 
-test: test-static test-docs test-debug-tools
+test: test-static test-debug-tools
 
 test-static:
-	sh tests/assert-pure-fennel.sh
+	sh .github/scripts/static-smoke.sh
 	find . -path ./.git -prune -o -path ./.emacs -prune -o -path ./.helix -prune -o \
 		-path ./libraries -prune -o -path ./.build -prune -o -path ./dist -prune -o \
 		-path ./.worktrees -prune -o -type f \( -name '*.fnl' -o -name '*.fnlm' \) -print0 | \
 		xargs -0 -r -n1 $(FENNEL) --compile >/dev/null
 
-test-docs:
-	sh tests/docs-smoke.sh
-
 test-debug-tools:
-	sh tests/justfile-smoke.sh
+	sh .github/scripts/template-justfile-smoke.sh
 
 test-kristal:
-	KRISTAL="$(KRISTAL)" sh tests/run-kristal.sh
+	KRISTAL="$(KRISTAL)" sh .github/scripts/run-kristal-smoke.sh

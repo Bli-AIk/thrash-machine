@@ -139,7 +139,7 @@
         (Squeak data.x data.y [data.width data.height data.polygon])))
    (print (: Game :loc "Loaded [var:name]!" "mod.loaded" {:name self.info.name}))
 
-   (when (= (os.getenv "THRASH_MACHINE_SMOKE") "1")
+   (when (= (os.getenv "KRISTAL_MOD_SMOKE") "1")
      (let [smoke (assert (self.libs.fumos.require "thrash_machine.smoke"))]
        (smoke.run))))
 
