@@ -64,8 +64,6 @@ just run 也会查找常见的本地 Kristal 路径；开发模式下可直接�
 
 .emacs 和 .helix 是项目级配置子模块。它们提供 LuaLS、Kristal 路径和启动快捷键；设置 KRISTAL_ROOT 后即可从对应编辑器启动游戏。
 
-完整操作见 开发说明（docs/development.zh-hans.md）。
-
 ## 构建与发行
 
     just build

@@ -4,8 +4,8 @@ function Mod:init()
     end)
     print(Game:locText("Loaded [var:name]!", {name = self.info.name}))
 
-    if os.getenv("THRASH_MACHINE_SMOKE") == "1" then
-        print("THRASH_MACHINE_SMOKE=PASS")
+    if os.getenv("KRISTAL_MOD_SMOKE") == "1" then
+        print("KRISTAL_MOD_SMOKE=PASS")
         love.event.quit()
     end
 end
