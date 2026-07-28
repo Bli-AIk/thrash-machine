@@ -1,6 +1,6 @@
 KRISTAL ?=
 
-.PHONY: test test-static test-debug-tools test-kristal
+.PHONY: test test-static test-debug-tools test-kristal build-android
 
 test: test-static test-debug-tools
 
@@ -16,3 +16,6 @@ test-debug-tools:
 
 test-kristal:
 	KRISTAL="$(KRISTAL)" sh .github/scripts/run-kristal-smoke.sh
+
+build-android:
+	./build_android.sh

@@ -20,6 +20,7 @@
 - kristal-debug-tools 提供可复用的战斗启动调试参数，生产包自动移除。
 - .emacs 和 .helix 提供项目级 Kristal/LuaLS 配置。
 - release-please、Mod ZIP、release/debug .love、Windows x64 包和 SHA-256 清单。
+- 可选 Android APK 打包入口，以及仅在 Android 默认启用的虚拟触摸按键库。
 
 ## 使用
 
@@ -40,6 +41,7 @@
 | Kristal v0.10.0 | 本地运行与独立包基线。 |
 | LuaJIT | Lua 语法检查和运行时。 |
 | rsync、zip、unzip、Python 3 | 构建发行包。 |
+| JDK 17、Android SDK API 34、Build Tools 34.0.0、Android NDK 25.2.9519653 | 可选 Android APK 构建。 |
 | just | 运行共享 Kristal 调试启动器。 |
 | Emacs 30+ 或 Helix、lua-language-server | 可选编辑器支持。 |
 
@@ -72,6 +74,40 @@ just run 也会查找常见的本地 Kristal 路径；开发模式下可直接�
 just build 固定使用 Kristal v0.10.0，生成 release/debug .love、Windows x64 包；它仅修改暂存引擎副本的目标 Mod、自动启动、窗口标识和 release/debug 标志。just build-mod 生成可放入 Kristal mods/ 的生产 Mod ZIP。
 
 生产资产会保留语言库，禁用并剔除 object-editor、terminal-cli、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/main 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 SHA256SUMS。
+
+### Android
+
+Android 构建是显式目标，不会被普通 `just build` 或发布工作流默认触发。它使用官方 LÖVE Android 11.5 工程，将 release `.love` 放入 APK，并默认使用本机 Android debug keystore 签名，使 APK 可以直接安装到设备：
+
+    just build-android
+
+首次构建需要 JDK 17、Android SDK API 34、Build Tools `34.0.0`、Android NDK `25.2.9519653`、Git、rsync 和可用网络。可以用官方 `sdkmanager` 安装 Android 组件：
+
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    export ANDROID_SDK_ROOT=/home/aik/Android/Sdk
+    yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses
+    "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" \
+        "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
+
+可通过环境变量覆盖应用信息：
+
+    ANDROID_SDK_ROOT=/path/to/android-sdk \
+    THRASH_MACHINE_ANDROID_APPLICATION_ID=com.example.myproject \
+    THRASH_MACHINE_ANDROID_NAME="My Project" \
+    THRASH_MACHINE_ANDROID_VERSION_CODE=1 \
+    just build-android
+
+官方 Android 工程会缓存到 `.build/cache/love-android-11.5`，APK 输出为 `dist/thrash-machine-android.apk`。默认签名适合本地测试，不适合发布到应用商店；正式发布时可通过以下环境变量使用自己的 keystore：
+
+    THRASH_MACHINE_ANDROID_SIGNING_KEYSTORE=/absolute/path/release.keystore \
+    THRASH_MACHINE_ANDROID_SIGNING_STORE_PASSWORD='store-password' \
+    THRASH_MACHINE_ANDROID_SIGNING_KEY_ALIAS='release' \
+    THRASH_MACHINE_ANDROID_SIGNING_KEY_PASSWORD='key-password' \
+    just build-android
+
+密码建议通过 CI secret 或当前 shell 环境注入，不要提交到仓库。可以设置 `THRASH_MACHINE_ANDROID_ICON` 使用一个 PNG 替换默认 LÖVE 图标。
+
+`virtualkeyboard` library 默认只在 Android 启用，提供按钮布局和可选摇杆布局，并把触摸转换为普通 Kristal `Input` 按键。它只承诺 APK 打包、LÖVE Android runtime 启动和这些基础输入；不承诺 Kristal 或 Mod 使用的所有 LÖVE API 在 Android 上兼容。要测试桌面触摸输入，可在 `mod.json` 的 `virtualkeyboard` 配置中将 `only_android` 设为 `false`。
 
 ## 提交规范
 

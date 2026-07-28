@@ -68,6 +68,128 @@ def patch_mod_manifest(args: argparse.Namespace) -> None:
     write_text(manifest, text)
 
 
+def set_gradle_property(text: str, key: str, value: str, path: Path) -> str:
+    if "\n" in value or "\r" in value:
+        raise SystemExit(f"Invalid newline in Gradle property {key!r} for {path}")
+
+    pattern = rf"(?m)^{re.escape(key)}=.*$"
+    replacement = f"{key}={value}"
+    patched, count = re.subn(pattern, replacement, text, count=1)
+    if count == 1:
+        return patched
+
+    if patched and not patched.endswith("\n"):
+        patched += "\n"
+    return patched + replacement + "\n"
+
+
+def local_properties_value(value: str) -> str:
+    """Escape a path for java.util.Properties, used by local.properties."""
+    return (
+        value.replace("\\", "\\\\")
+        .replace(" ", "\\ ")
+        .replace(":", "\\:")
+        .replace("=", "\\=")
+    )
+
+
+def patch_android_local_properties(args: argparse.Namespace) -> None:
+    properties = Path(args.properties)
+    text = read_text(properties) if properties.exists() else ""
+
+    text = re.sub(rf"(?m)^[ \t]*{re.escape('sdk.dir')}[ \t]*=.*(?:\n|$)", "", text)
+    text = set_gradle_property(
+        text, "sdk.dir", local_properties_value(args.sdk_dir), properties
+    )
+
+    write_text(properties, text)
+
+
+def patch_android_properties(args: argparse.Namespace) -> None:
+    properties = Path(args.properties)
+    text = read_text(properties)
+
+    for key in ("app.name", "app.name_byte_array"):
+        text = re.sub(rf"(?m)^{re.escape(key)}=.*\n?", "", text)
+
+    name = args.name
+    if all(ord(char) < 128 for char in name):
+        text = set_gradle_property(text, "app.name", name, properties)
+    else:
+        byte_array = ",".join(str(byte) for byte in name.encode("utf-8"))
+        text = set_gradle_property(text, "app.name_byte_array", byte_array, properties)
+
+    for key, value in {
+        "app.application_id": args.application_id,
+        "app.orientation": args.orientation,
+        "app.version_code": args.version_code,
+        "app.version_name": args.version_name,
+    }.items():
+        text = set_gradle_property(text, key, value, properties)
+
+    write_text(properties, text)
+
+
+def patch_android_gradle(args: argparse.Namespace) -> None:
+    gradle = Path(args.gradle)
+    text = read_text(gradle)
+    original = """    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+"""
+    replacement = """    def signingKeystore = System.getenv("THRASH_MACHINE_ANDROID_SIGNING_KEYSTORE")
+    def hasCustomSigning = signingKeystore != null && !signingKeystore.isEmpty()
+    def signingStorePassword = System.getenv("THRASH_MACHINE_ANDROID_SIGNING_STORE_PASSWORD")
+    def signingKeyAlias = System.getenv("THRASH_MACHINE_ANDROID_SIGNING_KEY_ALIAS")
+    def signingKeyPassword = System.getenv("THRASH_MACHINE_ANDROID_SIGNING_KEY_PASSWORD")
+
+    signingConfigs {
+        if (hasCustomSigning) {
+            release {
+                storeFile file(signingKeystore)
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig = hasCustomSigning ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+"""
+    if original not in text:
+        raise SystemExit(f"Could not patch Android signing configuration in {gradle}")
+    write_text(gradle, text.replace(original, replacement, 1))
+
+
+def patch_android_game_activity(args: argparse.Namespace) -> None:
+    source = Path(args.source)
+    text = read_text(source)
+    original = (
+        "        embed = getResources().getBoolean(R.bool.embed);\n"
+        "\n"
+        "        if (!embed) {\n"
+    )
+    replacement = (
+        "        embed = getResources().getBoolean(R.bool.embed);\n"
+        "        // Upstream skips handleIntent() for embed builds, so initialize the\n"
+        "        // asset-copy path explicitly before native LÖVE asks for the game.\n"
+        "        needToCopyGameInArchive = embed;\n"
+        "\n"
+        "        if (!embed) {\n"
+    )
+    if original not in text:
+        raise SystemExit(f"Could not patch embedded game initialization in {source}")
+    write_text(source, text.replace(original, replacement, 1))
+
+
 def zip_dir(args: argparse.Namespace) -> None:
     output = Path(args.output)
     source = Path(args.source)
@@ -79,6 +201,8 @@ def zip_dir(args: argparse.Namespace) -> None:
         for path in sorted(source.rglob("*")):
             if path.is_file():
                 relative = path.relative_to(source).as_posix()
+                if "__pycache__/" in f"{relative}/" or relative.endswith((".pyc", ".pyo")):
+                    continue
                 archive.write(path, f"{prefix}/{relative}" if prefix else relative)
 
 
@@ -99,6 +223,28 @@ def main() -> None:
     patch_manifest.add_argument("dev", choices=("true", "false"))
     patch_manifest.add_argument("object_editor", choices=("true", "false"))
     patch_manifest.set_defaults(handler=patch_mod_manifest)
+
+    patch_android = commands.add_parser("patch-android-properties")
+    patch_android.add_argument("properties")
+    patch_android.add_argument("application_id")
+    patch_android.add_argument("name")
+    patch_android.add_argument("orientation")
+    patch_android.add_argument("version_code")
+    patch_android.add_argument("version_name")
+    patch_android.set_defaults(handler=patch_android_properties)
+
+    patch_android_local = commands.add_parser("patch-android-local-properties")
+    patch_android_local.add_argument("properties")
+    patch_android_local.add_argument("sdk_dir")
+    patch_android_local.set_defaults(handler=patch_android_local_properties)
+
+    patch_android_gradle_command = commands.add_parser("patch-android-gradle")
+    patch_android_gradle_command.add_argument("gradle")
+    patch_android_gradle_command.set_defaults(handler=patch_android_gradle)
+
+    patch_android_activity_command = commands.add_parser("patch-android-game-activity")
+    patch_android_activity_command.add_argument("source")
+    patch_android_activity_command.set_defaults(handler=patch_android_game_activity)
 
     zip_command = commands.add_parser("zip-dir")
     zip_command.add_argument("output")

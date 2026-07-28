@@ -31,6 +31,10 @@ rsync -a \
     --exclude='/justfile' \
     --exclude='/build_standalone.sh' \
     --exclude='/build_standalone.py' \
+    --exclude='/build_android.sh' \
+    --exclude='__pycache__/' \
+    --exclude='*.pyc' \
+    --exclude='*.pyo' \
     --exclude='/release-please-config.json' \
     --exclude='/.release-please-manifest.json' \
     --exclude='/.gitmodules' \

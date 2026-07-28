@@ -13,6 +13,9 @@ test-kristal:
 build:
     @./build_standalone.sh
 
+build-android:
+    @./build_android.sh
+
 build-mod:
     @./.github/scripts/build_mod.sh
 

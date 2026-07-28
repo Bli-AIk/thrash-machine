@@ -22,6 +22,9 @@ test -f "$root/libraries/kristal-i18n/lib.lua"
 test -f "$root/libraries/object-editor/lib.lua"
 test -f "$root/libraries/terminal-cli/lib.lua"
 test -f "$root/libraries/kristal-debug-tools/lib.lua"
+test -f "$root/libraries/virtualkeyboard/lib.lua"
+test -f "$root/libraries/virtualkeyboard/lib.json"
+luajit -b "$root/libraries/virtualkeyboard/lib.lua" /dev/null
 test ! -e "$root/libraries/fumos"
 test ! -e "$root/flsproject.fnl"
 if git -C "$root" config -f .gitmodules --get submodule.libraries/fumos.url >/dev/null 2>&1; then
