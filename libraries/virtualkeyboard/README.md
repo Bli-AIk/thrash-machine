@@ -28,20 +28,24 @@ Available configuration:
 }
 ```
 
-The default `buttons` layout uses a separated directional cross. Its touch
-area reads the horizontal and vertical axes independently, so diagonal input,
-multi-touch, and sliding from one direction to another are supported. Action
-buttons can also be held together and can be changed by sliding a finger to
-another button.
+The default `buttons` layout uses a separated directional cross. On a wide
+screen with enough border space, the controls are drawn in the left and right
+side areas instead of over the game canvas; narrower windows fall back to the
+canvas edges. Its touch area reads the horizontal and vertical axes
+independently, so diagonal input, multi-touch, and sliding from one direction
+to another are supported. The `z` button is vertically centered between `x`
+and `c`. Action buttons can also be held together and can be changed by
+sliding a finger to another button.
 
 Set `layout` to `joystick` to use a directional joystick with the `z`, `x`
 and `c` buttons. A mod can also call `VirtualKeyboard:setVisible(false)` or
 `VirtualKeyboard:toggle()` at runtime. `toggle_key` is disabled by default;
 Android Back is intentionally not used as the control toggle.
 
-The adapter draws in Kristal's existing 640x480 game canvas and converts touch
-coordinates through Kristal's game scale and side offsets. It is not an API
-compatibility layer for Kristal or LÖVE on Android.
+The adapter draws in Kristal's side areas when available, falls back to the
+existing 640x480 game canvas, and converts touch coordinates through Kristal's
+game scale and side offsets. It is not an API compatibility layer for Kristal
+or LÖVE on Android.
 
 ## Attribution
 

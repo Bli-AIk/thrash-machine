@@ -33,21 +33,21 @@ end
 
 local function button_layout()
     return {
-        {key = "left", kind = "arrow", x = 48, y = 360},
-        {key = "right", kind = "arrow", x = 176, y = 360},
+        {key = "left", kind = "arrow", x = 32, y = 360},
+        {key = "right", kind = "arrow", x = 192, y = 360},
         {key = "up", kind = "arrow", x = 112, y = 285},
         {key = "down", kind = "arrow", x = 112, y = 435},
-        {key = "z", kind = "button", x = 505, y = 385},
-        {key = "x", kind = "button", x = 590, y = 300},
-        {key = "c", kind = "button", x = 590, y = 425}
+        {key = "z", kind = "button", x = 520, y = 360},
+        {key = "x", kind = "button", x = 600, y = 300},
+        {key = "c", kind = "button", x = 600, y = 420}
     }
 end
 
 local function action_button_layout()
     return {
-        {key = "z", kind = "button", x = 505, y = 385},
-        {key = "x", kind = "button", x = 590, y = 300},
-        {key = "c", kind = "button", x = 590, y = 425}
+        {key = "z", kind = "button", x = 520, y = 360},
+        {key = "x", kind = "button", x = 600, y = 300},
+        {key = "c", kind = "button", x = 600, y = 420}
     }
 end
 
@@ -275,6 +275,71 @@ function lib:build_layout()
     end
 end
 
+function lib:update_layout()
+    local scale = Kristal.getGameScale()
+    local offset_x, offset_y = Kristal.getSideOffsets()
+    local screen_width = love.graphics.getWidth() / scale
+    local side_width = offset_x / scale
+    local game_top = offset_y / scale
+
+    -- Keep controls out of the play area when the border leaves enough room.
+    -- Narrow windows fall back to the 640x480 game canvas.
+    self.screen_scale = scale
+    self.side_layout = side_width >= 240
+
+    local direction_center_x = 112
+    local direction_center_y = 360
+    local action_center_x = 560
+    local action_center_y = 360
+    if self.side_layout then
+        direction_center_x = side_width / 2
+        action_center_x = screen_width - side_width / 2
+        direction_center_y = game_top + direction_center_y
+        action_center_y = game_top + action_center_y
+    end
+
+    if self.direction_pad then
+        self.direction_pad.x = direction_center_x
+        self.direction_pad.y = direction_center_y
+    end
+    if self.joystick then
+        self.joystick.x = direction_center_x
+        self.joystick.y = direction_center_y
+        self.joystick.handle_x = direction_center_x
+        self.joystick.handle_y = direction_center_y
+        if self.joystick.touch_id ~= nil then
+            self:update_joystick()
+        end
+    end
+
+    for _, button in ipairs(self.buttons) do
+        if button.kind == "arrow" then
+            if button.key == "left" then
+                button.x = direction_center_x - 80
+                button.y = direction_center_y
+            elseif button.key == "right" then
+                button.x = direction_center_x + 80
+                button.y = direction_center_y
+            elseif button.key == "up" then
+                button.x = direction_center_x
+                button.y = direction_center_y - 75
+            elseif button.key == "down" then
+                button.x = direction_center_x
+                button.y = direction_center_y + 75
+            end
+        elseif button.key == "z" then
+            button.x = action_center_x - 40
+            button.y = action_center_y
+        elseif button.key == "x" then
+            button.x = action_center_x + 40
+            button.y = action_center_y - 60
+        elseif button.key == "c" then
+            button.x = action_center_x + 40
+            button.y = action_center_y + 60
+        end
+    end
+end
+
 function lib:set_joystick_mapping(mapping)
     local joystick = self.joystick
     if not joystick then
@@ -351,6 +416,14 @@ function lib:screen_to_game(x, y)
     return (x - offset_x) / scale, (y - offset_y) / scale
 end
 
+function lib:screen_to_control(x, y)
+    self:update_layout()
+    if self.side_layout then
+        return x / self.screen_scale, y / self.screen_scale
+    end
+    return self:screen_to_game(x, y)
+end
+
 function lib:press_button(button, touch_id)
     if button.touch_id ~= nil then
         return false
@@ -395,7 +468,7 @@ function lib:assign_touch(touch_id, touch)
 end
 
 function lib:touch_pressed(touch_id, x, y)
-    local game_x, game_y = self:screen_to_game(x, y)
+    local game_x, game_y = self:screen_to_control(x, y)
     local touch = {x = game_x, y = game_y, owner = nil}
     self.touches[touch_id] = touch
     self:assign_touch(touch_id, touch)
@@ -422,7 +495,7 @@ function lib:touch_moved(touch_id, x, y)
         return
     end
 
-    touch.x, touch.y = self:screen_to_game(x, y)
+    touch.x, touch.y = self:screen_to_control(x, y)
 
     if touch.owner == self.direction_pad then
         self:update_direction_touch(touch_id)
@@ -540,6 +613,12 @@ function lib:install_hooks()
         return result
     end)
 
+    HookSystem.hook(love, "draw", function(orig, ...)
+        local result = orig(...)
+        owner:draw_overlay()
+        return result
+    end)
+
     HookSystem.hook(love, "focus", function(orig, focused, ...)
         local result = orig(focused, ...)
         if not focused then
@@ -558,35 +637,28 @@ function lib:onKeyPressed(key, is_repeat)
     end
 end
 
-function lib:postDraw()
-    if not self:isVisible() then
-        return
-    end
-
+function lib:draw_controls(render_scale)
     local alpha = clamp(get_number("opacity", 0.78, 0), 0, 1)
-    love.graphics.push("all")
-    love.graphics.origin()
-
-    if self.joystick then
-        local joystick = self.joystick
+    local joystick = self.joystick
+    if joystick then
         love.graphics.setColor(1, 1, 1, alpha)
         love.graphics.draw(
             joystick.container,
-            joystick.x,
-            joystick.y,
+            joystick.x * render_scale,
+            joystick.y * render_scale,
             0,
-            joystick.scale,
-            joystick.scale,
+            joystick.scale * render_scale,
+            joystick.scale * render_scale,
             joystick.container:getWidth() / 2,
             joystick.container:getHeight() / 2
         )
         love.graphics.draw(
             joystick.handle,
-            joystick.handle_x,
-            joystick.handle_y,
+            joystick.handle_x * render_scale,
+            joystick.handle_y * render_scale,
             0,
-            joystick.scale,
-            joystick.scale,
+            joystick.scale * render_scale,
+            joystick.scale * render_scale,
             joystick.handle:getWidth() / 2,
             joystick.handle:getHeight() / 2
         )
@@ -601,16 +673,46 @@ function lib:postDraw()
         love.graphics.setColor(1, 1, 1, pressed and math.min(1, alpha + 0.12) or alpha)
         love.graphics.draw(
             image,
-            button.x,
-            button.y,
+            button.x * render_scale,
+            button.y * render_scale,
             0,
-            button.scale,
-            button.scale,
+            button.scale * render_scale,
+            button.scale * render_scale,
             image:getWidth() / 2,
             image:getHeight() / 2
         )
     end
+end
 
+function lib:postDraw()
+    if not self:isVisible() then
+        return
+    end
+
+    self:update_layout()
+    if self.side_layout then
+        return
+    end
+
+    love.graphics.push("all")
+    love.graphics.origin()
+    self:draw_controls(1)
+    love.graphics.pop()
+end
+
+function lib:draw_overlay()
+    if not self:isVisible() or (Game and Kristal.getState() ~= Game) then
+        return
+    end
+
+    self:update_layout()
+    if not self.side_layout then
+        return
+    end
+
+    love.graphics.push("all")
+    love.graphics.origin()
+    self:draw_controls(self.screen_scale)
     love.graphics.pop()
 end
 
@@ -623,12 +725,15 @@ function lib:init()
     self.key_sources = {}
     self.touches = {}
     self.buttons = {}
+    self.side_layout = false
+    self.screen_scale = 1
 
     if not self.enabled then
         return
     end
 
     self:build_layout()
+    self:update_layout()
     if #self.buttons == 0 and not self.joystick then
         self.enabled = false
         print("[virtualkeyboard] No controls could be loaded; library disabled")

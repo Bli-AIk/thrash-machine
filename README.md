@@ -107,7 +107,7 @@ Android 构建是显式目标，不会被普通 `just build` 或发布工作流�
 
 密码建议通过 CI secret 或当前 shell 环境注入，不要提交到仓库。可以设置 `THRASH_MACHINE_ANDROID_ICON` 使用一个 PNG 替换默认 LÖVE 图标。
 
-`virtualkeyboard` library 默认只在 Android 启用，提供分离的十字按钮布局和可选摇杆布局，并把触摸转换为普通 Kristal `Input` 按键。默认十字区域支持多点、滑动切换和斜向输入，动作键也可以同时按下。它只承诺 APK 打包、LÖVE Android runtime 启动和这些基础输入；不承诺 Kristal 或 Mod 使用的所有 LÖVE API 在 Android 上兼容。要测试桌面触摸输入，可在 `mod.json` 的 `virtualkeyboard` 配置中将 `only_android` 设为 `false`。
+`virtualkeyboard` library 默认只在 Android 启用，提供分离的十字按钮布局和可选摇杆布局，并把触摸转换为普通 Kristal `Input` 按键。宽屏有足够边框空间时，按键会绘制在游戏画布左右的边栏，窄屏则回退到画布边缘。默认十字区域支持多点、滑动切换和斜向输入；右侧 Z 键垂直对齐在 X/C 中点，动作键也可以同时按下。它只承诺 APK 打包、LÖVE Android runtime 启动和这些基础输入；不承诺 Kristal 或 Mod 使用的所有 LÖVE API 在 Android 上兼容。要测试桌面触摸输入，可在 `mod.json` 的 `virtualkeyboard` 配置中将 `only_android` 设为 `false`。
 
 ## 提交规范
 

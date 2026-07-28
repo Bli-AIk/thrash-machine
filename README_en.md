@@ -73,7 +73,7 @@ The Android project is cached in `.build/cache/love-android-11.5`; the APK is wr
 
 Inject passwords through CI secrets or the current shell environment instead of committing them. Set `THRASH_MACHINE_ANDROID_ICON` to a PNG to replace the default LÖVE icon.
 
-The `virtualkeyboard` library is enabled by default only on Android. It provides a separated directional cross and an optional joystick layout, converting touch input into normal Kristal `Input` keys. The default cross supports multi-touch, sliding between directions, and diagonal input; action buttons can be held together as well. It only covers APK packaging, starting the LÖVE Android runtime, and this basic input path; it does not guarantee that every LÖVE API used by Kristal or a Mod is Android-compatible. Set `only_android` to `false` in the `virtualkeyboard` section of `mod.json` to test it on desktop.
+The `virtualkeyboard` library is enabled by default only on Android. It provides a separated directional cross and an optional joystick layout, converting touch input into normal Kristal `Input` keys. On wide screens with enough border space, the controls are drawn in the side areas outside the game canvas; narrower windows fall back to the canvas edges. The default cross supports multi-touch, sliding between directions, and diagonal input. The `z` button is vertically centered between `x` and `c`, and action buttons can be held together as well. It only covers APK packaging, starting the LÖVE Android runtime, and this basic input path; it does not guarantee that every LÖVE API used by Kristal or a Mod is Android-compatible. Set `only_android` to `false` in the `virtualkeyboard` section of `mod.json` to test it on desktop.
 
 ## License
 
