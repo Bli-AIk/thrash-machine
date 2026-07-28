@@ -30,7 +30,8 @@ Available configuration:
 
 The default `buttons` layout uses a separated directional cross. On a wide
 screen with enough border space, the controls are drawn in the left and right
-side areas instead of over the game canvas; narrower windows fall back to the
+side areas instead of over the game canvas, leaving about one button width at
+the left outer edge and two at the right; narrower windows fall back to the
 canvas edges. Its touch area reads the horizontal and vertical axes
 independently, so diagonal input, multi-touch, and sliding from one direction
 to another are supported. The `z` button is vertically centered between `x`

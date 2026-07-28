@@ -292,8 +292,24 @@ function lib:update_layout()
     local action_center_x = 560
     local action_center_y = 360
     if self.side_layout then
-        direction_center_x = side_width / 2
-        action_center_x = screen_width - side_width / 2
+        local button_width = 0
+        for _, button in ipairs(self.buttons) do
+            button_width = math.max(
+                button_width,
+                button.normal:getWidth() * button.scale,
+                button.pressed_image:getWidth() * button.scale
+            )
+        end
+
+        -- Keep the outermost visible buttons away from the physical screen
+        -- edges while leaving the controls close to their respective sides.
+        -- Cap the margins when a side area is too narrow to contain a layout.
+        local left_margin = math.min(button_width, side_width - 160 - button_width)
+        local right_margin = math.min(button_width * 2, side_width - 80 - button_width)
+        left_margin = math.max(0, left_margin)
+        right_margin = math.max(0, right_margin)
+        direction_center_x = left_margin + button_width / 2 + 80
+        action_center_x = screen_width - right_margin - button_width / 2 - 40
         direction_center_y = game_top + direction_center_y
         action_center_y = game_top + action_center_y
     end
