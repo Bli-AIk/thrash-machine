@@ -18,13 +18,21 @@ Available configuration:
     "layout": "buttons",
     "toggle_key": null,
     "opacity": 0.78,
-    "button_scale": 3,
-    "button_radius": 44,
+    "button_scale": 2.5,
+    "button_radius": 38,
+    "direction_area_radius": 122,
+    "direction_deadzone": 0.2,
     "joystick_scale": 2.5,
-    "joystick_radius": 90,
+    "joystick_radius": 108,
     "joystick_deadzone": 0.35
 }
 ```
+
+The default `buttons` layout uses a separated directional cross. Its touch
+area reads the horizontal and vertical axes independently, so diagonal input,
+multi-touch, and sliding from one direction to another are supported. Action
+buttons can also be held together and can be changed by sliding a finger to
+another button.
 
 Set `layout` to `joystick` to use a directional joystick with the `z`, `x`
 and `c` buttons. A mod can also call `VirtualKeyboard:setVisible(false)` or

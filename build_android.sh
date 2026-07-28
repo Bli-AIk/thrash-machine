@@ -183,6 +183,7 @@ build_love_archive() {
     rm -rf "$love_output"
     mkdir -p "$love_output"
     THRASH_MACHINE_MOD_DIR="$THRASH_MACHINE_MOD_DIR" \
+        THRASH_MACHINE_ANDROID_TOUCH_SKIP_INTRO=1 \
         THRASH_MACHINE_BUILD_VARIANTS=release \
         THRASH_MACHINE_BUILD_WINDOWS_EXE=0 \
         THRASH_MACHINE_OUTPUT_DIR="$love_output" \

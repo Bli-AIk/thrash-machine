@@ -190,6 +190,41 @@ def patch_android_game_activity(args: argparse.Namespace) -> None:
     write_text(source, text.replace(original, replacement, 1))
 
 
+def patch_android_loading_touch(args: argparse.Namespace) -> None:
+    source = Path(args.source)
+    text = read_text(source)
+    original = (
+        "function Loading:onKeyPressed(key)\n"
+        "    self.key_check = true\n"
+        "    self.skipped = true\n"
+        "    if self.loading_state == Loading.States.WAITING then\n"
+        "        self:beginLoad()\n"
+        "    end\n"
+        "end\n\n"
+        "return Loading\n"
+    )
+    replacement = (
+        "function Loading:onKeyPressed(key)\n"
+        "    self.key_check = true\n"
+        "    self.skipped = true\n"
+        "    if self.loading_state == Loading.States.WAITING then\n"
+        "        self:beginLoad()\n"
+        "    end\n"
+        "end\n\n"
+        "-- Android has no physical keyboard during the loading screen.\n"
+        "function love.touchpressed(...)\n"
+        "    local state = Kristal and Kristal.getState and Kristal.getState()\n"
+        "    if state == LoadingState and state.onKeyPressed then\n"
+        "        state:onKeyPressed(\"confirm\")\n"
+        "    end\n"
+        "end\n\n"
+        "return Loading\n"
+    )
+    if original not in text:
+        raise SystemExit(f"Could not patch Android loading touch handling in {source}")
+    write_text(source, text.replace(original, replacement, 1))
+
+
 def zip_dir(args: argparse.Namespace) -> None:
     output = Path(args.output)
     source = Path(args.source)
@@ -245,6 +280,10 @@ def main() -> None:
     patch_android_activity_command = commands.add_parser("patch-android-game-activity")
     patch_android_activity_command.add_argument("source")
     patch_android_activity_command.set_defaults(handler=patch_android_game_activity)
+
+    patch_android_loading_command = commands.add_parser("patch-android-loading-touch")
+    patch_android_loading_command.add_argument("source")
+    patch_android_loading_command.set_defaults(handler=patch_android_loading_touch)
 
     zip_command = commands.add_parser("zip-dir")
     zip_command.add_argument("output")

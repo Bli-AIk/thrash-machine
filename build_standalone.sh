@@ -156,6 +156,10 @@ prepare_stage() {
     python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-lua-config \
         "$stage_dir" "$THRASH_MACHINE_MOD_ID" "$release_mode" \
         "$identity" "$title"
+    if [ "${THRASH_MACHINE_ANDROID_TOUCH_SKIP_INTRO:-0}" = "1" ]; then
+        python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-android-loading-touch \
+            "$stage_dir/src/engine/loadstate.lua"
+    fi
     python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-mod-manifest \
         "$stage_mod/mod.json" "$mod_dev" "$object_editor"
     printf '%s\n' "$stage_dir"
