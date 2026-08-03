@@ -10,17 +10,17 @@
 
     git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
     cd thrash-machine
-    git submodule update --init --recursive
+    ./start.sh
     make test
     KRISTAL_ROOT=/path/to/Kristal just run
+
+`start.sh` uses the Git project directory name by default and lets you confirm or change it in an interactive terminal. It updates the template's Mod ID, display name, build variables, documentation references, and project filenames, then initializes all submodules recursively. Use `./start.sh --name "My Project"` to provide a name explicitly, or `./start.sh --yes` in a non-interactive environment.
 
 Battle startup debugging is provided by the `kristal-debug-tools` library submodule:
 
     just run --encounter
     just run --wave 2 --tp 50 --mercy 100
     just run --wave-force 3
-
-The template uses thrash-machine as its Mod ID. Change the ID, display name, version, and README badge URLs after creating a repository from the GitHub template.
 
 ## Tooling
 

@@ -28,9 +28,9 @@
 
     git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
     cd thrash-machine
-    git submodule update --init --recursive
+    ./start.sh
 
-模板在 mod.json 中使用 ID thrash-machine。从 GitHub 的 Use this template 创建新仓库后，应先修改该 ID、显示名称、版本和 README 徽章地址。
+`start.sh` 会默认使用当前 Git 项目目录名作为项目名，并在交互式终端中允许确认或修改它。脚本会同步更新模板中的 Mod ID、显示名称、构建变量、文档引用和项目文件名，然后递归拉取所有子模块。也可以直接使用 `./start.sh --name "My Project"`，在无交互环境中使用 `./start.sh --yes`。
 
 ### 依赖
 
