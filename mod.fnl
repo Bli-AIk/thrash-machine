@@ -132,7 +132,7 @@
      (hook-power-stat-labels (Registry.getPartyMember id)))
 
    (let [bridge (assert (self.libs.fumos.require "thrash_machine.bridge"))]
-     (print (bridge.describe "Thrash Machine")))
+     (print (bridge.describe "thrash-machine-experimental-fumos")))
 
    (: Game :registerEvent "squeak"
       (fn [data]

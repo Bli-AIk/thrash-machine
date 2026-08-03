@@ -3,10 +3,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd -P)"
-THRASH_MACHINE_BUILD_DIR="${THRASH_MACHINE_MOD_BUILD_DIR:-$ROOT/.build/mod}"
-THRASH_MACHINE_OUTPUT_DIR="${THRASH_MACHINE_OUTPUT_DIR:-$ROOT/dist}"
-THRASH_MACHINE_OUTPUT_FILE="${THRASH_MACHINE_MOD_OUTPUT_FILE:-$THRASH_MACHINE_OUTPUT_DIR/thrash-machine-mod.zip}"
-STAGE_DIR="$THRASH_MACHINE_BUILD_DIR/source"
+THRASH_MACHINE_EXPERIMENTAL_FUMOS_BUILD_DIR="${THRASH_MACHINE_EXPERIMENTAL_FUMOS_MOD_BUILD_DIR:-$ROOT/.build/mod}"
+THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_DIR="${THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_DIR:-$ROOT/dist}"
+THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE="${THRASH_MACHINE_EXPERIMENTAL_FUMOS_MOD_OUTPUT_FILE:-$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_DIR/thrash-machine-experimental-fumos-mod.zip}"
+STAGE_DIR="$THRASH_MACHINE_EXPERIMENTAL_FUMOS_BUILD_DIR/source"
 
 command -v python3 >/dev/null
 command -v rsync >/dev/null
@@ -14,7 +14,7 @@ command -v unzip >/dev/null
 command -v zip >/dev/null
 
 rm -rf "$STAGE_DIR"
-mkdir -p "$STAGE_DIR" "$THRASH_MACHINE_OUTPUT_DIR"
+mkdir -p "$STAGE_DIR" "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_DIR"
 rsync -a \
     --exclude='/.git/' \
     --exclude='.git' \
@@ -43,9 +43,9 @@ rsync -a \
 rm -rf "$STAGE_DIR/libraries/object-editor"
 rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
 python3 "$ROOT/build_standalone.py" patch-mod-manifest "$STAGE_DIR/mod.json" false false
-rm -f "$THRASH_MACHINE_OUTPUT_FILE"
-(cd "$STAGE_DIR" && zip -9 -q -r "$THRASH_MACHINE_OUTPUT_FILE" .)
-test -s "$THRASH_MACHINE_OUTPUT_FILE"
-unzip -t "$THRASH_MACHINE_OUTPUT_FILE" >/dev/null
-unzip -Z1 "$THRASH_MACHINE_OUTPUT_FILE" | grep -Fx 'mod.json' >/dev/null
-printf 'Created Mod package: %s\n' "$THRASH_MACHINE_OUTPUT_FILE"
+rm -f "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE"
+(cd "$STAGE_DIR" && zip -9 -q -r "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE" .)
+test -s "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE"
+unzip -t "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE" >/dev/null
+unzip -Z1 "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE" | grep -Fx 'mod.json' >/dev/null
+printf 'Created Mod package: %s\n' "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE"

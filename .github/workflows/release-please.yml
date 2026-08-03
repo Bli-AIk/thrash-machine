@@ -67,7 +67,7 @@ jobs:
           (cd dist && sha256sum -c SHA256SUMS)
       - uses: actions/upload-artifact@v4
         with:
-          name: thrash-machine-${{ needs.release.outputs.tag_name }}
+          name: thrash-machine-experimental-fumos-${{ needs.release.outputs.tag_name }}
           path: dist/
           if-no-files-found: error
       - name: Upload release assets

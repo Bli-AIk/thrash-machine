@@ -1,11 +1,11 @@
-# Thrash Machine
+# thrash-machine-experimental-fumos
 
-[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/>
+[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine-experimental-fumos.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine-experimental-fumos.svg"/>
 <img src="https://img.shields.io/badge/Fennel-4D2B8C?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
 
 > 当前状态：可作为新 Kristal Mod 的开发模板使用。
 
-**Thrash Machine** 是一个以 Fennel 为作者语言的 Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将常用的 FUMOS、简体中文语言库、开发期 object-editor、Emacs 和 Helix 配置组织为可更新的子模块。
+**thrash-machine-experimental-fumos** 是一个以 Fennel 为作者语言的 Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将常用的 FUMOS、简体中文语言库、开发期 object-editor、Emacs 和 Helix 配置组织为可更新的子模块。
 
 | 简体中文 | English |
 | --- | --- |
@@ -26,8 +26,8 @@
 ### 克隆
 
 ```sh
-git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
-cd thrash-machine
+git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine-experimental-fumos.git
+cd thrash-machine-experimental-fumos
 git submodule update --init --recursive
 ```
 

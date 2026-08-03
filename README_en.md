@@ -1,16 +1,16 @@
-# Thrash Machine
+# thrash-machine-experimental-fumos
 
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE)
 
-**Thrash Machine** is a Fennel-first Kristal v0.10 template. It keeps a playable starter map, Dummy battle, and object event while wiring together FUMOS, Simplified Chinese localization, a development-only object editor, and project-local Emacs and Helix configuration.
+**thrash-machine-experimental-fumos** is a Fennel-first Kristal v0.10 template. It keeps a playable starter map, Dummy battle, and object event while wiring together FUMOS, Simplified Chinese localization, a development-only object editor, and project-local Emacs and Helix configuration.
 
 [简体中文](README.md)
 
 ## Quick Start
 
 ```sh
-git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
-cd thrash-machine
+git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine-experimental-fumos.git
+cd thrash-machine-experimental-fumos
 git submodule update --init --recursive
 make test
 KRISTAL_ROOT=/path/to/Kristal just run
