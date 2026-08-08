@@ -46,16 +46,3 @@ end
         return true
     end)
 
-    -- Light world CELL menu: always available (the engine only enables it for
-    -- light-starting saves or after the light switch conversion).
-    HookSystem.hook(Game, "enter", function(orig, self, ...)
-        local result = orig(self, ...)
-        Game:setFlag("has_cell_phone", true)
-        if Game.inventory and Game:isLight() then
-            local storage = Game.inventory:getStorage("key_items")
-            if storage and not Game.inventory:hasItem("cell_phone") then
-                Game.inventory:addItem("cell_phone")
-            end
-        end
-        return result
-    end)
