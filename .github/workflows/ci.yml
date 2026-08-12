@@ -51,7 +51,7 @@ jobs:
             unzip -t "$file" >/dev/null
           done
           unzip -Z1 dist/thrash-machine-experimental-fumos-mod.zip | grep -Fx mod.json >/dev/null
-          test -z "$(unzip -Z1 dist/thrash-machine-experimental-fumos-mod.zip | grep '^libraries/object-editor/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-experimental-fumos-mod.zip | grep '^libraries/kristal-object-selector-plus/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-experimental-fumos-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
       - name: Generate and verify SHA-256 manifest
         run: |

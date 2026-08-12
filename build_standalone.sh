@@ -97,7 +97,7 @@ copy_mod() {
         "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_MOD_DIR/" "$stage_mod/"
 
     if [ "$variant" = "release" ]; then
-        rm -rf "$stage_mod/libraries/object-editor"
+        rm -rf "$stage_mod/libraries/kristal-object-selector-plus"
         rm -rf "$stage_mod/libraries/kristal-debug-tools"
     fi
 }

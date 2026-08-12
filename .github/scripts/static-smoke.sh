@@ -20,11 +20,11 @@ test -f "$root/flsproject.fnl"
 test -f "$root/fnl/thrash_machine/bridge.fnl"
 test -f "$root/libraries/fumos/lib.lua"
 test -f "$root/libraries/kristal-i18n/lib.lua"
-test -f "$root/libraries/object-editor/lib.lua"
+test -f "$root/libraries/kristal-object-selector-plus/lib.lua"
 test -f "$root/libraries/kristal-debug-tools/lib.lua"
 test -f "$root/.emacs/init.el"
 test -f "$root/.helix/languages.toml"
 test "$(git -C "$root" config -f .gitmodules --get submodule.libraries/fumos.url)" = \
     https://github.com/Bli-AIk/fumos.git
-test "$(git -C "$root" config -f .gitmodules --get submodule.libraries/object-editor.url)" = \
-    https://github.com/Bli-AIk/object-editor.git
+test "$(git -C "$root" config -f .gitmodules --get submodule.libraries/kristal-object-selector-plus.url)" = \
+    https://github.com/Bli-AIk/kristal-object-selector-plus.git

@@ -5,7 +5,7 @@
 
 > 当前状态：可作为新 Kristal Mod 的开发模板使用。
 
-**thrash-machine-experimental-fumos** 是一个以 Fennel 为作者语言的 Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将常用的 FUMOS、简体中文语言库、开发期 object-editor、Emacs 和 Helix 配置组织为可更新的子模块。
+**thrash-machine-experimental-fumos** 是一个以 Fennel 为作者语言的 Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将常用的 FUMOS、简体中文语言库、开发期 kristal-object-selector-plus、Emacs 和 Helix 配置组织为可更新的子模块。
 
 | 简体中文 | English |
 | --- | --- |
@@ -15,7 +15,7 @@
 
 - 作者维护的 Mod 代码全部使用 `.fnl`；FUMOS 在 Kristal 中直接加载 Fennel。
 - `kristal-i18n` 预置英文/简体中文和系统语言自动选择。
-- `object-editor` 仅在开发模式启用，生产包自动禁用并移除。
+- `kristal-object-selector-plus` 仅在开发模式启用，生产包自动禁用并移除。
 - `kristal-debug-tools` 提供可复用的战斗启动调试参数，生产包自动移除。
 - `.emacs` 提供 FUMOS live REPL、Fennel LSP 和 Kristal LuaLS 集成。
 - `.helix` 提供项目级 Kristal/Lua 配置；Helix 内置 Fennel grammar 可直接使用 `fennel-ls`。
@@ -87,7 +87,7 @@ just build-mod
 
 `just build` 固定使用 Kristal `v0.10.0`，生成 release/debug `.love`、Windows x64 包；它仅修改暂存引擎副本的目标 Mod、自动启动、窗口标识和 release/debug 标志。`just build-mod` 生成可放入 Kristal `mods/` 的生产 Mod ZIP。
 
-生产资产会保留 FUMOS 和语言库，禁用并剔除 object-editor、kristal-debug-tools、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/`main` 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 `SHA256SUMS`。
+生产资产会保留 FUMOS 和语言库，禁用并剔除 kristal-object-selector-plus、kristal-debug-tools、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/`main` 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 `SHA256SUMS`。
 
 ## 提交规范
 

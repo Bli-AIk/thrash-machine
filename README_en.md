@@ -41,7 +41,7 @@ just build
 just build-mod
 ```
 
-Production packages preserve FUMOS and localization, while disabling and excluding `object-editor` and `kristal-debug-tools`. The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags.
+Production packages preserve FUMOS and localization, while disabling and excluding `kristal-object-selector-plus` and `kristal-debug-tools`. The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags.
 
 ## License
 

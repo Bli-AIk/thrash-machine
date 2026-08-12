@@ -40,7 +40,7 @@ rsync -a \
     --exclude='*.tiled-session' \
     "$ROOT/" "$STAGE_DIR/"
 
-rm -rf "$STAGE_DIR/libraries/object-editor"
+rm -rf "$STAGE_DIR/libraries/kristal-object-selector-plus"
 rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
 python3 "$ROOT/build_standalone.py" patch-mod-manifest "$STAGE_DIR/mod.json" false false
 rm -f "$THRASH_MACHINE_EXPERIMENTAL_FUMOS_OUTPUT_FILE"
