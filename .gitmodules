@@ -17,3 +17,6 @@
 [submodule "libraries/kristal-debug-tools"]
 	path = libraries/kristal-debug-tools
 	url = https://github.com/Bli-AIk/kristal-debug-tools.git
+[submodule "libraries/kristal-debug-tools-gui"]
+	path = libraries/kristal-debug-tools-gui
+	url = https://github.com/Bli-AIk/kristal-debug-tools-gui.git

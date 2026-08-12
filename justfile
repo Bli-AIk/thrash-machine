@@ -9,10 +9,6 @@ run *args:
 gui:
     @just --justfile libraries/kristal-debug-tools/justfile gui
 
-# Run the GUI's Go test suite.
-test-go:
-    @just --justfile libraries/kristal-debug-tools/justfile test-go
-
 test:
     @make test
 
