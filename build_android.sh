@@ -32,19 +32,14 @@ need_cmd() {
     command -v "$1" >/dev/null 2>&1 || fail "Missing required command: $1"
 }
 
-read_mod_version() {
-    python3 - "$THRASH_MACHINE_MOD_DIR/mod.json" <<'PY'
-import re
-import sys
-from pathlib import Path
+# shellcheck source=build-helper/lib.sh
+source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 
-text = Path(sys.argv[1]).read_text(encoding="utf-8")
-match = re.search(r'(?m)^\s*"version"\s*:\s*"([^"]+)"', text)
-if not match:
-    raise SystemExit("Could not find mod.json version")
-version = match.group(1)
-print(version[1:] if version.startswith("v") else version)
-PY
+read_mod_version() {
+    version="$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+        "$THRASH_MACHINE_MOD_DIR/mod.json" | head -n 1)"
+    [ -n "$version" ] || fail "Could not find mod.json version"
+    printf '%s\n' "${version#v}"
 }
 
 check_inputs() {
@@ -52,8 +47,6 @@ check_inputs() {
 
     need_cmd git
     need_cmd java
-    need_cmd python3
-    need_cmd rsync
     need_cmd find
 
     java_home="${THRASH_MACHINE_ANDROID_JAVA_HOME:-${JAVA_HOME:-}}"
@@ -143,10 +136,9 @@ stage_android_source() {
 
     rm -rf "$stage_dir"
     mkdir -p "$stage_dir"
-    rsync -a --delete \
-        --exclude='/.git' \
-        --exclude='/.git/' \
-        "$THRASH_MACHINE_ANDROID_CACHE_DIR/" "$stage_dir/"
+    # tar instead of rsync (rsync is not available in Git Bash on Windows).
+    tar -cf - --exclude='*.git' \
+        -C "$THRASH_MACHINE_ANDROID_CACHE_DIR" . | tar -xf - -C "$stage_dir"
     mkdir -p "$stage_dir/app/src/embed/assets"
     cp "$THRASH_MACHINE_ANDROID_WORK_DIR/love/${THRASH_MACHINE_OUTPUT_BASENAME}-release.love" \
         "$stage_dir/app/src/embed/assets/game.love"
@@ -161,18 +153,18 @@ stage_android_source() {
         done
     fi
 
-    python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-android-properties \
+    run_helper patch-android-properties \
         "$stage_dir/gradle.properties" \
         "$THRASH_MACHINE_ANDROID_APPLICATION_ID" \
         "$THRASH_MACHINE_ANDROID_NAME" \
         "$THRASH_MACHINE_ANDROID_ORIENTATION" \
         "$THRASH_MACHINE_ANDROID_VERSION_CODE" \
         "$THRASH_MACHINE_ANDROID_VERSION_NAME"
-    python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-android-gradle \
+    run_helper patch-android-gradle \
         "$stage_dir/app/build.gradle"
-    python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-android-game-activity \
+    run_helper patch-android-game-activity \
         "$stage_dir/love/src/main/java/org/love2d/android/GameActivity.java"
-    python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-android-local-properties \
+    run_helper patch-android-local-properties \
         "$stage_dir/local.properties" \
         "$ANDROID_SDK_ROOT"
 }

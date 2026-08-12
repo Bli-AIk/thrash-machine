@@ -71,37 +71,40 @@ copy_mod() {
     stage_mod="$1"
     variant="$2"
     mkdir -p "$stage_mod"
-    rsync -a \
-        --exclude='/.git/' \
-        --exclude='.git' \
-        --exclude='/.github/' \
-        --exclude='/.build/' \
-        --exclude='/dist/' \
-        --exclude='/.emacs/' \
-        --exclude='/.helix/' \
-        --exclude='/.vscode/' \
-        --exclude='/.worktrees/' \
-        --exclude='/tests/' \
-        --exclude='/docs/' \
-        --exclude='/Makefile' \
-        --exclude='/justfile' \
-        --exclude='/build_standalone.sh' \
-        --exclude='/build_standalone.py' \
-        --exclude='/build_android.sh' \
-        --exclude='__pycache__/' \
+    # Stage with tar instead of rsync (rsync is not available in Git Bash
+    # on Windows; tar is). Member names are "./…", so a leading "./" pins a
+    # pattern to the mod root, while slash-free patterns match basenames
+    # anywhere (like rsync's unanchored patterns).
+    tar -cf - \
+        --exclude='*.git' \
+        --exclude='./.github' \
+        --exclude='./.build' \
+        --exclude='./dist' \
+        --exclude='./.emacs' \
+        --exclude='./.helix' \
+        --exclude='./.vscode' \
+        --exclude='./.worktrees' \
+        --exclude='./tests' \
+        --exclude='./docs' \
+        --exclude='./Makefile' \
+        --exclude='./justfile' \
+        --exclude='./build_standalone.sh' \
+        --exclude='./build_android.sh' \
+        --exclude='./build-helper' \
+        --exclude='__pycache__' \
         --exclude='*.pyc' \
         --exclude='*.pyo' \
-        --exclude='/release-please-config.json' \
-        --exclude='/.release-please-manifest.json' \
-        --exclude='/.gitmodules' \
-        --exclude='/.gitignore' \
+        --exclude='./release-please-config.json' \
+        --exclude='./.release-please-manifest.json' \
+        --exclude='./.gitmodules' \
+        --exclude='./.gitignore' \
         --exclude='*.tiled-project' \
         --exclude='*.tiled-session' \
-        --exclude='/libraries/kristal-debug-tools/gui/' \
-        --exclude='/libraries/kristal-debug-tools/just.cmd' \
-        --exclude='/libraries/kristal-debug-tools/dist/' \
-        --exclude='/libraries/kristal-debug-tools/.tools/' \
-        "$THRASH_MACHINE_MOD_DIR/" "$stage_mod/"
+        --exclude='./libraries/kristal-debug-tools/gui' \
+        --exclude='./libraries/kristal-debug-tools/just.cmd' \
+        --exclude='./libraries/kristal-debug-tools/dist' \
+        --exclude='./libraries/kristal-debug-tools/.tools' \
+        -C "$THRASH_MACHINE_MOD_DIR" . | tar -xf - -C "$stage_mod"
 
     if [ "$variant" = "release" ]; then
         rm -rf "$stage_mod/libraries/kristal-object-selector-plus"
@@ -123,7 +126,7 @@ zip_dir() {
             (cd "$source" && zip -9 -q -r "$output" .)
         fi
     else
-        python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" zip-dir "$output" "$source" "$prefix"
+        run_helper zip-dir "$output" "$source" "$prefix"
     fi
 }
 
@@ -157,14 +160,14 @@ prepare_stage() {
         identity="${THRASH_MACHINE_MOD_ID}_debug"
         title="${THRASH_MACHINE_PROJECT_TITLE} Debug"
     fi
-    python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-lua-config \
+    run_helper patch-lua-config \
         "$stage_dir" "$THRASH_MACHINE_MOD_ID" "$release_mode" \
         "$identity" "$title"
     if [ "${THRASH_MACHINE_ANDROID_TOUCH_SKIP_INTRO:-0}" = "1" ]; then
-        python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-android-loading-touch \
+        run_helper patch-android-loading-touch \
             "$stage_dir/src/engine/loadstate.lua"
     fi
-    python3 "$THRASH_MACHINE_MOD_DIR/build_standalone.py" patch-mod-manifest \
+    run_helper patch-mod-manifest \
         "$stage_mod/mod.json" "$mod_dev" "$object_editor"
     printf '%s\n' "$stage_dir"
 }
@@ -214,12 +217,13 @@ build_variant() {
 }
 
 need_cmd git
-need_cmd python3
-need_cmd rsync
 need_cmd tar
 need_cmd unzip
 need_cmd curl
-need_cmd zip
+# `zip` is optional: when missing, zip_dir falls back to the build-helper
+# (LÖVE) which writes stored zips.
+# shellcheck source=build-helper/lib.sh
+source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 ensure_kristal
 mkdir -p "$THRASH_MACHINE_OUTPUT_DIR"
 ensure_love_windows
