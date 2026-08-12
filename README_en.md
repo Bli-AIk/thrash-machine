@@ -41,7 +41,15 @@ KRISTAL_ROOT=/path/to/Kristal just run   # run (common local Kristal paths are a
 
 Debug arguments pass straight to kristal-debug-tools: `just run --encounter`, `just run --wave 2 --tp 50`, `just run --lang zh-hans`.
 
-Requires Git (with Git Bash), LÖVE 11.5 and just; packaging is bash + tar + Lua (`build-helper/`, run by LÖVE's bundled LuaJIT) — **no Python**. On Windows, use the default Git install PATH option ("Git from the command line and also from 3rd-party software") so `bash` is on PATH; Git Bash has no `zip`, so the Lua helper writes zips when it's missing.
+Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run by LÖVE's bundled LuaJIT — **no Python or rsync on any OS**):
+
+| OS | Required | Notes |
+| ---- | ---- | ---- |
+| **Windows** | Git for Windows (default PATH option at install), LÖVE 11.5 | Git Bash provides bash/tar/curl/unzip/sed; Git Bash has no `zip`, so the Lua helper writes zips when it's missing |
+| **Linux** | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`) | `zip` optional: system zip when present, Lua helper otherwise |
+| **macOS** | Git (Xcode Command Line Tools), LÖVE 11.5 (`brew install --cask love`) | tar/unzip/curl/zip are built in |
+
+`just` is only needed for command-line packaging (the GUI embeds its own). Android packaging additionally needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653.
 
 ## Builds
 

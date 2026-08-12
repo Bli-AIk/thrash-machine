@@ -41,7 +41,15 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 
 运行调试参数直接透传给 kristal-debug-tools：`just run --encounter`、`just run --wave 2 --tp 50`、`just run --lang zh-hans`。
 
-需要 Git（含 Git Bash）、LÖVE 11.5、just；打包由 bash + tar + Lua（`build-helper/`，用 LÖVE 自带的 LuaJIT 运行）完成，**不需要 Python**。Windows 上安装 Git 时选默认 PATH 选项（"Git from the command line and also from 3rd-party software"），`bash` 即进入 PATH；Git Bash 不含 `zip`，缺省时由 Lua 助手写入 zip。
+打包所需软件按系统区分（打包由 bash + tar + Lua `build-helper/` 完成，用 LÖVE 自带的 LuaJIT 运行，**所有系统都不需要 Python / rsync**）：
+
+| 系统 | 必需 | 说明 |
+| ---- | ---- | ---- |
+| **Windows** | Git for Windows（安装时选默认 PATH 选项）、LÖVE 11.5 | Git Bash 自带 bash/tar/curl/unzip/sed；Git Bash 不含 `zip`，缺省时由 Lua 助手写入 zip |
+| **Linux** | git、tar、unzip、curl、love（如 Arch：`sudo pacman -S love`） | `zip` 可选：有则用系统 zip，无则 Lua 助手 |
+| **macOS** | Git（Xcode 命令行工具）、LÖVE 11.5（`brew install --cask love`） | tar/unzip/curl/zip 系统自带 |
+
+`just` 仅在命令行打包时需要（GUI 自带内嵌 just）。Android 打包额外需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653。
 
 ## 构建
 
