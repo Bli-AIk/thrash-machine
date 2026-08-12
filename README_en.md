@@ -43,11 +43,11 @@ Debug arguments pass straight to kristal-debug-tools: `just run --encounter`, `j
 
 Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run by LÖVE's bundled LuaJIT — **no Python or rsync on any OS**):
 
-| OS | Required | Notes |
-| ---- | ---- | ---- |
-| **Windows** | Git for Windows (default PATH option at install), LÖVE 11.5 | Git Bash provides bash/tar/curl/unzip/sed; Git Bash has no `zip`, so the Lua helper writes zips when it's missing |
-| **Linux** | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`) | `zip` optional: system zip when present, Lua helper otherwise |
-| **macOS** | Git (Xcode Command Line Tools), LÖVE 11.5 (`brew install --cask love`) | tar/unzip/curl/zip are built in |
+| OS          | Required                                                               | Notes                                                                                                             |
+| ----------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Windows** | Git for Windows (default PATH option at install), LÖVE 11.5            | Git Bash provides bash/tar/curl/unzip/sed; Git Bash has no `zip`, so the Lua helper writes zips when it's missing |
+| **Linux**   | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`)         | `zip` optional: system zip when present, Lua helper otherwise                                                     |
+| **macOS**   | Git (Xcode Command Line Tools), LÖVE 11.5 (`brew install --cask love`) | tar/unzip/curl/zip are built in                                                                                   |
 
 `just` is only needed for command-line packaging (the GUI embeds its own). **LÖVE must be on PATH** (or installed in the default locations — the scripts check Windows' `Program Files\LOVE` and `%LOCALAPPDATA%\Programs\LOVE` automatically). Android packaging additionally needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653.
 
