@@ -58,6 +58,12 @@ just run 也会查找常见的本地 Kristal 路径；开发模式下可直接�
     just run --wave 2 --tp 50 --mercy 100
     just run --wave-force 3
 
+启动时可用 `--lang`、`--language` 或 `-l` 选择语言，当前支持英文和简体中文：
+
+    just run --lang en
+    just run --language zh-hans
+    just run -l zh-hans
+
 `--wave` 使用敌人 wave 列表的从 1 开始的编号，也接受 wave ID；`--wave-force` 会在每轮重复该 wave。其他项目只需引用 `libraries/kristal-debug-tools` 并配置自己的 `default_encounter`。
 
     KRISTAL=/path/to/Kristal make test-kristal

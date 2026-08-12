@@ -32,6 +32,15 @@ printf '%s\n' "$output" | grep -F -- '--mercy 75' >/dev/null
 output=$(run_dry --wave-force 3)
 printf '%s\n' "$output" | grep -F -- '--wave-force 3' >/dev/null
 
+output=$(run_dry --lang zh-hans)
+printf '%s\n' "$output" | grep -F -- '--lang zh-hans' >/dev/null
+
+output=$(run_dry --language=en)
+printf '%s\n' "$output" | grep -F -- '--lang en' >/dev/null
+
+output=$(run_dry -l zh-hans)
+printf '%s\n' "$output" | grep -F -- '--lang zh-hans' >/dev/null
+
 output=$(run_dry -- --custom value)
 printf '%s\n' "$output" | grep -F -- '--custom value' >/dev/null
 
@@ -42,6 +51,11 @@ fi
 
 if run_dry --unknown >/dev/null 2>&1; then
     printf '%s\n' 'unknown-option validation failed' >&2
+    exit 1
+fi
+
+if run_dry --language >/dev/null 2>&1; then
+    printf '%s\n' 'language missing-value validation failed' >&2
     exit 1
 fi
 

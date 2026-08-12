@@ -22,6 +22,12 @@ Battle startup debugging is provided by the `kristal-debug-tools` library submod
     just run --wave 2 --tp 50 --mercy 100
     just run --wave-force 3
 
+Select the startup language with `--lang`, `--language`, or `-l`:
+
+    just run --lang en
+    just run --language zh-hans
+    just run -l zh-hans
+
 ## Tooling
 
 - Kristal v0.10.0 and LÖVE 11.5 for local runs and standalone builds.
