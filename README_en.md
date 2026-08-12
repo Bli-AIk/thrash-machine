@@ -1,86 +1,63 @@
 # Thrash Machine
 
-[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE)
+[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/v/release/Bli-AIk/thrash-machine.svg"/> <br>
+<img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
 
-**Thrash Machine** is a standard Lua Kristal v0.10 template. It keeps a playable starter map, Dummy battle, and object event while wiring together Simplified Chinese localization, development-only object editing and terminal debugging, and project-local Emacs and Helix configuration.
+**Thrash Machine** is a ready-to-use standard Lua Kristal v0.10 template: a playable starter map, Dummy battle and object event out of the box, with Simplified Chinese localization and development tools organized as submodules.
 
-[简体中文](README.md)
+| English | 简体中文                |
+| ------- | ----------------------- |
+| English | [简体中文](./README.md) |
+
+## Kristal Version Support
+
+| `kristal`                                                                                                      | `thrash-machine` |
+| -------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`) | v0.0.0           |
+
+## What's Inside
+
+- Playable starter map + Dummy battle + object event
+- English / Simplified Chinese via kristal-i18n, switchable in-game
+- Dev tools as submodules, stripped from release packages
+
+| Submodule                    | Purpose                                                    |
+| ---------------------------- | ---------------------------------------------------------- |
+| kristal-i18n                 | Localization, en/zh_hans built in                          |
+| kristal-object-selector-plus | Scene object editor (Blender-style G/R/S)                  |
+| terminal-cli                 | Terminal debug console (Linux/POSIX)                       |
+| kristal-debug-tools          | Battle debug launcher (`--encounter` / `--wave` / `--tp`…) |
+| .emacs / .helix              | Project editor config (LuaLS, Kristal paths)               |
 
 ## Quick Start
 
-    git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
-    cd thrash-machine
-    ./start.sh
-    make test
-    KRISTAL_ROOT=/path/to/Kristal just run
+```sh
+git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
+cd thrash-machine
+./start.sh            # rename the template to your project (--name "My Project"; --yes non-interactive)
+make test             # static assertions + syntax checks
+KRISTAL_ROOT=/path/to/Kristal just run   # run (common local Kristal paths are auto-detected)
+```
 
-`start.sh` uses the Git project directory name by default and lets you confirm or change it in an interactive terminal. It updates the template's Mod ID, display name, build variables, documentation references, and project filenames, then initializes all submodules recursively. Use `./start.sh --name "My Project"` to provide a name explicitly, or `./start.sh --yes` in a non-interactive environment.
+Debug arguments pass straight to kristal-debug-tools: `just run --encounter`, `just run --wave 2 --tp 50`, `just run --lang zh-hans`.
 
-Battle startup debugging is provided by the `kristal-debug-tools` library submodule:
-
-    just run --encounter
-    just run --wave 2 --tp 50 --mercy 100
-    just run --wave-force 3
-
-Select the startup language with `--lang`, `--language`, or `-l`:
-
-    just run --lang en
-    just run --language zh-hans
-    just run -l zh-hans
-
-## Tooling
-
-- Kristal v0.10.0 and LÖVE 11.5 for local runs and standalone builds.
-- JDK 17, Android SDK API 34, Build Tools 34.0.0, and Android NDK 25.2.9519653 for the optional Android build.
-- LuaJIT for syntax checks and runtime support.
-- kristal-i18n for English and Simplified Chinese localization.
-- object-editor for development-only scene editing; release packages exclude it.
-- terminal-cli for interactive Lua debugging in the development terminal; release packages exclude it.
-- kristal-debug-tools for reusable battle startup debugging; release packages exclude it.
-- .emacs and .helix for LuaLS, Kristal paths, and launch helpers.
-- An optional Android APK target and Android-only-by-default virtual touch controls.
+Requires Git, LÖVE 11.5, LuaJIT, just, and rsync/zip/unzip/Python 3.
 
 ## Builds
 
-    just build
-    just build-mod
+- `just build` — release/debug .love and Windows x64 packages (pinned to Kristal v0.10.0)
+- `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
+- `just build-android` — optional Android APK (first build needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
 
-The standalone builder stages stock Kristal v0.10.0 and changes only target-Mod startup, window identity, and release/debug flags. Production packages keep localization, disable the object editor, exclude terminal-cli, and omit development files.
+GitHub Actions verifies builds on PR/main; after a release-please PR merges, assets and SHA-256 manifests are uploaded automatically.
 
-### Android
+## Commit Convention
 
-Android is an explicit build target and is not included in the normal desktop build or release jobs. It uses the official LÖVE Android 11.5 project, embeds the release `.love` archive, and signs the APK with the local Android debug keystore by default so it can be installed directly on a device:
+Use Conventional Commits (feat/fix drive release-please versions and changelogs):
 
-    just build-android
-
-The first build requires JDK 17, Android SDK API 34, Build Tools `34.0.0`, Android NDK `25.2.9519653`, Git, rsync, and network access. Install the Android components with the official `sdkmanager`:
-
-    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
-    export ANDROID_SDK_ROOT=/home/aik/Android/Sdk
-    yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses
-    "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" \
-        "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
-
-Application metadata can be overridden with environment variables:
-
-    ANDROID_SDK_ROOT=/path/to/android-sdk \
-    THRASH_MACHINE_ANDROID_APPLICATION_ID=com.example.myproject \
-    THRASH_MACHINE_ANDROID_NAME="My Project" \
-    THRASH_MACHINE_ANDROID_VERSION_CODE=1 \
-    just build-android
-
-The Android project is cached in `.build/cache/love-android-11.5`; the APK is written to `dist/thrash-machine-android.apk`. The default signature is for local testing, not store distribution. For a release build, provide your own keystore through these environment variables:
-
-    THRASH_MACHINE_ANDROID_SIGNING_KEYSTORE=/absolute/path/release.keystore \
-    THRASH_MACHINE_ANDROID_SIGNING_STORE_PASSWORD='store-password' \
-    THRASH_MACHINE_ANDROID_SIGNING_KEY_ALIAS='release' \
-    THRASH_MACHINE_ANDROID_SIGNING_KEY_PASSWORD='key-password' \
-    just build-android
-
-Inject passwords through CI secrets or the current shell environment instead of committing them. Set `THRASH_MACHINE_ANDROID_ICON` to a PNG to replace the default LÖVE icon.
-
-The `virtualkeyboard` library is enabled by default only on Android. It provides a separated directional cross and an optional joystick layout, converting touch input into normal Kristal `Input` keys. On wide screens with enough border space, the controls are drawn in the side areas outside the game canvas; every layout leaves about one button width at the left outer edge and two at the right, while narrower windows keep the same spacing inside the 640x480 canvas. The default cross supports multi-touch, sliding between directions, and diagonal input. The `z` button is vertically centered between `x` and `c`, and action buttons can be held together as well. It only covers APK packaging, starting the LÖVE Android runtime, and this basic input path; it does not guarantee that every LÖVE API used by Kristal or a Mod is Android-compatible. Set `only_android` to `false` in the `virtualkeyboard` section of `mod.json` to test it on desktop.
+    feat: add a new Lua battle wave
+    fix: fix object events after room transitions
 
 ## License
 
-Repository-authored Lua source and documentation are dual-licensed under Apache-2.0 (LICENSE-APACHE) or MIT (LICENSE-MIT). See third-party notices (THIRD_PARTY.md) for Kristal and submodule license boundaries.
+Repository-authored Lua source and docs are dual-licensed under MIT (LICENSE-MIT) or Apache-2.0 (LICENSE-APACHE). Kristal and submodule license boundaries: THIRD_PARTY.md.

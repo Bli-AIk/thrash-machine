@@ -1,137 +1,63 @@
 # Thrash Machine
 
-[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/>
-<img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
+[![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/v/release/Bli-AIk/thrash-machine.svg"/> <br>
+<img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
 
-> 当前状态：可作为新 Kristal Mod 的开发模板使用。
+**Thrash Machine** 是一个开箱即用的标准 Lua Kristal v0.10 模板：自带能跑的 starter 地图、Dummy 战斗和对象事件，中文本地化和开发期工具按子模块组织好。
 
-**Thrash Machine** 是一个标准 Lua Kristal v0.10 模板。它保留可运行的 starter map、Dummy 战斗和对象事件，并将简体中文语言库、开发期 object-editor、terminal-cli、Emacs 和 Helix 配置组织为可更新的子模块。
-
-| 简体中文 | English |
-| --- | --- |
+| 简体中文 | English                 |
+| -------- | ----------------------- |
 | 简体中文 | [English](README_en.md) |
 
-## 特性
+## Kristal 版本支持
 
-- 作者维护的 Mod 代码使用 Kristal 原生 Lua 文件。
-- kristal-i18n 预置英文/简体中文和系统语言自动选择。
-- object-editor 仅在开发模式启用，生产包自动禁用并移除。
-- terminal-cli 在开发模式下把 Kristal 调试控制台连接到当前终端，生产包自动移除。
-- kristal-debug-tools 提供可复用的战斗启动调试参数，生产包自动移除。
-- .emacs 和 .helix 提供项目级 Kristal/LuaLS 配置。
-- release-please、Mod ZIP、release/debug .love、Windows x64 包和 SHA-256 清单。
-- 可选 Android APK 打包入口，以及仅在 Android 默认启用的虚拟触摸按键库。
+| `kristal`                                                                                                      | `thrash-machine` |
+| -------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`) | v0.0.0           |
 
-## 使用
+## 有什么
 
-### 克隆
+- 直接可玩：starter 地图 + Dummy 战斗 + 对象事件
+- 中英双语（kristal-i18n），游戏内可切换
+- 开发期工具按子模块组织，生产包自动剔除
 
-    git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
-    cd thrash-machine
-    ./start.sh
+| 子模块                       | 用途                                                 |
+| ---------------------------- | ---------------------------------------------------- |
+| kristal-i18n                 | 本地化，内置英文/简体中文                            |
+| kristal-object-selector-plus | 场景对象编辑器（Blender 风格 G/R/S）                 |
+| terminal-cli                 | 终端调试控制台（Linux/POSIX）                        |
+| kristal-debug-tools          | 战斗调试启动器（`--encounter` / `--wave` / `--tp`…） |
+| .emacs / .helix              | 项目级编辑器配置（LuaLS、Kristal 路径）              |
 
-`start.sh` 会默认使用当前 Git 项目目录名作为项目名，并在交互式终端中允许确认或修改它。脚本会同步更新模板中的 Mod ID、显示名称、构建变量、文档引用和项目文件名，然后递归拉取所有子模块。也可以直接使用 `./start.sh --name "My Project"`，在无交互环境中使用 `./start.sh --yes`。
+## 开始
 
-### 依赖
+```sh
+git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
+cd thrash-machine
+./start.sh            # 把模板改成你的项目（--name "My Project"；--yes 免交互）
+make test             # 静态断言 + 语法检查
+KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal 路径）
+```
 
-| 工具 | 用途 |
-| --- | --- |
-| Git | 获取模板和子模块。 |
-| LÖVE 11.5 | 运行 Kristal。 |
-| Kristal v0.10.0 | 本地运行与独立包基线。 |
-| LuaJIT | Lua 语法检查和运行时。 |
-| rsync、zip、unzip、Python 3 | 构建发行包。 |
-| JDK 17、Android SDK API 34、Build Tools 34.0.0、Android NDK 25.2.9519653 | 可选 Android APK 构建。 |
-| just | 运行共享 Kristal 调试启动器。 |
-| Emacs 30+ 或 Helix、lua-language-server | 可选编辑器支持。 |
+运行调试参数直接透传给 kristal-debug-tools：`just run --encounter`、`just run --wave 2 --tp 50`、`just run --lang zh-hans`。
 
-### 开发
+需要 Git、LÖVE 11.5、LuaJIT、just 和 rsync/zip/unzip/Python 3。
 
-    make test
-    KRISTAL_ROOT=/path/to/Kristal just run
+## 构建
 
-just run 也会查找常见的本地 Kristal 路径；开发模式下可直接在当前终端输入 Lua 调试命令。要在独立的干净 Kristal checkout 中跑启动 smoke test：
+- `just build` —— release/debug .love 与 Windows x64 包（固定 Kristal v0.10.0）
+- `just build-mod` —— 可直接放进 mods/ 的 Mod ZIP（自动剔除开发期工具）
+- `just build-android` —— 可选 Android APK（首次构建需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
 
-直接调试战斗时可以使用共享 `kristal-debug-tools` 子模块：
-
-    just run --encounter
-    just run --wave 2 --tp 50 --mercy 100
-    just run --wave-force 3
-
-启动时可用 `--lang`、`--language` 或 `-l` 选择语言，当前支持英文和简体中文：
-
-    just run --lang en
-    just run --language zh-hans
-    just run -l zh-hans
-
-`--wave` 使用敌人 wave 列表的从 1 开始的编号，也接受 wave ID；`--wave-force` 会在每轮重复该 wave。其他项目只需引用 `libraries/kristal-debug-tools` 并配置自己的 `default_encounter`。
-
-    KRISTAL=/path/to/Kristal make test-kristal
-
-### 编辑器
-
-.emacs 和 .helix 是项目级配置子模块。它们提供 LuaLS、Kristal 路径和启动快捷键；设置 KRISTAL_ROOT 后即可从对应编辑器启动游戏。
-
-## 构建与发行
-
-    just build
-    just build-mod
-
-just build 固定使用 Kristal v0.10.0，生成 release/debug .love、Windows x64 包；它仅修改暂存引擎副本的目标 Mod、自动启动、窗口标识和 release/debug 标志。just build-mod 生成可放入 Kristal mods/ 的生产 Mod ZIP。
-
-生产资产会保留语言库，禁用并剔除 object-editor、terminal-cli、编辑器配置、测试和构建文件。GitHub Actions 会在 PR/main 上验证构建；release-please 合并发布 PR 后，标签工作流会上传所有资产与 SHA256SUMS。
-
-### Android
-
-Android 构建是显式目标，不会被普通 `just build` 或发布工作流默认触发。它使用官方 LÖVE Android 11.5 工程，将 release `.love` 放入 APK，并默认使用本机 Android debug keystore 签名，使 APK 可以直接安装到设备：
-
-    just build-android
-
-首次构建需要 JDK 17、Android SDK API 34、Build Tools `34.0.0`、Android NDK `25.2.9519653`、Git、rsync 和可用网络。可以用官方 `sdkmanager` 安装 Android 组件：
-
-    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
-    export ANDROID_SDK_ROOT=/home/aik/Android/Sdk
-    yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses
-    "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" \
-        "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653"
-
-可通过环境变量覆盖应用信息：
-
-    ANDROID_SDK_ROOT=/path/to/android-sdk \
-    THRASH_MACHINE_ANDROID_APPLICATION_ID=com.example.myproject \
-    THRASH_MACHINE_ANDROID_NAME="My Project" \
-    THRASH_MACHINE_ANDROID_VERSION_CODE=1 \
-    just build-android
-
-官方 Android 工程会缓存到 `.build/cache/love-android-11.5`，APK 输出为 `dist/thrash-machine-android.apk`。默认签名适合本地测试，不适合发布到应用商店；正式发布时可通过以下环境变量使用自己的 keystore：
-
-    THRASH_MACHINE_ANDROID_SIGNING_KEYSTORE=/absolute/path/release.keystore \
-    THRASH_MACHINE_ANDROID_SIGNING_STORE_PASSWORD='store-password' \
-    THRASH_MACHINE_ANDROID_SIGNING_KEY_ALIAS='release' \
-    THRASH_MACHINE_ANDROID_SIGNING_KEY_PASSWORD='key-password' \
-    just build-android
-
-密码建议通过 CI secret 或当前 shell 环境注入，不要提交到仓库。可以设置 `THRASH_MACHINE_ANDROID_ICON` 使用一个 PNG 替换默认 LÖVE 图标。
-
-`virtualkeyboard` library 默认只在 Android 启用，提供分离的十字按钮布局和可选摇杆布局，并把触摸转换为普通 Kristal `Input` 按键。宽屏有足够边框空间时，按键会绘制在游戏画布左右的边栏；所有布局都会在左侧外边缘约留一个按键宽、右侧约留两个按键宽，窄屏则在 640x480 画布内保持同样的边距。默认十字区域支持多点、滑动切换和斜向输入；右侧 Z 键垂直对齐在 X/C 中点，动作键也可以同时按下。它只承诺 APK 打包、LÖVE Android runtime 启动和这些基础输入；不承诺 Kristal 或 Mod 使用的所有 LÖVE API 在 Android 上兼容。要测试桌面触摸输入，可在 `mod.json` 的 `virtualkeyboard` 配置中将 `only_android` 设为 `false`。
+GitHub Actions 在 PR/main 上自动验证构建；release-please 合并发布 PR 后自动上传产物与 SHA-256 清单。
 
 ## 提交规范
 
-使用 KRISIS 风格的 Conventional Commits，摘要以简洁中文表达：
+用 Conventional Commits（feat/fix 驱动 release-please 的版本与变更日志）：
 
     feat: 添加新的 Lua 战斗波次
     fix: 修复地图切换后的对象事件
-    refactor: 整理战斗模块
-    docs: 补充 Lua 开发说明
-    chore(main): release v0.1.0
-
-feat 与 fix 会被 release-please 用于版本与变更日志；发布提交由自动化生成。
 
 ## 许可证
 
-本仓库自有的 Lua 源码与文档可任选以下许可证使用：
-
-- Apache License, Version 2.0（LICENSE-APACHE）
-- MIT License（LICENSE-MIT）
-
-Kristal starter 内容和子模块具有各自的许可边界，详见第三方声明（THIRD_PARTY.md）。
+自研 Lua 源码与文档为 MIT / Apache-2.0 双许可（LICENSE-MIT / LICENSE-APACHE）。Kristal 与子模块的许可边界见 THIRD_PARTY.md。
