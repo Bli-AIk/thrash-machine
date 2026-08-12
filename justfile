@@ -17,6 +17,11 @@ gui:
 gui-dev:
     @just --justfile libraries/kristal-debug-tools/justfile gui-dev
 
+# Run the debug-tools GUI from source with a Rust release build.
+# zh_hans: 源码模式运行调试工具图形界面（Rust release 构建）
+gui-dev-release:
+    @just --justfile libraries/kristal-debug-tools/justfile gui-dev-release
+
 # Run the mod's test suite.
 # zh_hans: 运行 mod 测试
 test:
