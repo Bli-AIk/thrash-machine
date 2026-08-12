@@ -19,14 +19,16 @@ test:
 test-kristal:
     @make test-kristal
 
+# `bash` prefix: just runs recipes via cmd on Windows; Git Bash's bash is
+# on PATH with the default Git for Windows install.
 build:
-    @./build_standalone.sh
+    @bash ./build_standalone.sh
 
 build-android:
-    @./build_android.sh
+    @bash ./build_android.sh
 
 build-mod:
-    @./.github/scripts/build_mod.sh
+    @bash ./.github/scripts/build_mod.sh
 
 clean-build:
     rm -rf .build dist

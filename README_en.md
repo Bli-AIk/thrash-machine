@@ -41,13 +41,24 @@ KRISTAL_ROOT=/path/to/Kristal just run   # run (common local Kristal paths are a
 
 Debug arguments pass straight to kristal-debug-tools: `just run --encounter`, `just run --wave 2 --tp 50`, `just run --lang zh-hans`.
 
-Requires Git, LÖVE 11.5, LuaJIT, just, and rsync/zip/unzip/Python 3.
+Requires Git (with Git Bash), LÖVE 11.5 and just; packaging is bash + tar + Lua (`build-helper/`, run by LÖVE's bundled LuaJIT) — **no Python**. On Windows, use the default Git install PATH option ("Git from the command line and also from 3rd-party software") so `bash` is on PATH; Git Bash has no `zip`, so the Lua helper writes zips when it's missing.
 
 ## Builds
 
-- `just build` — release/debug .love and Windows x64 packages (pinned to Kristal v0.10.0)
+### Manual packaging
+
+- `just build` — release/debug `.love` and Windows x64 packages (pinned to Kristal v0.10.0, output in `dist/`)
 - `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
 - `just build-android` — optional Android APK (first build needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
+
+### Packaging from the GUI
+
+The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just gui` anywhere):
+
+1. Expand the "RUN LIST (ADVANCED)" panel → **PROJECT BUILDS** group
+2. Click `build` / `build-mod` / `build-android` — the task runs in a separate terminal window with live output
+
+Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it).
 
 GitHub Actions verifies builds on PR/main; after a release-please PR merges, assets and SHA-256 manifests are uploaded automatically.
 

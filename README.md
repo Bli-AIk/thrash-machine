@@ -41,13 +41,24 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 
 运行调试参数直接透传给 kristal-debug-tools：`just run --encounter`、`just run --wave 2 --tp 50`、`just run --lang zh-hans`。
 
-需要 Git、LÖVE 11.5、LuaJIT、just 和 rsync/zip/unzip/Python 3。
+需要 Git（含 Git Bash）、LÖVE 11.5、just；打包由 bash + tar + Lua（`build-helper/`，用 LÖVE 自带的 LuaJIT 运行）完成，**不需要 Python**。Windows 上安装 Git 时选默认 PATH 选项（"Git from the command line and also from 3rd-party software"），`bash` 即进入 PATH；Git Bash 不含 `zip`，缺省时由 Lua 助手写入 zip。
 
 ## 构建
 
-- `just build` —— release/debug .love 与 Windows x64 包（固定 Kristal v0.10.0）
+### 手动打包
+
+- `just build` —— release/debug `.love` 与 Windows x64 包（固定 Kristal v0.10.0，产出在 `dist/`）
 - `just build-mod` —— 可直接放进 mods/ 的 Mod ZIP（自动剔除开发期工具）
 - `just build-android` —— 可选 Android APK（首次构建需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
+
+### GUI 打包
+
+用 kristal-debug-tools GUI 也可以打包（Windows 下 `gui.cmd`，或任意平台 `just gui`）：
+
+1. 展开"运行项列表（高级）"→ **项目构建** 组
+2. 点 `build` / `build-mod` / `build-android` —— 任务在独立终端窗口运行，输出实时可见
+
+要求与手动打包相同：Windows 需 Git Bash 在 PATH、LÖVE 已安装；`just` 无需安装（GUI 自带）。
 
 GitHub Actions 在 PR/main 上自动验证构建；release-please 合并发布 PR 后自动上传产物与 SHA-256 清单。
 
