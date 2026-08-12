@@ -9,3 +9,6 @@ dist/
 
 # GUI download cache (release binaries + .mode)
 .tools/
+
+# GUI source is optional and cloned on demand by `just gui-dev`.
+libraries/kristal-debug-tools-gui/

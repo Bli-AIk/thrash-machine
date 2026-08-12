@@ -7,10 +7,15 @@ default: test
 run *args:
     @just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
 
-# Run the debug-tools GUI (end users: downloads release binaries on first use).
-# zh_hans: 启动调试工具图形界面（首次自动下载，无需 just/Rust/Node）
+# Run the debug-tools GUI (end users: auto-downloads/updates release binaries).
+# zh_hans: 启动调试工具图形界面（自动检测并下载最新 release，无需 just/Rust/Node）
 gui:
     @just --justfile libraries/kristal-debug-tools/justfile gui
+
+# Run the debug-tools GUI from source (clones the GUI repo on demand).
+# zh_hans: 源码模式运行调试工具图形界面（GUI 仓库按需 clone）
+gui-dev:
+    @just --justfile libraries/kristal-debug-tools/justfile gui-dev
 
 # Run the mod's test suite.
 # zh_hans: 运行 mod 测试
