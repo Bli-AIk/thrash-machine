@@ -32,10 +32,20 @@ test:
 test-kristal:
     @make test-kristal
 
-# Build the standalone distribution (`bash` prefix: Git Bash on Windows).
-# zh_hans: 构建独立分发版（Windows 下需要 Git Bash）
+# Build .love only.
+# zh_hans: 只打包 .love
+build-love:
+    @THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=0 bash ./build_standalone.sh
+
+# Build Windows only.
+# zh_hans: 只打包 Windows
+build-win:
+    @THRASH_MACHINE_BUILD_LOVE=0 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 bash ./build_standalone.sh
+
+# Build .love + Windows (original behavior).
+# zh_hans: 同时打包 .love 和 Windows（老用法）
 build:
-    @bash ./build_standalone.sh
+    @THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 bash ./build_standalone.sh
 
 # Build the Android distribution.
 # zh_hans: 构建 Android 分发版

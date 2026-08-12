@@ -55,9 +55,25 @@ Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run 
 
 ### Manual packaging
 
-- `just build` — release/debug `.love` and Windows x64 packages (pinned to Kristal v0.10.0, output in `dist/`)
+- `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal v0.10.0 by default, output in `dist/`)
+- `just build-win` — Windows x64 package only
+- `just build-love` — release/debug `.love` only, without Windows executables or a LÖVE download
 - `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
 - `just build-android` — optional Android APK (first build needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
+
+When `just build`, `just build-win`, or `just build-love` (or `./build_standalone.sh`) runs in an interactive terminal, the script first asks where the Kristal engine should come from:
+
+1. Use a local Kristal checkout (auto-detects `.build/Kristal`, `KRISTAL_ROOT`, and common paths)
+2. Enter a local path yourself (a Git checkout or a plain directory both work)
+3. Pick a tag from the Git remote (the tag list is fetched and shown)
+4. Enter a full commit hash from the Git remote (40 hex characters)
+
+All remote downloads use shallow clones (`--depth 1`), and the default checkout location is `.build/Kristal`. CI and non-interactive environments do not prompt and keep using v0.10.0. To skip the prompt, set:
+
+- `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit`
+- `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` for a local path
+- `THRASH_MACHINE_KRISTAL_REF` for a tag or commit hash
+- `THRASH_MACHINE_KRISTAL_REPO` to override the remote repository
 
 ### Packaging from the GUI
 

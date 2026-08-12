@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd -P)"
+THRASH_MACHINE_MOD_DIR="$ROOT"
 THRASH_MACHINE_BUILD_DIR="${THRASH_MACHINE_MOD_BUILD_DIR:-$ROOT/.build/mod}"
 THRASH_MACHINE_OUTPUT_DIR="${THRASH_MACHINE_OUTPUT_DIR:-$ROOT/dist}"
 THRASH_MACHINE_OUTPUT_FILE="${THRASH_MACHINE_MOD_OUTPUT_FILE:-$THRASH_MACHINE_OUTPUT_DIR/thrash-machine-mod.zip}"
@@ -24,6 +25,7 @@ tar -cf - \
     --exclude='./.github' \
     --exclude='./.build' \
     --exclude='./dist' \
+    --exclude='./.tools' \
     --exclude='./.emacs' \
     --exclude='./.helix' \
     --exclude='./.vscode' \
@@ -45,6 +47,7 @@ tar -cf - \
     --exclude='*.tiled-project' \
     --exclude='*.tiled-session' \
     --exclude='./libraries/kristal-debug-tools/gui' \
+    --exclude='./libraries/kristal-debug-tools-gui' \
     --exclude='./libraries/kristal-debug-tools/just.cmd' \
     --exclude='./libraries/kristal-debug-tools/dist' \
     --exclude='./libraries/kristal-debug-tools/.tools' \
@@ -54,12 +57,7 @@ rm -rf "$STAGE_DIR/libraries/kristal-object-selector-plus"
 rm -rf "$STAGE_DIR/libraries/terminal-cli"
 rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
 run_helper patch-mod-manifest "$STAGE_DIR/mod.json" false false
-rm -f "$THRASH_MACHINE_OUTPUT_FILE"
-if command -v zip >/dev/null 2>&1; then
-    (cd "$STAGE_DIR" && zip -9 -q -r "$THRASH_MACHINE_OUTPUT_FILE" .)
-else
-    run_helper zip-dir "$THRASH_MACHINE_OUTPUT_FILE" "$STAGE_DIR" ""
-fi
+zip_dir "$THRASH_MACHINE_OUTPUT_FILE" "$STAGE_DIR" ""
 test -s "$THRASH_MACHINE_OUTPUT_FILE"
 unzip -t "$THRASH_MACHINE_OUTPUT_FILE" >/dev/null
 unzip -Z1 "$THRASH_MACHINE_OUTPUT_FILE" | grep -Fx 'mod.json' >/dev/null

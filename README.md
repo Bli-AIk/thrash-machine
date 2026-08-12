@@ -55,9 +55,25 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 
 ### 手动打包
 
-- `just build` —— release/debug `.love` 与 Windows x64 包（固定 Kristal v0.10.0，产出在 `dist/`）
+- `just build` —— 同时生成 release/debug `.love` 与 Windows x64 包（老用法，默认固定 Kristal v0.10.0，产出在 `dist/`）
+- `just build-win` —— 只生成 Windows x64 包
+- `just build-love` —— 只生成 release/debug `.love`，不生成 Windows exe、也不下载 LÖVE
 - `just build-mod` —— 可直接放进 mods/ 的 Mod ZIP（自动剔除开发期工具）
 - `just build-android` —— 可选 Android APK（首次构建需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
+
+在交互式终端运行 `just build`、`just build-win` 或 `just build-love`（或直接 `./build_standalone.sh`）时，脚本会先询问 Kristal 引擎来源：
+
+1. 使用本地 Kristal（自动检测 `.build/Kristal`、`KRISTAL_ROOT` 和常见路径）
+2. 自己输入本地路径（Git 检出或普通目录均可）
+3. 从 Git 远程选择 tag（自动列出远程 tag 列表）
+4. 从 Git 远程输入完整 commit hash（40 位十六进制）
+
+远程下载一律使用浅克隆（`--depth 1`），默认克隆到 `.build/Kristal`。CI 和非交互环境不会提问，仍使用 v0.10.0。需要跳过提问时可用环境变量指定：
+
+- `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` 指定来源
+- `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` 指定本地路径
+- `THRASH_MACHINE_KRISTAL_REF` 指定 tag 或 commit hash
+- `THRASH_MACHINE_KRISTAL_REPO` 覆盖远程仓库
 
 ### GUI 打包
 

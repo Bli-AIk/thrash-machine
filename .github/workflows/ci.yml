@@ -30,8 +30,12 @@ jobs:
           sudo apt-get install -y just jq love luajit rsync unzip xvfb zip
       - name: Check Lua source and documentation
         run: make test
-      - name: Build standalone packages
-        run: ./build_standalone.sh
+      - name: Build standalone packages (love + win)
+        run: just build
+      - name: Build Windows-only package
+        run: THRASH_MACHINE_OUTPUT_DIR=dist-win just build-win
+      - name: Build .love-only package
+        run: THRASH_MACHINE_OUTPUT_DIR=dist-love just build-love
       - name: Build Mod package
         run: ./.github/scripts/build_mod.sh
       - name: Run Kristal smoke test
@@ -50,6 +54,13 @@ jobs:
             test -s "$file"
             unzip -t "$file" >/dev/null
           done
+          test -s dist-win/thrash-machine-release-win64.zip
+          test -s dist-win/thrash-machine-debug-win64.zip
+          test ! -e dist-win/thrash-machine-release.love
+          test ! -e dist-win/thrash-machine-debug.love
+          test -s dist-love/thrash-machine-release.love
+          test -s dist-love/thrash-machine-debug.love
+          test -z "$(find dist-love -name '*.zip' | head -n 1)"
           unzip -Z1 dist/thrash-machine-mod.zip | grep -Fx mod.json >/dev/null
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-object-selector-plus/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"

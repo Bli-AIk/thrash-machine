@@ -1,6 +1,6 @@
 KRISTAL ?=
 
-.PHONY: test test-static test-debug-tools test-kristal build-android
+.PHONY: test test-static test-debug-tools test-kristal build build-love build-win build-android
 
 test: test-static test-debug-tools
 
@@ -16,6 +16,15 @@ test-debug-tools:
 
 test-kristal:
 	KRISTAL="$(KRISTAL)" sh .github/scripts/run-kristal-smoke.sh
+
+build-love:
+	THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=0 ./build_standalone.sh
+
+build-win:
+	THRASH_MACHINE_BUILD_LOVE=0 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 ./build_standalone.sh
+
+build:
+	THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 ./build_standalone.sh
 
 build-android:
 	./build_android.sh

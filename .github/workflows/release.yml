@@ -54,7 +54,7 @@ jobs:
           test "$version" = "$RELEASE_TAG"
       - name: Build release assets
         run: |
-          ./build_standalone.sh
+          just build
           ./.github/scripts/build_mod.sh
           .github/scripts/generate_sha256sums.sh dist
           (cd dist && sha256sum -c SHA256SUMS)

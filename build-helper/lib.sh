@@ -41,3 +41,41 @@ run_helper() {
     rm -f "$args_file"
     return $status
 }
+
+zip_dir() {
+    local output="$1" source="$2" prefix="${3:-}" total _count=0
+
+    mkdir -p "$(dirname "$output")"
+    rm -f "$output"
+
+    if command -v zip >/dev/null 2>&1; then
+        if [ -t 1 ]; then
+            total="$(find "$source" -mindepth 1 2>/dev/null | wc -l | tr -d '[:space:]')"
+            total="${total:-0}"
+            printf '\r[build] zip %s: 0/%s' "$(basename "$output")" "$total" >&2
+            if [ -n "$prefix" ]; then
+                (cd "$(dirname "$source")" && zip -9 -r "$output" "$(basename "$source")") |
+                    while IFS= read -r _; do
+                        printf '\r[build] zip %s: %s/%s' "$(basename "$output")" "$((_count += 1))" "$total" >&2
+                    done
+            else
+                (cd "$source" && zip -9 -r "$output" .) |
+                    while IFS= read -r _; do
+                        printf '\r[build] zip %s: %s/%s' "$(basename "$output")" "$((_count += 1))" "$total" >&2
+                    done
+            fi
+            printf '\r[build] zip %s: done (%s files)\n' "$(basename "$output")" "$total" >&2
+        else
+            if [ -n "$prefix" ]; then
+                (cd "$(dirname "$source")" && zip -9 -q -r "$output" "$(basename "$source")")
+            else
+                (cd "$source" && zip -9 -q -r "$output" .)
+            fi
+        fi
+    else
+        printf '[build] zip not found; using LÖVE stored-zip helper for %s\n' \
+            "$(basename "$output")" >&2
+        run_helper zip-dir "$output" "$source" "$prefix"
+        printf '[build] zip %s: done (LÖVE helper)\n' "$(basename "$output")" >&2
+    fi
+}
