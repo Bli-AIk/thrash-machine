@@ -97,6 +97,10 @@ copy_mod() {
         --exclude='/.gitignore' \
         --exclude='*.tiled-project' \
         --exclude='*.tiled-session' \
+        --exclude='/libraries/kristal-debug-tools/gui/' \
+        --exclude='/libraries/kristal-debug-tools/just.cmd' \
+        --exclude='/libraries/kristal-debug-tools/dist/' \
+        --exclude='/libraries/kristal-debug-tools/.tools/' \
         "$THRASH_MACHINE_MOD_DIR/" "$stage_mod/"
 
     if [ "$variant" = "release" ]; then
