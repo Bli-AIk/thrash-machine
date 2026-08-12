@@ -4,25 +4,10 @@ default: test
 run *args:
     @just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
 
-# --- kristal-debug-tools (libraries/) ---
-
-# Open the debug-tools GUI (single webview window).
-gui-run:
-    @just --justfile libraries/kristal-debug-tools/justfile gui-run
-
-# Build the GUI + kristal-run for the host platform.
-gui-build:
-    @just --justfile libraries/kristal-debug-tools/justfile gui-build
-
-# Build Windows GUI + kristal-run.exe (with embedded just).
-gui-build-windows:
-    @just --justfile libraries/kristal-debug-tools/justfile gui-build-windows
-
-# Run the Go test suite of the debug-tools GUI.
-test-go:
-    @just --justfile libraries/kristal-debug-tools/justfile test-go
-
-# --- mod build ---
+# The kristal-debug-tools GUI is for end users without just:
+#   - Windows: run gui.cmd (downloads the release binary on first use).
+#   - Developers: just --justfile libraries/kristal-debug-tools/justfile
+#     test-go runs the GUI's Go test suite.
 
 test:
     @make test
