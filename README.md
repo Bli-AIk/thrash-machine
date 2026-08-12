@@ -49,7 +49,7 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 | **Linux** | git、tar、unzip、curl、love（如 Arch：`sudo pacman -S love`） | `zip` 可选：有则用系统 zip，无则 Lua 助手 |
 | **macOS** | Git（Xcode 命令行工具）、LÖVE 11.5（`brew install --cask love`） | tar/unzip/curl/zip 系统自带 |
 
-`just` 仅在命令行打包时需要（GUI 自带内嵌 just）。Android 打包额外需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653。
+`just` 仅在命令行打包时需要（GUI 自带内嵌 just）。**LÖVE 需在 PATH 中**（或装在默认位置——脚本会自动检查 Windows 的 `Program Files\LOVE` 与 `%LOCALAPPDATA%\Programs\LOVE`）。Android 打包额外需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653。
 
 ## 构建
 

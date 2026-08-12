@@ -49,7 +49,7 @@ Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run 
 | **Linux** | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`) | `zip` optional: system zip when present, Lua helper otherwise |
 | **macOS** | Git (Xcode Command Line Tools), LÖVE 11.5 (`brew install --cask love`) | tar/unzip/curl/zip are built in |
 
-`just` is only needed for command-line packaging (the GUI embeds its own). Android packaging additionally needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653.
+`just` is only needed for command-line packaging (the GUI embeds its own). **LÖVE must be on PATH** (or installed in the default locations — the scripts check Windows' `Program Files\LOVE` and `%LOCALAPPDATA%\Programs\LOVE` automatically). Android packaging additionally needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653.
 
 ## Builds
 
