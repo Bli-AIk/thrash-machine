@@ -4,10 +4,14 @@ default: test
 run *args:
     @just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
 
-# The kristal-debug-tools GUI is for end users without just:
-#   - Windows: run gui.cmd (downloads the release binary on first use).
-#   - Developers: just --justfile libraries/kristal-debug-tools/justfile
-#     test-go runs the GUI's Go test suite.
+# Build and run the debug-tools GUI (developer convenience; end users run
+# gui.cmd or the release binary instead).
+gui:
+    @just --justfile libraries/kristal-debug-tools/justfile gui
+
+# Run the GUI's Go test suite.
+test-go:
+    @just --justfile libraries/kristal-debug-tools/justfile test-go
 
 test:
     @make test
