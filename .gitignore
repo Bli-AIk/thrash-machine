@@ -6,3 +6,6 @@ dist/
 *.log
 *.tiled-session
 .DS_Store
+
+# GUI download cache (release binaries + .mode)
+.tools/
