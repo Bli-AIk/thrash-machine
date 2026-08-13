@@ -49,7 +49,12 @@ Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run 
 | **Linux**   | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`)         | `zip` optional: system zip when present, Lua helper otherwise                                                     |
 | **macOS**   | Git (Xcode Command Line Tools), LÖVE 11.5 (`brew install --cask love`) | tar/unzip/curl/zip are built in                                                                                   |
 
-`just` is only needed for command-line packaging (the GUI embeds its own). **LÖVE must be on PATH** (or installed in the default locations — the scripts check Windows' `Program Files\LOVE` and `%LOCALAPPDATA%\Programs\LOVE` automatically). Android packaging additionally needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653.
+`just` is only needed for command-line packaging (the GUI embeds its own). **LÖVE must be on PATH** (or installed in the default locations — the scripts check Windows' `Program Files\LOVE` and `%LOCALAPPDATA%\Programs\LOVE` automatically).
+
+Android packaging has **two modes**:
+
+- **Wrap build (recommended for casual users)**: `just build-android-wrap` — only needs a JDK (the official LÖVE shell APK and Android build-tools are downloaded automatically); an APK is ready in minutes, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play.
+- **Compile build**: `just build-android` — compiles a native APK from source and needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653 (more setup involved, and the JDK/SDK/NDK must be fetched over the network).
 
 ## Builds
 
@@ -59,7 +64,8 @@ Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run 
 - `just build-win` — Windows x64 package only
 - `just build-love` — release/debug `.love` only, without Windows executables or a LÖVE download
 - `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
-- `just build-android` — optional Android APK (first build needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
+- `just build-android` — **compile-build** Android APK (needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
+- `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; only a JDK is required and it is faster, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
 
 When `just build`, `just build-win`, or `just build-love` (or `./build_standalone.sh`) runs in an interactive terminal, the script first asks where the Kristal engine should come from:
 
@@ -84,7 +90,37 @@ The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just 
 
 Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it).
 
-GitHub Actions verifies builds on PR/main; after a release-please PR merges, assets and SHA-256 manifests are uploaded automatically.
+GitHub's automated builds check that the project packages correctly on every push and merge; when a new version is released, the packaged files (including the Windows x64 package, the .love package, and the **compiled APK**) are uploaded to the GitHub Release page automatically. The **wrap APK is not built automatically by default** — enable it by checking `build_android_wrap` when triggering a build manually on GitHub. Don't want to install JDK or Android SDK on your own machine? Just merge the version-release PR on GitHub — packaging and uploading are fully automatic.
+
+## Android Packaging
+
+### Distribution matrix
+
+|                                      | Windows            | `.love`                | Mod                            | Android compile                           | Android wrap                        |
+| ------------------------------------ | ------------------ | ---------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------- |
+| Recipe                               | `just build-win`   | `just build-love`      | `just build-mod`               | `just build-android`                      | `just build-android-wrap`           |
+| Output                               | `dist/*-win64.zip` | `dist/*.love`          | `dist/*-mod.zip`               | `dist/*-android.apk`                      | `dist/*-android-wrap.apk`           |
+| Runs on                              | Windows            | Any platform with LÖVE | Kristal `mods/` (any platform) | Android                                   | Android                             |
+| Build deps                           | git, LÖVE, curl    | LÖVE                   | git, LÖVE                      | JDK 17 + SDK/NDK                          | A JDK only                          |
+| Custom package id / icon / name      | —                  | —                      | —                              | ✅ env overrides                          | ❌ official shell                   |
+| Modify the LÖVE engine / native code | —                  | —                      | —                              | ✅                                        | ❌                                  |
+| Best for                             | Desktop players    | Unix users/developers  | Players installing mods        | Official distribution, deep customization | Casual users, quick personal builds |
+
+### One-click packaging on Windows
+
+Double-click **`build_android.cmd`** in the project root and pick:
+
+1. **Quick wrap build** — automatically installs whatever is missing into `.tools\` (PortableGit Git Bash, JDK 17, LÖVE 11.5) and produces the APK;
+2. **Full compile build** — additionally downloads the Android cmdline-tools/SDK/NDK (first run ~1.5 GB).
+
+It also accepts arguments: `build_android.cmd wrap` or `build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
+
+Equivalent commands on any platform:
+
+```sh
+just build-android-wrap   # wrap build (only a JDK is needed)
+just build-android        # compile build (needs the full Android SDK/NDK)
+```
 
 ## Custom Icons (Optional)
 
@@ -100,11 +136,11 @@ assets/icon/
     └── ldpi.png mdpi.png hdpi.png xhdpi.png xxhdpi.png xxxhdpi.png
 ```
 
-| Target | Tools required | Notes |
-| ------ | -------------- | ----- |
-| Game window | none | copied to the mod root automatically (the engine only reads `window_icon.png` there) |
-| Windows exe | `rcedit` (needs `wine` on Linux/macOS) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing |
-| Android APK | none | per-density icons with automatic nearest-density fallback |
+| Target      | Tools required                                                                 | Notes                                                                                |
+| ----------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| Game window | none                                                                           | copied to the mod root automatically (the engine only reads `window_icon.png` there) |
+| Windows exe | `rcedit` (needs `wine` on Linux/macOS) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing                                                  |
+| Android APK | none                                                                           | per-density icons with automatic nearest-density fallback                            |
 
 - Under `win/` drop a set of size-named PNGs (32 + 256 gives the best result) or a ready-made `icon.ico`; the script prefers an existing `.ico`.
 - `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into `.tools/rcedit/` automatically.

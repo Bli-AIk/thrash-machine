@@ -1,6 +1,6 @@
 KRISTAL ?=
 
-.PHONY: test test-static test-debug-tools test-kristal build build-love build-win build-android
+.PHONY: test test-static test-debug-tools test-kristal build build-love build-win build-android build-android-wrap
 
 test: test-static test-debug-tools
 
@@ -28,3 +28,6 @@ build:
 
 build-android:
 	./build_android.sh
+
+build-android-wrap:
+	./build_android_wrap.sh

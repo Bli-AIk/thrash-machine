@@ -250,9 +250,13 @@ build_apk() {
     mkdir -p "$THRASH_MACHINE_OUTPUT_DIR"
     cp "$apk_source" "$apk_output"
     test -s "$apk_output"
-    apksigner="$ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner"
-    [ -x "$apksigner" ] || fail "Android build-tools apksigner is missing: $apksigner"
-    "$apksigner" verify "$apk_output" >/dev/null 2>&1 || fail \
+    # Use the jar directly instead of the apksigner shell wrapper: the wrapper
+    # has no .bat counterpart on Windows (only apksigner.bat exists there), so
+    # `java -jar` is the portable way to run it on every host.
+    apksigner_jar="$ANDROID_SDK_ROOT/build-tools/34.0.0/lib/apksigner.jar"
+    [ -f "$apksigner_jar" ] || fail \
+        "Android build-tools apksigner.jar is missing: $apksigner_jar"
+    java -jar "$apksigner_jar" verify "$apk_output" >/dev/null 2>&1 || fail \
         "Generated APK is not signed or failed Android signature verification: $apk_output"
     log "Created Android APK: $apk_output"
 }

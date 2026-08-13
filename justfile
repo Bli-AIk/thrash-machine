@@ -47,10 +47,17 @@ build-win:
 build:
     @THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 bash ./build_standalone.sh
 
-# Build the Android distribution.
-# zh_hans: 构建 Android 分发版
+# Compile the Android APK from source (full build; needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653).
+# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653）
 build-android:
     @bash ./build_android.sh
+
+# Wrap-build a quick Android APK (official LÖVE shell + game.love, re-aligned and re-signed).
+# Only needs a JDK; build-tools are downloaded automatically. Faster, but cannot
+# change package id/icon/name and cannot be published on Google Play.
+# zh_hans: 套包构建 Android APK（官方 LÖVE 壳 + game.love，重对齐并重签名；只需 JDK，自动下载工具；不能改包名/图标/名称，不能上 Google Play）
+build-android-wrap:
+    @bash ./build_android_wrap.sh
 
 # Build the mod-only distribution.
 # zh_hans: 构建 mod 单包分发版
