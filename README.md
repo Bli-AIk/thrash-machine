@@ -88,7 +88,7 @@ Android 打包有**两种模式**：
 1. 展开"运行项列表（高级）"→ **项目构建** 组
 2. 点 `build` / `build-mod` / `build-android` —— 任务在独立终端窗口运行，输出实时可见
 
-要求与手动打包相同：Windows 需 Git Bash 在 PATH、LÖVE 已安装；`just` 无需安装（GUI 自带）。
+要求与手动打包相同：Windows 需 Git Bash 在 PATH、LÖVE 已安装；`just` 无需安装（GUI 自带）。如果最新版刚发布而 CI 还在构建（release 资源尚未上传），会自动回退下载上一个版本的包；若上一个版本之前已下载过，会先询问你是否使用缓存的旧版本。
 
 GitHub 的自动构建会在每次推送和合并时自动检查项目能否正常打包；发布新版本时，打包好的文件（包括 Windows x64 包、.love 包、编译版 APK）会自动上传到 GitHub 的 Release 页面。**套包版默认不会自动构建**，需要时可在 GitHub 上手动触发构建并勾选 `build_android_wrap`。不想在自己电脑上安装 JDK、Android SDK 这些环境？直接合并 GitHub 上的版本发布 PR 就行，打包和上传全自动完成。
 

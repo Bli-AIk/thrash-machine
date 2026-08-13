@@ -88,7 +88,7 @@ The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just 
 1. Expand the "RUN LIST (ADVANCED)" panel → **PROJECT BUILDS** group
 2. Click `build` / `build-mod` / `build-android` — the task runs in a separate terminal window with live output
 
-Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it).
+Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it). If the latest release was just cut while CI is still building (assets not uploaded yet), the script falls back to the previous release; if the previous release was already downloaded, it asks before using the cached copy.
 
 GitHub's automated builds check that the project packages correctly on every push and merge; when a new version is released, the packaged files (including the Windows x64 package, the .love package, and the **compiled APK**) are uploaded to the GitHub Release page automatically. The **wrap APK is not built automatically by default** — enable it by checking `build_android_wrap` when triggering a build manually on GitHub. Don't want to install JDK or Android SDK on your own machine? Just merge the version-release PR on GitHub — packaging and uploading are fully automatic.
 
