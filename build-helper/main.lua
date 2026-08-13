@@ -12,6 +12,7 @@
 --   patch-android-gradle <gradle>
 --   patch-android-game-activity <source>
 --   patch-android-loading-touch <source>
+--   set-mod-json-flag <manifest> <key> <true|false>
 --   zip-dir <output> <source> [prefix]
 
 local function fail(msg)
@@ -154,6 +155,38 @@ local function patch_mod_manifest(args)
         manifest
     )
     write_text(manifest, text)
+end
+
+-- Set a top-level mod.json boolean flag (e.g. setWindowTitleAndIcon) in place,
+-- preserving all JSONC comments and other fields. The value is matched up to
+-- the next comma/brace/newline, so the previous value may be null/true/false.
+-- If the key is absent the step is skipped with a warning (builds must not
+-- hard-fail over an optional cosmetic flag).
+local function set_mod_json_flag(args)
+    local manifest = args[2]
+    local key = args[3]
+    local value = args[4]
+    if value ~= "true" and value ~= "false" then
+        fail("set-mod-json-flag: expected true or false, got " .. tostring(value))
+    end
+    if key == "" or key:find('"') then
+        fail("set-mod-json-flag: invalid key " .. tostring(key))
+    end
+    local text = read_text(manifest)
+    local esc_key = key:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+    local patched, count = text:gsub(
+        '("' .. esc_key .. '"%s*:%s*)[^,%}\r\n]*',
+        "%1" .. value,
+        1
+    )
+    if count ~= 1 then
+        io.stderr:write(
+            "build-helper: set-mod-json-flag: '" .. key .. "' not found in "
+            .. manifest .. "; skipping (flag left unchanged)\n"
+        )
+        return
+    end
+    write_text(manifest, patched)
 end
 
 local function patch_android_local_properties(args)
@@ -416,7 +449,7 @@ local function main()
     end
     local command = args[1]
     if not command then
-        fail("missing subcommand (patch-lua-config / patch-mod-manifest / patch-android-* / zip-dir)")
+        fail("missing subcommand (patch-lua-config / patch-mod-manifest / patch-android-* / set-mod-json-flag / zip-dir)")
     end
     if command == "patch-lua-config" then
         patch_lua_config(args)
@@ -432,6 +465,8 @@ local function main()
         patch_android_game_activity(args)
     elseif command == "patch-android-loading-touch" then
         patch_android_loading_touch(args)
+    elseif command == "set-mod-json-flag" then
+        set_mod_json_flag(args)
     elseif command == "zip-dir" then
         zip_dir(args)
     else

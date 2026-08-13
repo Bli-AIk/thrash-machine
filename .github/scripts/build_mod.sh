@@ -7,6 +7,9 @@ THRASH_MACHINE_MOD_DIR="$ROOT"
 THRASH_MACHINE_BUILD_DIR="${THRASH_MACHINE_MOD_BUILD_DIR:-$ROOT/.build/mod}"
 THRASH_MACHINE_OUTPUT_DIR="${THRASH_MACHINE_OUTPUT_DIR:-$ROOT/dist}"
 THRASH_MACHINE_OUTPUT_FILE="${THRASH_MACHINE_MOD_OUTPUT_FILE:-$THRASH_MACHINE_OUTPUT_DIR/thrash-machine-mod.zip}"
+# Same icon conventions as build_standalone.sh (defaults, but honour overrides).
+THRASH_MACHINE_ICON_DIR="${THRASH_MACHINE_ICON_DIR:-$ROOT/assets/icon}"
+THRASH_MACHINE_WINDOW_ICON="${THRASH_MACHINE_WINDOW_ICON:-$THRASH_MACHINE_ICON_DIR/window_icon.png}"
 STAGE_DIR="$THRASH_MACHINE_BUILD_DIR/source"
 
 command -v unzip >/dev/null
@@ -51,12 +54,17 @@ tar -cf - \
     --exclude='./libraries/kristal-debug-tools/just.cmd' \
     --exclude='./libraries/kristal-debug-tools/dist' \
     --exclude='./libraries/kristal-debug-tools/.tools' \
+    --exclude='./assets/icon' \
     -C "$ROOT" . | tar -xf - -C "$STAGE_DIR"
 
 rm -rf "$STAGE_DIR/libraries/kristal-object-selector-plus"
 rm -rf "$STAGE_DIR/libraries/terminal-cli"
 rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
 run_helper patch-mod-manifest "$STAGE_DIR/mod.json" false false
+if [ -f "$THRASH_MACHINE_WINDOW_ICON" ]; then
+    cp "$THRASH_MACHINE_WINDOW_ICON" "$STAGE_DIR/window_icon.png"
+    run_helper set-mod-json-flag "$STAGE_DIR/mod.json" setWindowTitleAndIcon true
+fi
 zip_dir "$THRASH_MACHINE_OUTPUT_FILE" "$STAGE_DIR" ""
 test -s "$THRASH_MACHINE_OUTPUT_FILE"
 unzip -t "$THRASH_MACHINE_OUTPUT_FILE" >/dev/null

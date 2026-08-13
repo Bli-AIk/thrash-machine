@@ -16,6 +16,10 @@ THRASH_MACHINE_ANDROID_ORIENTATION="${THRASH_MACHINE_ANDROID_ORIENTATION:-landsc
 THRASH_MACHINE_ANDROID_VERSION_CODE="${THRASH_MACHINE_ANDROID_VERSION_CODE:-1}"
 THRASH_MACHINE_ANDROID_VERSION_NAME="${THRASH_MACHINE_ANDROID_VERSION_NAME:-}"
 THRASH_MACHINE_ANDROID_ICON="${THRASH_MACHINE_ANDROID_ICON:-}"
+# Directory mode takes precedence over the single-file THRASH_MACHINE_ANDROID_ICON:
+# icons named <density>.png (ldpi/mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi); a missing
+# density falls back to the nearest available one.
+THRASH_MACHINE_ANDROID_ICON_DIR="${THRASH_MACHINE_ANDROID_ICON_DIR:-$THRASH_MACHINE_MOD_DIR/assets/icon/android}"
 THRASH_MACHINE_ANDROID_NDK_DIR="${THRASH_MACHINE_ANDROID_NDK_DIR:-}"
 THRASH_MACHINE_OUTPUT_BASENAME="${THRASH_MACHINE_OUTPUT_BASENAME:-thrash-machine}"
 
@@ -131,6 +135,62 @@ ensure_android_source() {
     git -C "$THRASH_MACHINE_ANDROID_CACHE_DIR" submodule update --init --recursive
 }
 
+android_density_dpi() {
+    case "$1" in
+        ldpi) echo 120 ;; mdpi) echo 160 ;; hdpi) echo 240 ;;
+        xhdpi) echo 320 ;; xxhdpi) echo 480 ;; xxxhdpi) echo 640 ;;
+    esac
+}
+
+# Print the path of the density icon nearest to $1 (smallest dpi difference),
+# or nothing when the icon dir has no usable png at all.
+pick_android_icon() {
+    local target="$1" d best="" best_d=999999 diff
+    for d in ldpi mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+        [ -f "$THRASH_MACHINE_ANDROID_ICON_DIR/$d.png" ] || continue
+        diff=$(( $(android_density_dpi "$target") - $(android_density_dpi "$d") ))
+        diff=${diff#-}
+        if [ "$diff" -lt "$best_d" ]; then best="$d"; best_d="$diff"; fi
+    done
+    [ -n "$best" ] && printf '%s\n' "$THRASH_MACHINE_ANDROID_ICON_DIR/$best.png"
+}
+
+# Copy launcher icons into res/drawable-<density>/love.png. Directory mode wins
+# when the dir holds any <density>.png (only density-named files count — a
+# stray png must not hijack the mode); otherwise fall back to the legacy
+# single-file mode; if neither is configured, love-android's default stays.
+stage_android_icons() {
+    local stage="$1" density source
+    local density_dir_has_icon=0
+
+    for density in ldpi mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+        [ -f "$THRASH_MACHINE_ANDROID_ICON_DIR/$density.png" ] && density_dir_has_icon=1
+    done
+
+    if [ -n "$THRASH_MACHINE_ANDROID_ICON_DIR" ] && [ "$density_dir_has_icon" = "1" ]; then
+        for density in ldpi mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            # pick_android_icon returns non-zero when no density matches; keep
+            # the build going (set -e) and let the nearest-density fallback
+            # fill any gap from the files that do exist.
+            source="$(pick_android_icon "$density" || true)"
+            [ -n "$source" ] || continue
+            mkdir -p "$stage/app/src/main/res/drawable-$density"
+            cp "$source" "$stage/app/src/main/res/drawable-$density/love.png"
+        done
+        return 0
+    fi
+
+    if [ -n "$THRASH_MACHINE_ANDROID_ICON" ]; then
+        [ -f "$THRASH_MACHINE_ANDROID_ICON" ] || fail \
+            "Android icon does not exist: $THRASH_MACHINE_ANDROID_ICON"
+        for density in ldpi mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "$stage/app/src/main/res/drawable-$density"
+            cp "$THRASH_MACHINE_ANDROID_ICON" \
+                "$stage/app/src/main/res/drawable-$density/love.png"
+        done
+    fi
+}
+
 stage_android_source() {
     local stage_dir="$THRASH_MACHINE_ANDROID_WORK_DIR/project"
 
@@ -143,15 +203,7 @@ stage_android_source() {
     cp "$THRASH_MACHINE_ANDROID_WORK_DIR/love/${THRASH_MACHINE_OUTPUT_BASENAME}-release.love" \
         "$stage_dir/app/src/embed/assets/game.love"
 
-    if [ -n "$THRASH_MACHINE_ANDROID_ICON" ]; then
-        [ -f "$THRASH_MACHINE_ANDROID_ICON" ] || fail \
-            "Android icon does not exist: $THRASH_MACHINE_ANDROID_ICON"
-        for density in ldpi mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            mkdir -p "$stage_dir/app/src/main/res/drawable-$density"
-            cp "$THRASH_MACHINE_ANDROID_ICON" \
-                "$stage_dir/app/src/main/res/drawable-$density/love.png"
-        done
-    fi
+    stage_android_icons "$stage_dir"
 
     run_helper patch-android-properties \
         "$stage_dir/gradle.properties" \

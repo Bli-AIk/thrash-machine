@@ -86,6 +86,31 @@ Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE ins
 
 GitHub Actions verifies builds on PR/main; after a release-please PR merges, assets and SHA-256 manifests are uploaded automatically.
 
+## Custom Icons (Optional)
+
+The build scripts read custom icons from `assets/icon/` by **directory convention** — no configuration needed. Any icon step is skipped (with a warning) when the file or the required tool is missing, so the default build is unchanged.
+
+```
+assets/icon/
+├── window_icon.png      # Game window icon → copied to the mod root + setWindowTitleAndIcon=true
+├── win/                 # Windows exe icon
+│   ├── icon.ico         #   ready-made .ico (optional shortcut)
+│   └── 16x16.png 32x32.png 48x48.png 64x64.png 128x128.png 256x256.png
+└── android/             # Android launcher icons (missing densities fall back to the nearest)
+    └── ldpi.png mdpi.png hdpi.png xhdpi.png xxhdpi.png xxxhdpi.png
+```
+
+| Target | Tools required | Notes |
+| ------ | -------------- | ----- |
+| Game window | none | copied to the mod root automatically (the engine only reads `window_icon.png` there) |
+| Windows exe | `rcedit` (needs `wine` on Linux/macOS) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing |
+| Android APK | none | per-density icons with automatic nearest-density fallback |
+
+- Under `win/` drop a set of size-named PNGs (32 + 256 gives the best result) or a ready-made `icon.ico`; the script prefers an existing `.ico`.
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into `.tools/rcedit/` automatically.
+- The whole `assets/icon/` directory is excluded from `.love` / mod packages; `window_icon.png` is copied to the mod root during the build and then packaged.
+- Paths can be overridden: `THRASH_MACHINE_ICON_DIR`, `THRASH_MACHINE_WINDOW_ICON`, `THRASH_MACHINE_WIN_ICON_DIR`, `THRASH_MACHINE_RCEDit`, `THRASH_MACHINE_ANDROID_ICON_DIR`, `THRASH_MACHINE_ANDROID_ICON`.
+
 ## Commit Convention
 
 Use Conventional Commits (feat/fix drive release-please versions and changelogs):

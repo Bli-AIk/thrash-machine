@@ -86,6 +86,31 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 
 GitHub Actions 在 PR/main 上自动验证构建；release-please 合并发布 PR 后自动上传产物与 SHA-256 清单。
 
+## 自定义图标（可选）
+
+构建脚本按**目录约定**读取 `assets/icon/`，无需配置。图标文件或工具缺失时该步骤自动跳过并警告，默认构建不受影响。
+
+```
+assets/icon/
+├── window_icon.png      # 游戏窗口图标 → 构建时复制到 mod 根目录并置 setWindowTitleAndIcon=true
+├── win/                 # Windows exe 图标
+│   ├── icon.ico         #   现成 .ico（可选捷径）
+│   └── 16x16.png 32x32.png 48x48.png 64x64.png 128x128.png 256x256.png
+└── android/             # Android 启动图标（缺失 density 自动就近回退）
+    └── ldpi.png mdpi.png hdpi.png xhdpi.png xxhdpi.png xxxhdpi.png
+```
+
+| 目标 | 所需工具 | 说明 |
+| ---- | -------- | ---- |
+| 游戏窗口 | 无 | 自动复制到 mod 根目录（引擎只认根目录的 `window_icon.png`） |
+| Windows exe | `rcedit`（Linux/macOS 需 `wine`）+ `icotool`/ImageMagick 合成 PNG | 工具缺失时跳过并警告，不影响构建 |
+| Android APK | 无 | 各 density 独立成图，缺失的自动用最近的补位 |
+
+- `win/` 下放一组尺寸 PNG（至少 32 + 256 效果最佳）或直接放 `icon.ico`；脚本优先用现成 `.ico`。
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` 时脚本自动下载 rcedit 到 `.tools/rcedit/`。
+- 完整 `assets/icon/` 目录会被排除出 `.love` / mod 包；`window_icon.png` 会在构建时复制到 mod 根目录后进包。
+- 可用环境变量覆盖路径：`THRASH_MACHINE_ICON_DIR`、`THRASH_MACHINE_WINDOW_ICON`、`THRASH_MACHINE_WIN_ICON_DIR`、`THRASH_MACHINE_RCEDit`、`THRASH_MACHINE_ANDROID_ICON_DIR`、`THRASH_MACHINE_ANDROID_ICON`。
+
 ## 提交规范
 
 用 Conventional Commits（feat/fix 驱动 release-please 的版本与变更日志）：

@@ -36,6 +36,17 @@ THRASH_MACHINE_BUILD_WINDOWS_EXE="${THRASH_MACHINE_BUILD_WINDOWS_EXE:-1}"
 THRASH_MACHINE_BUILD_LOVE="${THRASH_MACHINE_BUILD_LOVE:-1}"
 THRASH_MACHINE_UPDATE_REPOS="${THRASH_MACHINE_UPDATE_REPOS:-0}"
 
+# --- icons (all optional) ----------------------------------------------------
+# Convention: <mod-root>/assets/icon/{window_icon.png, win/, android/}.
+# Every step is skipped (with a warning) when the icon file or the required
+# tool is missing, so the default build is unchanged without any icons.
+THRASH_MACHINE_ICON_DIR="${THRASH_MACHINE_ICON_DIR:-$THRASH_MACHINE_MOD_DIR/assets/icon}"
+THRASH_MACHINE_WINDOW_ICON="${THRASH_MACHINE_WINDOW_ICON:-$THRASH_MACHINE_ICON_DIR/window_icon.png}"
+THRASH_MACHINE_WIN_ICON_DIR="${THRASH_MACHINE_WIN_ICON_DIR:-$THRASH_MACHINE_ICON_DIR/win}"
+THRASH_MACHINE_RCEDit="${THRASH_MACHINE_RCEDit:-}"          # empty → probe .tools/ and PATH
+THRASH_MACHINE_ICON_FETCH_TOOLS="${THRASH_MACHINE_ICON_FETCH_TOOLS:-0}"  # 1 = auto-download rcedit
+THRASH_MACHINE_RCEDit_URL="${THRASH_MACHINE_RCEDit_URL:-https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe}"
+
 log() {
     printf '[build] %s\n' "$*" >&2
 }
@@ -50,6 +61,124 @@ need_cmd() {
         printf 'Missing required command: %s\n' "$1" >&2
         exit 1
     }
+}
+
+# --- icon helpers (all optional; every failure only skips that icon step) ----
+
+# Is the host actually Windows (Git Bash uname is MINGW*/MSYS*)? rcedit is a
+# native Windows exe, so we run it directly there and via wine elsewhere.
+is_windows_host() {
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# Resolve the rcedit binary: 1) THRASH_MACHINE_RCEDit 2) .tools/rcedit/
+# 3) rcedit on PATH. Returns the path or exits 1.
+resolve_rcedit() {
+    local bin="${THRASH_MACHINE_RCEDit:-}"
+    if [ -n "$bin" ]; then
+        [ -f "$bin" ] && { printf '%s\n' "$bin"; return 0; }
+        command -v "$bin" >/dev/null 2>&1 && { command -v "$bin"; return 0; }
+        return 1
+    fi
+    if [ -f "$THRASH_MACHINE_MOD_DIR/.tools/rcedit/rcedit-x64.exe" ]; then
+        printf '%s\n' "$THRASH_MACHINE_MOD_DIR/.tools/rcedit/rcedit-x64.exe"
+        return 0
+    fi
+    command -v rcedit >/dev/null 2>&1 && { command -v rcedit; return 0; }
+    return 1
+}
+
+# Auto-download rcedit into .tools/rcedit/ (gated by THRASH_MACHINE_ICON_FETCH_TOOLS=1).
+fetch_rcedit() {
+    local dest="$THRASH_MACHINE_MOD_DIR/.tools/rcedit/rcedit-x64.exe"
+    [ -f "$dest" ] && { printf '%s\n' "$dest"; return 0; }
+    [ "$THRASH_MACHINE_ICON_FETCH_TOOLS" = "1" ] || return 1
+    command -v curl >/dev/null 2>&1 || return 1
+    log "下载 rcedit（用于 Windows exe 图标）"
+    mkdir -p "$(dirname "$dest")"
+    curl --fail --location --output "$dest" "$THRASH_MACHINE_RCEDit_URL" || {
+        rm -f "$dest"
+        log "下载 rcedit 失败，跳过 exe 图标注入"
+        return 1
+    }
+    printf '%s\n' "$dest"
+}
+
+# Produce a .ico for the Windows exe. Prefers a ready-made icon.ico, else
+# combines win/*.png with icotool (or ImageMagick) into <out_dir>/game.ico.
+# Prints the .ico path, or nothing when no usable source/tool exists.
+resolve_win_ico() {
+    local out_dir="$1" ico png pngs=()
+    # Always create the output dir: build_variant copies love.exe into
+    # $out_dir/love-icon.exe whether the .ico is ready-made or combined here.
+    mkdir -p "$out_dir"
+    if [ -f "$THRASH_MACHINE_WIN_ICON_DIR/icon.ico" ]; then
+        printf '%s\n' "$THRASH_MACHINE_WIN_ICON_DIR/icon.ico"
+        return 0
+    fi
+    for png in "$THRASH_MACHINE_WIN_ICON_DIR"/[0-9]*x[0-9]*.png; do
+        [ -f "$png" ] && pngs+=("$png")
+    done
+    [ "${#pngs[@]}" -eq 0 ] && return 1
+    ico="$out_dir/game.ico"
+    if command -v icotool >/dev/null 2>&1; then
+        icotool -c -o "$ico" "${pngs[@]}" || return 1
+    elif command -v magick >/dev/null 2>&1; then
+        magick "${pngs[@]}" "$ico" || return 1
+    elif command -v convert >/dev/null 2>&1; then
+        convert "${pngs[@]}" "$ico" || return 1
+    else
+        log "icotool/ImageMagick 不可用，跳过 exe 图标合成"
+        return 1
+    fi
+    [ -f "$ico" ] && { printf '%s\n' "$ico"; return 0; }
+    return 1
+}
+
+# Inject a .ico into a love.exe copy. MUST run before `cat` appends the .love
+# payload: rcedit rebuilds the PE via EndUpdateResource and would drop any
+# bytes appended after the last section. Returns 0 on success or graceful
+# skip, 1 only when the injection was attempted but failed.
+inject_exe_icon() {
+    local exe="$1" ico="$2" rcedit before_sha
+    rcedit="$(resolve_rcedit)" || rcedit="$(fetch_rcedit)" || {
+        log "rcedit 不可用，跳过 exe 图标注入: $(basename "$exe")"
+        return 0
+    }
+    if ! is_windows_host; then
+        command -v wine >/dev/null 2>&1 || {
+            log "Linux 主机缺 wine，跳过 exe 图标注入: $(basename "$exe")"
+            return 0
+        }
+    fi
+    log "注入 exe 图标: $(basename "$exe")"
+    before_sha="$(sha256sum "$exe" | awk '{print $1}')"
+    if is_windows_host; then
+        "$rcedit" "$exe" --set-icon "$ico" || return 1
+    else
+        WINEPREFIX="$THRASH_MACHINE_CACHE_DIR/wine" WINEDEBUG=-all \
+            wine "$rcedit" "$exe" --set-icon "$ico"
+    fi
+    # wine can mask a failed rcedit with exit 0; a no-op means the icon was
+    # not applied, so fail the step (the caller falls back to the default).
+    if [ "$(sha256sum "$exe" | awk '{print $1}')" = "$before_sha" ]; then
+        log "rcedit 未修改 exe（图标可能无效），跳过 exe 图标注入"
+        return 1
+    fi
+}
+
+# The engine only reads window_icon.png from the mod root, so copy the
+# convention-located source there and explicitly enable setWindowTitleAndIcon.
+stage_window_icon() {
+    local stage_mod="$1"
+    if [ -f "$THRASH_MACHINE_WINDOW_ICON" ]; then
+        cp "$THRASH_MACHINE_WINDOW_ICON" "$stage_mod/window_icon.png"
+        run_helper set-mod-json-flag "$stage_mod/mod.json" setWindowTitleAndIcon true
+        log "已暂存 window_icon.png 并置 setWindowTitleAndIcon=true"
+    fi
 }
 
 detect_kristal_path() {
@@ -459,6 +588,7 @@ copy_mod() {
         --exclude='./libraries/kristal-debug-tools/just.cmd' \
         --exclude='./libraries/kristal-debug-tools/dist' \
         --exclude='./libraries/kristal-debug-tools/.tools' \
+        --exclude='./assets/icon' \
         -C "$THRASH_MACHINE_MOD_DIR" . | tar -xf - -C "$stage_mod"
 
     if [ "$variant" = "release" ]; then
@@ -507,6 +637,7 @@ prepare_stage() {
     fi
     run_helper patch-mod-manifest \
         "$stage_mod/mod.json" "$mod_dev" "$object_editor"
+    stage_window_icon "$stage_mod"
     printf '%s\n' "$stage_dir"
 }
 
@@ -553,7 +684,20 @@ build_variant() {
         exe_name="${THRASH_MACHINE_EXE_BASENAME}-${variant}.exe"
         rm -rf "$package_dir"
         mkdir -p "$package_dir"
-        cat "$love_dir/love.exe" "$love_file" > "$package_dir/$exe_name"
+        # Inject the icon into a copy of love.exe BEFORE cat appends the .love
+        # payload (rcedit rebuilds the PE and would drop appended bytes).
+        local ico="" icon_love="$love_dir/love.exe" candidate
+        ico="$(resolve_win_ico "$THRASH_MACHINE_BUILD_ROOT/$variant/icon" || true)"
+        if [ -n "$ico" ]; then
+            candidate="$THRASH_MACHINE_BUILD_ROOT/$variant/icon/love-icon.exe"
+            cp "$love_dir/love.exe" "$candidate"
+            if inject_exe_icon "$candidate" "$ico"; then
+                icon_love="$candidate"
+            else
+                log "exe 图标注入失败，回退默认图标"
+            fi
+        fi
+        cat "$icon_love" "$love_file" > "$package_dir/$exe_name"
         cp "$love_dir"/*.dll "$package_dir/"
         test ! -f "$love_dir/license.txt" || cp "$love_dir/license.txt" "$package_dir/"
         zip_dir "$THRASH_MACHINE_OUTPUT_DIR/${package_name}.zip" "$package_dir" "$package_name"

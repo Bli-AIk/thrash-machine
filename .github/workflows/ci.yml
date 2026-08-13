@@ -27,7 +27,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y just jq love luajit rsync unzip xvfb zip
+          sudo apt-get install -y just jq love luajit rsync unzip xvfb zip icoutils
       - name: Check Lua source and documentation
         run: make test
       - name: Build standalone packages (love + win)
@@ -65,6 +65,17 @@ jobs:
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-object-selector-plus/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
+          # Custom-icon contract: build-time icon sources never leak into packages.
+          # Inside the .love the mod lives under mods/<id>/, so the leaked path
+          # would be mods/thrash-machine/assets/icon/ — not a root-level one.
+          test -z "$(unzip -Z1 dist/thrash-machine-release.love | grep '^mods/thrash-machine/assets/icon/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^assets/icon/' || true)"
+          # When a window icon is provided, it must land at the mod root and enable the flag.
+          if [ -f assets/icon/window_icon.png ]; then
+            unzip -p dist/thrash-machine-release.love mods/thrash-machine/mod.json \
+              | grep -q '"setWindowTitleAndIcon": true'
+            unzip -Z1 dist/thrash-machine-release.love | grep -Fx 'mods/thrash-machine/window_icon.png' >/dev/null
+          fi
       - name: Generate and verify SHA-256 manifest
         run: |
           .github/scripts/generate_sha256sums.sh dist

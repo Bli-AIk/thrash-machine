@@ -7,6 +7,9 @@ dist/
 *.tiled-session
 .DS_Store
 
+# Generated copy of assets/icon/window_icon.png at the mod root (engine convention).
+/window_icon.png
+
 # GUI download cache (release binaries + .mode)
 .tools/
 
