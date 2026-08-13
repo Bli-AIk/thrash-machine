@@ -331,12 +331,23 @@ end
 
 -- --- zip-dir (stored entries; LÖVE's physfs reads stored zips fine) --------
 
+-- LÖVE 11 ships LuaJIT, which does not have Lua 5.3+ bitwise operators, so
+-- use LuaJIT's bit library for the CRC-32 table and checksum.
+local bit = require("bit")
+local bxor = bit.bxor
+local band = bit.band
+local rshift = bit.rshift
+
 local crc_table = {}
 do
     for i = 0, 255 do
         local c = i
         for _ = 1, 8 do
-            c = (c % 2 == 1) and (0xEDB88320 ~ (c >> 1)) or (c >> 1)
+            if c % 2 == 1 then
+                c = bxor(0xEDB88320, rshift(c, 1))
+            else
+                c = rshift(c, 1)
+            end
         end
         crc_table[i] = c
     end
@@ -345,9 +356,9 @@ end
 local function crc32(data)
     local crc = 0xFFFFFFFF
     for i = 1, #data do
-        crc = crc_table[((crc ~ data:byte(i)) & 0xFF)] ~ (crc >> 8)
+        crc = bxor(crc_table[band(bxor(crc, data:byte(i)), 0xFF)], rshift(crc, 8))
     end
-    return crc ~ 0xFFFFFFFF
+    return bxor(crc, 0xFFFFFFFF)
 end
 
 local function u16(v)
