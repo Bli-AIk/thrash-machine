@@ -45,6 +45,14 @@ run_helper() {
 zip_dir() {
     local output="$1" source="$2" prefix="${3:-}" total _count=0
 
+    # The zip invocations below run in a subshell after cd'ing into the
+    # source directory, so resolve a relative output path against the caller's
+    # working directory first (CI passes e.g. THRASH_MACHINE_OUTPUT_DIR=dist-win).
+    case "$output" in
+        /*) ;;
+        *) output="$(pwd -P)/$output" ;;
+    esac
+
     mkdir -p "$(dirname "$output")"
     rm -f "$output"
 
