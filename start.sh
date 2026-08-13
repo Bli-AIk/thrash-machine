@@ -324,4 +324,25 @@ printf 'Updated %s tracked text file(s).\n' "$changed_files"
 printf 'Renamed %s tracked file path(s).\n' "$renamed_paths"
 printf '%s\n' 'Updating submodules...'
 git -C "$project_root" submodule update --init --recursive
+
+printf '%s\n' 'Resetting project version to 0.0.0...'
+if [ -f "$project_root/mod.json" ]; then
+    perl -0pi -e 's/^([[:space:]]*"version"[[:space:]]*:[[:space:]]*")[^"]*(".*)$/$1v0.0.0$2/m' \
+        "$project_root/mod.json"
+fi
+if [ -f "$project_root/.release-please-manifest.json" ]; then
+    cat > "$project_root/.release-please-manifest.json" <<'EOF'
+{
+  ".": "0.0.0"
+}
+EOF
+fi
+if [ -f "$project_root/CHANGELOG.md" ]; then
+    cat > "$project_root/CHANGELOG.md" <<'EOF'
+# Changelog
+
+All notable changes are documented here by release-please.
+EOF
+fi
+
 printf '%s\n' 'Project initialization complete.'
