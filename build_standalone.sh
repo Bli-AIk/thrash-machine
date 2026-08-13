@@ -46,6 +46,10 @@ THRASH_MACHINE_WIN_ICON_DIR="${THRASH_MACHINE_WIN_ICON_DIR:-$THRASH_MACHINE_ICON
 THRASH_MACHINE_RCEDit="${THRASH_MACHINE_RCEDit:-}"          # empty → probe .tools/ and PATH
 THRASH_MACHINE_ICON_FETCH_TOOLS="${THRASH_MACHINE_ICON_FETCH_TOOLS:-0}"  # 1 = auto-download rcedit
 THRASH_MACHINE_RCEDit_URL="${THRASH_MACHINE_RCEDit_URL:-https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe}"
+# wine prefix lives OUTSIDE the mod tree: wine creates a `z: -> /` symlink
+# under it, and LÖVE recursively scans the mod root at runtime — a loop
+# there makes getInfo return nil and crashes the game at startup.
+THRASH_MACHINE_WINE_PREFIX="${THRASH_MACHINE_WINE_PREFIX:-${XDG_CACHE_HOME:-$HOME/.cache}/thrash-machine/wine}"
 
 log() {
     printf '[build] %s\n' "$*" >&2
@@ -159,7 +163,7 @@ inject_exe_icon() {
     if is_windows_host; then
         "$rcedit" "$exe" --set-icon "$ico" || return 1
     else
-        WINEPREFIX="$THRASH_MACHINE_CACHE_DIR/wine" WINEDEBUG=-all \
+        WINEPREFIX="$THRASH_MACHINE_WINE_PREFIX" WINEDEBUG=-all \
             wine "$rcedit" "$exe" --set-icon "$ico"
     fi
     # wine can mask a failed rcedit with exit 0; a no-op means the icon was
