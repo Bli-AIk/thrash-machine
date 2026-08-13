@@ -8,8 +8,8 @@ test-static:
 	sh .github/scripts/static-smoke.sh
 	find . -path ./.git -prune -o -path ./.emacs -prune -o -path ./.helix -prune -o \
 		-path ./libraries -prune -o -path ./.build -prune -o -path ./dist -prune -o \
-		-path ./.worktrees -prune -o -type f -name '*.lua' -exec \
-		luajit -b {} /dev/null \;
+		-path ./.worktrees -prune -o -type f -name '*.lua' -print0 | \
+		xargs -0 -I{} luajit -b {} /dev/null
 
 test-debug-tools:
 	sh .github/scripts/template-justfile-smoke.sh
