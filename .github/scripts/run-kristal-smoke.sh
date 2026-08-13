@@ -24,7 +24,7 @@ test -d "$KRISTAL/mods"
 test ! -e "$mod_path"
 mkdir "$mod_path"
 created=1
-rsync -aL --exclude='.git' --exclude='.build' --exclude='dist' "$root/" "$mod_path/"
+rsync -aL --exclude='.git' --exclude='.build' --exclude='dist*' "$root/" "$mod_path/"
 
 mkdir -p "$sandbox/home" "$sandbox/data" "$sandbox/config" "$sandbox/cache" "$sandbox/runtime"
 chmod 700 "$sandbox/runtime"

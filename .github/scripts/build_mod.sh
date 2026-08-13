@@ -27,7 +27,7 @@ tar -cf - \
     --exclude='*.git' \
     --exclude='./.github' \
     --exclude='./.build' \
-    --exclude='./dist' \
+    --exclude='./dist*' \
     --exclude='./.tools' \
     --exclude='./.emacs' \
     --exclude='./.helix' \
