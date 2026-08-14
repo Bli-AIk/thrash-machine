@@ -178,9 +178,15 @@ use_path_java() {
 }
 
 # Download + unpack a Temurin JDK of the given major version into
-# THRASH_MACHINE_JDK_DIR (archive cached in .build/cache).
+# THRASH_MACHINE_JDK_DIR (archive cached in .build/cache). Reuses an existing
+# installation instead of re-downloading ~190 MB every build.
 install_portable_jdk() {
     local version="$1" dest="$THRASH_MACHINE_JDK_DIR"
+    # Windows JDKs ship bin/java.exe, POSIX ones bin/java — accept either.
+    if [ -x "$dest/bin/java" ] || [ -x "$dest/bin/java.exe" ]; then
+        printf 'JDK %s 已存在: %s\n' "$version" "$dest" >&2
+        return 0
+    fi
     [ "$THRASH_MACHINE_FETCH_JDK" = "1" ] || {
         printf 'No JDK %s found and THRASH_MACHINE_FETCH_JDK=0; install JDK %s or set THRASH_MACHINE_ANDROID_JAVA_HOME\n' \
             "$version" "$version" >&2
@@ -206,12 +212,15 @@ install_portable_jdk() {
     url="https://api.adoptium.net/v3/binary/latest/${version}/ga/${os}/${arch}/jdk/hotspot/normal/eclipse"
     printf '下载便携 JDK %s（Temurin %s/%s，约 190 MB）…\n' "$version" "$os" "$arch" >&2
     cd_out="$(mktemp)"
+    cd_err="$(mktemp)"
     if ! (cd "$cache" && curl --fail --location --remote-name --remote-header-name \
-            --write-out '%{filename_effective}' "$url") > "$cd_out" 2>/dev/null; then
-        rm -f "$cd_out"
-        printf '下载 JDK %s 失败: %s\n' "$version" "$url" >&2
+            --write-out '%{filename_effective}' "$url") > "$cd_out" 2> "$cd_err"; then
+        err_tail="$(tr -d '\r' < "$cd_err" | grep . | tail -n 2)"
+        rm -f "$cd_out" "$cd_err"
+        printf '下载 JDK %s 失败: %s\n%s\n' "$version" "$url" "${err_tail:+curl: $err_tail}" >&2
         exit 1
     fi
+    rm -f "$cd_err"
     archive="$cache/$(cat "$cd_out")"
     rm -f "$cd_out"
     [ -f "$archive" ] || { printf 'JDK 下载未产生文件（%s）\n' "$url" >&2; exit 1; }
@@ -252,6 +261,10 @@ install_portable_jdk() {
         mv "$extract" "$dest"
     fi
     rm -rf "$extract"
-    [ -x "$dest/bin/java" ] || { rm -rf "$dest"; printf 'JDK %s 缺少 bin/java: %s\n' "$version" "$dest" >&2; exit 1; }
+    if [ ! -x "$dest/bin/java" ] && [ ! -x "$dest/bin/java.exe" ]; then
+        rm -rf "$dest"
+        printf 'JDK %s 缺少 bin/java: %s\n' "$version" "$dest" >&2
+        exit 1
+    fi
     printf 'JDK %s 已就绪: %s\n' "$version" "$dest" >&2
 }
