@@ -17,7 +17,8 @@ set -euo pipefail
 #   - No native code changes; the shell only carries assets/game.love.
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-THRASH_MACHINE_MOD_DIR="${THRASH_MACHINE_MOD_DIR:-$SCRIPT_DIR}"
+# Scripts live in tools/; the mod root is one level up.
+THRASH_MACHINE_MOD_DIR="${THRASH_MACHINE_MOD_DIR:-$(CDPATH= cd -- "$(dirname -- "$SCRIPT_DIR")" && pwd -P)}"
 THRASH_MACHINE_MOD_DIR="$(CDPATH= cd -- "$THRASH_MACHINE_MOD_DIR" && pwd -P)"
 THRASH_MACHINE_OUTPUT_DIR="${THRASH_MACHINE_OUTPUT_DIR:-$THRASH_MACHINE_MOD_DIR/dist}"
 THRASH_MACHINE_CACHE_DIR="${THRASH_MACHINE_CACHE_DIR:-$THRASH_MACHINE_MOD_DIR/.build/cache}"
@@ -158,7 +159,7 @@ build_love_archive() {
         THRASH_MACHINE_OUTPUT_DIR="$love_output" \
         THRASH_MACHINE_KRISTAL_SOURCE="$THRASH_MACHINE_KRISTAL_SOURCE" \
         THRASH_MACHINE_KRISTAL_REF="$THRASH_MACHINE_KRISTAL_REF" \
-        "$THRASH_MACHINE_MOD_DIR/build_standalone.sh"
+        "$THRASH_MACHINE_MOD_DIR/tools/build_standalone.sh"
     [ -s "$love_output/${THRASH_MACHINE_OUTPUT_BASENAME}-release.love" ] || fail \
         "The release .love archive was not created"
     printf '%s\n' "$love_output/${THRASH_MACHINE_OUTPUT_BASENAME}-release.love"

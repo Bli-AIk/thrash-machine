@@ -34,7 +34,7 @@
 ```sh
 git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
 cd thrash-machine
-./start.sh            # 把模板改成你的项目（--name "My Project"；--yes 免交互）
+./tools/start.sh       # 把模板改成你的项目（--name "My Project"；--yes 免交互）
 make test             # 静态断言 + 语法检查
 KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal 路径）
 ```
@@ -67,7 +67,7 @@ Android 打包有**两种模式**：
 - `just build-android` —— **编译构建** Android APK（需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
 - `just build-android-wrap` —— **套包构建** Android APK（官方 LÖVE 壳 + 游戏 .love，自动下载工具并重签名；只需 JDK、速度更快，**但是**不能自定义包名/图标/名称，也不能上架 Google Play）
 
-在交互式终端运行 `just build`、`just build-win` 或 `just build-love`（或直接 `./build_standalone.sh`）时，脚本会先询问 Kristal 引擎来源：
+在交互式终端运行 `just build`、`just build-win` 或 `just build-love`（或直接 `./tools/build_standalone.sh`）时，脚本会先询问 Kristal 引擎来源：
 
 1. 使用本地 Kristal（自动检测 `.build/Kristal`、`KRISTAL_ROOT` 和常见路径）
 2. 自己输入本地路径（Git 检出或普通目录均可）
@@ -108,12 +108,12 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 
 ### Windows 一键打包
 
-双击项目根目录的 **`build_android.cmd`**，按提示选择：
+双击项目根目录的 **`tools\build_android.cmd`**，按提示选择：
 
 1. **快速套包构建** —— 自动下载/安装缺失的 Git Bash（PortableGit）、JDK 17、LÖVE 到 `.tools\`，然后直接出包；
 2. **完整编译构建** —— 额外自动下载 Android cmdline-tools/SDK/NDK（首次约 1.5 GB）。
 
-也支持带参数运行：`build_android.cmd wrap` 或 `build_android.cmd compile`。构建完成后会自动打开 `dist\` 目录。
+也支持带参数运行：`tools\build_android.cmd wrap` 或 `tools\build_android.cmd compile`。构建完成后会自动打开 `dist\` 目录。
 
 命令行（任意平台）等价用法：
 

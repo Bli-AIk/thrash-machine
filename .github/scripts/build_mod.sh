@@ -37,8 +37,7 @@ tar -cf - \
     --exclude='./docs' \
     --exclude='./Makefile' \
     --exclude='./justfile' \
-    --exclude='./build_standalone.sh' \
-    --exclude='./build_android.sh' \
+    --exclude='./tools' \
     --exclude='./build-helper' \
     --exclude='__pycache__' \
     --exclude='*.pyc' \

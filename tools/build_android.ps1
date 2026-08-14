@@ -14,7 +14,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+# Script lives in tools/; the mod root is two levels up.
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Root = Split-Path -Parent $ScriptDir
 $Tools = Join-Path $Root '.tools'
 
 # --- tiny helpers -------------------------------------------------------------
@@ -190,7 +192,7 @@ if ($Mode -eq 'compile') {
     $env:ANDROID_SDK_ROOT = $sdkDir
 }
 
-$script = if ($Mode -eq 'compile') { './build_android.sh' } else { './build_android_wrap.sh' }
+$script = if ($Mode -eq 'compile') { './tools/build_android.sh' } else { './tools/build_android_wrap.sh' }
 Write-Host "启动 Git Bash: $script"
 $rootFwd = $Root.Replace('\', '/')
 & $bash -lc "cd `"$rootFwd`" && $script"

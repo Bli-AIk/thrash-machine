@@ -82,7 +82,7 @@ jobs:
           ./.github/scripts/build_mod.sh
 
       - name: Build Android APK (compile)
-        run: ./build_android.sh
+        run: ./tools/build_android.sh
 
       - name: Generate and verify SHA-256 manifest
         run: |

@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
     printf '%s\n' \
-        'Usage: ./start.sh [--name PROJECT_NAME] [--yes]' \
+        'Usage: ./tools/start.sh [--name PROJECT_NAME] [--yes]' \
         '' \
         'Initialize this template with a project name and fetch all submodules.' \
         'When PROJECT_NAME is omitted, the Git root directory name is used.'

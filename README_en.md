@@ -34,7 +34,7 @@
 ```sh
 git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
 cd thrash-machine
-./start.sh            # rename the template to your project (--name "My Project"; --yes non-interactive)
+./tools/start.sh       # rename the template to your project (--name "My Project"; --yes non-interactive)
 make test             # static assertions + syntax checks
 KRISTAL_ROOT=/path/to/Kristal just run   # run (common local Kristal paths are auto-detected)
 ```
@@ -67,7 +67,7 @@ Android packaging has **two modes**:
 - `just build-android` — **compile-build** Android APK (needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
 - `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; only a JDK is required and it is faster, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
 
-When `just build`, `just build-win`, or `just build-love` (or `./build_standalone.sh`) runs in an interactive terminal, the script first asks where the Kristal engine should come from:
+When `just build`, `just build-win`, or `just build-love` (or `./tools/build_standalone.sh`) runs in an interactive terminal, the script first asks where the Kristal engine should come from:
 
 1. Use a local Kristal checkout (auto-detects `.build/Kristal`, `KRISTAL_ROOT`, and common paths)
 2. Enter a local path yourself (a Git checkout or a plain directory both work)
@@ -108,12 +108,12 @@ GitHub's automated builds check that the project packages correctly on every pus
 
 ### One-click packaging on Windows
 
-Double-click **`build_android.cmd`** in the project root and pick:
+Double-click **`tools\build_android.cmd`** in the project root and pick:
 
 1. **Quick wrap build** — automatically installs whatever is missing into `.tools\` (PortableGit Git Bash, JDK 17, LÖVE 11.5) and produces the APK;
 2. **Full compile build** — additionally downloads the Android cmdline-tools/SDK/NDK (first run ~1.5 GB).
 
-It also accepts arguments: `build_android.cmd wrap` or `build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
+It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
 
 Equivalent commands on any platform:
 

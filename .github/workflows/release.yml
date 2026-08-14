@@ -84,11 +84,11 @@ jobs:
 
       - name: Build Android APK (compile)
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_android_apk }}
-        run: ./build_android.sh
+        run: ./tools/build_android.sh
 
       - name: Build Android wrapper APK (wrap)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_android_wrap }}
-        run: ./build_android_wrap.sh
+        run: ./tools/build_android_wrap.sh
 
       - name: Generate and verify SHA-256 manifest
         run: |

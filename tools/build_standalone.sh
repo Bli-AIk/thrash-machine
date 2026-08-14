@@ -2,7 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-THRASH_MACHINE_MOD_DIR="${THRASH_MACHINE_MOD_DIR:-$SCRIPT_DIR}"
+# Scripts live in tools/; the mod root is one level up.
+THRASH_MACHINE_MOD_DIR="${THRASH_MACHINE_MOD_DIR:-$(CDPATH= cd -- "$(dirname -- "$SCRIPT_DIR")" && pwd -P)}"
 THRASH_MACHINE_MOD_DIR="$(CDPATH= cd -- "$THRASH_MACHINE_MOD_DIR" && pwd -P)"
 THRASH_MACHINE_BUILD_ROOT="${THRASH_MACHINE_BUILD_ROOT:-$THRASH_MACHINE_MOD_DIR/.build/standalone}"
 THRASH_MACHINE_OUTPUT_DIR="${THRASH_MACHINE_OUTPUT_DIR:-$THRASH_MACHINE_MOD_DIR/dist}"
@@ -575,8 +576,7 @@ copy_mod() {
         --exclude='./docs' \
         --exclude='./Makefile' \
         --exclude='./justfile' \
-        --exclude='./build_standalone.sh' \
-        --exclude='./build_android.sh' \
+        --exclude='./tools' \
         --exclude='./build-helper' \
         --exclude='__pycache__' \
         --exclude='*.pyc' \
