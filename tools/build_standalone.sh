@@ -669,7 +669,10 @@ prepare_stage() {
     run_helper patch-mod-manifest \
         "$stage_mod/mod.json" "$mod_dev" "$object_editor"
     stage_window_icon "$stage_mod"
-    printf '%s\n' "$stage_dir"
+    # stage_dir is set above as a side effect; return it via a global so this
+    # function is NOT called inside $(...) — a command substitution disables
+    # `set -e` for the whole body, which would silently swallow a failed
+    # run_helper (e.g. a patch that no longer matches) and ship a broken build.
 }
 
 ensure_love_windows() {
@@ -699,7 +702,7 @@ ensure_love_windows() {
 
 build_variant() {
     variant="$1"
-    stage_dir="$(prepare_stage "$variant")"
+    prepare_stage "$variant"
     if [ "$THRASH_MACHINE_BUILD_LOVE" = "1" ]; then
         love_output_dir="$THRASH_MACHINE_OUTPUT_DIR"
     else

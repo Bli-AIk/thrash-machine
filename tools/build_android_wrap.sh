@@ -185,7 +185,12 @@ param(
     [Parameter(Mandatory = $true)][string]$Apk,
     [Parameter(Mandatory = $true)][string]$Love
 )
+# Windows PowerShell 5.1 needs BOTH assemblies loaded: ZipFile lives in
+# System.IO.Compression.FileSystem, but ZipArchiveMode (used in the Open call)
+# lives in System.IO.Compression. Without the second Add-Type the type lookup
+# fails, $zip is null and the game.love swap silently does nothing.
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -AssemblyName System.IO.Compression
 $zip = [System.IO.Compression.ZipFile]::Open($Apk, [System.IO.Compression.ZipArchiveMode]::Update)
 try {
     $entry = $zip.GetEntry('assets/game.love')

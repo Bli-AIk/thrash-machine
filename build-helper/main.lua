@@ -25,7 +25,10 @@ local function read_text(path)
     if not f then fail("cannot read " .. path .. ": " .. tostring(err)) end
     local text = f:read("*a")
     f:close()
-    return text
+    -- Normalize CRLF to LF so literal block patches (patch-android-loading-touch,
+    -- patch-android-game-activity, patch-android-gradle) match regardless of the
+    -- checkout's line endings (Windows git may have checked files out as CRLF).
+    return (text:gsub("\r\n", "\n"))
 end
 
 local function write_text(path, text)
