@@ -57,15 +57,12 @@ log() {
 }
 
 fail() {
-    printf '[build] %s\n' "$*" >&2
+    printf '[错误] %s\n' "$*" >&2
     exit 1
 }
 
 need_cmd() {
-    command -v "$1" >/dev/null 2>&1 || {
-        printf 'Missing required command: %s\n' "$1" >&2
-        exit 1
-    }
+    command -v "$1" >/dev/null 2>&1 || fail "Missing required command: $1"
 }
 
 # --- icon helpers (all optional; every failure only skips that icon step) ----
@@ -106,7 +103,7 @@ fetch_rcedit() {
     mkdir -p "$(dirname "$dest")"
     curl --fail --location --output "$dest" "$THRASH_MACHINE_RCEDit_URL" || {
         rm -f "$dest"
-        log "下载 rcedit 失败，跳过 exe 图标注入"
+        warn "下载 rcedit 失败，跳过 exe 图标注入"
         return 1
     }
     printf '%s\n' "$dest"
@@ -136,7 +133,7 @@ resolve_win_ico() {
     elif command -v convert >/dev/null 2>&1; then
         convert "${pngs[@]}" "$ico" || return 1
     else
-        log "icotool/ImageMagick 不可用，跳过 exe 图标合成"
+        warn "icotool/ImageMagick 不可用，跳过 exe 图标合成"
         return 1
     fi
     [ -f "$ico" ] && { printf '%s\n' "$ico"; return 0; }
@@ -150,19 +147,21 @@ resolve_win_ico() {
 inject_exe_icon() {
     local exe="$1" ico="$2" rcedit before_sha
     rcedit="$(resolve_rcedit)" || rcedit="$(fetch_rcedit)" || {
-        log "rcedit 不可用，跳过 exe 图标注入: $(basename "$exe")"
+        warn "rcedit 不可用，跳过 exe 图标注入: $(basename "$exe")"
         return 0
     }
     if ! is_windows_host; then
         command -v wine >/dev/null 2>&1 || {
-            log "Linux 主机缺 wine，跳过 exe 图标注入: $(basename "$exe")"
+            warn "Linux 主机缺 wine，跳过 exe 图标注入: $(basename "$exe")"
             return 0
         }
     fi
     log "注入 exe 图标: $(basename "$exe")"
     before_sha="$(sha256sum "$exe" | awk '{print $1}')"
     if is_windows_host; then
-        "$rcedit" "$exe" --set-icon "$ico" || return 1
+        # rcedit is a native Windows exe and cannot open msys-style paths
+        # (/c/Users/...); convert them or it fails with "invalid argument".
+        "$rcedit" "$(win_path "$exe")" --set-icon "$(win_path "$ico")" || return 1
     else
         WINEPREFIX="$THRASH_MACHINE_WINE_PREFIX" WINEDEBUG=-all \
             wine "$rcedit" "$exe" --set-icon "$ico"
@@ -170,7 +169,7 @@ inject_exe_icon() {
     # wine can mask a failed rcedit with exit 0; a no-op means the icon was
     # not applied, so fail the step (the caller falls back to the default).
     if [ "$(sha256sum "$exe" | awk '{print $1}')" = "$before_sha" ]; then
-        log "rcedit 未修改 exe（图标可能无效），跳过 exe 图标注入"
+        warn "rcedit 未修改 exe（图标可能无效），跳过 exe 图标注入"
         return 1
     fi
 }
@@ -643,8 +642,7 @@ prepare_stage() {
             object_editor=true
             ;;
         *)
-            printf 'Unknown build variant: %s\n' "$variant" >&2
-            exit 1
+            fail "Unknown build variant: $variant"
             ;;
     esac
 
@@ -691,8 +689,7 @@ ensure_love_windows() {
         unzip -q "$love_zip" -d "$extract_dir"
         extracted="$(find "$extract_dir" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
         [ -n "$extracted" ] || {
-            printf 'Could not locate the extracted LÖVE directory\n' >&2
-            exit 1
+            fail 'Could not locate the extracted LÖVE directory'
         }
         mv "$extracted" "$love_dir"
         rm -rf "$extract_dir"
@@ -728,7 +725,7 @@ build_variant() {
             if inject_exe_icon "$candidate" "$ico"; then
                 icon_love="$candidate"
             else
-                log "exe 图标注入失败，回退默认图标"
+                warn "exe 图标注入失败，回退默认图标"
             fi
         fi
         cat "$icon_love" "$love_file" > "$package_dir/$exe_name"
@@ -762,3 +759,4 @@ ensure_love_windows
 for variant in $THRASH_MACHINE_BUILD_VARIANTS; do
     build_variant "$variant"
 done
+open_output_dir "$THRASH_MACHINE_OUTPUT_DIR"

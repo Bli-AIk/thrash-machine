@@ -12,11 +12,11 @@ THRASH_MACHINE_ICON_DIR="${THRASH_MACHINE_ICON_DIR:-$ROOT/assets/icon}"
 THRASH_MACHINE_WINDOW_ICON="${THRASH_MACHINE_WINDOW_ICON:-$THRASH_MACHINE_ICON_DIR/window_icon.png}"
 STAGE_DIR="$THRASH_MACHINE_BUILD_DIR/source"
 
-command -v unzip >/dev/null
 # `zip` is optional: when missing, the build-helper (LÖVE) writes the zip.
 
 # shellcheck source=build-helper/lib.sh
 source "$ROOT/build-helper/lib.sh"
+command -v unzip >/dev/null 2>&1 || fail 'Missing required command: unzip'
 
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR" "$THRASH_MACHINE_OUTPUT_DIR"
@@ -70,3 +70,4 @@ test -s "$THRASH_MACHINE_OUTPUT_FILE"
 unzip -t "$THRASH_MACHINE_OUTPUT_FILE" >/dev/null
 unzip -Z1 "$THRASH_MACHINE_OUTPUT_FILE" | grep -Fx 'mod.json' >/dev/null
 printf 'Created Mod package: %s\n' "$THRASH_MACHINE_OUTPUT_FILE"
+open_output_dir "$THRASH_MACHINE_OUTPUT_DIR"

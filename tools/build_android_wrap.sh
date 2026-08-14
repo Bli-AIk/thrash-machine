@@ -42,7 +42,7 @@ log() {
 }
 
 fail() {
-    printf '[android-wrap] %s\n' "$*" >&2
+    printf '[错误] %s\n' "$*" >&2
     exit 1
 }
 
@@ -155,6 +155,7 @@ build_love_archive() {
         THRASH_MACHINE_OUTPUT_DIR="$love_output" \
         THRASH_MACHINE_KRISTAL_SOURCE="$THRASH_MACHINE_KRISTAL_SOURCE" \
         THRASH_MACHINE_KRISTAL_REF="$THRASH_MACHINE_KRISTAL_REF" \
+        THRASH_MACHINE_NO_OPEN_DIR=1 \
         "$THRASH_MACHINE_MOD_DIR/tools/build_standalone.sh"
     [ -s "$love_output/${THRASH_MACHINE_OUTPUT_BASENAME}-release.love" ] || fail \
         "The release .love archive was not created"
@@ -305,6 +306,7 @@ main() {
     log "Created Android wrapper APK: $apk_output"
     log "提示：包 id 仍为 org.love2d.android，安装前请先卸载官方 LÖVE；"
     log "      此套包不能上架 Google Play（需要 AAB），也不能改图标/名称/applicationId。"
+    open_output_dir "$THRASH_MACHINE_OUTPUT_DIR"
 }
 
 main "$@"

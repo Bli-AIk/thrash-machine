@@ -3,6 +3,19 @@
 #
 # Source this after setting THRASH_MACHINE_MOD_DIR.
 
+# --- severity-labeled output ---------------------------------------------------
+# Info messages keep the caller's prefix (log); warnings and errors are labeled
+# so a build that merely skips an optional step (no `zip`, no icon tool, ...)
+# does not read like a crash.
+warn() {
+    printf '[警告] %s\n' "$*" >&2
+}
+
+fail() {
+    printf '[错误] %s\n' "$*" >&2
+    exit 1
+}
+
 resolve_love() {
     if [ -n "${LOVE:-}" ] && command -v "$LOVE" >/dev/null 2>&1; then
         command -v "$LOVE"
@@ -24,8 +37,7 @@ resolve_love() {
 THRASH_MACHINE_LOVE="${THRASH_MACHINE_LOVE:-}"
 if [ -z "$THRASH_MACHINE_LOVE" ]; then
     THRASH_MACHINE_LOVE="$(resolve_love)" || {
-        printf '%s\n' 'Missing required command: love (LÖVE). Install it from https://love2d.org' >&2
-        exit 1
+        fail 'Missing required command: love (LÖVE). Install it from https://love2d.org'
     }
 fi
 
@@ -44,12 +56,49 @@ win_path() {
     esac
 }
 
+# Open a directory in the platform's file manager (Windows → explorer, Linux →
+# xdg-open, macOS → open). Best-effort and non-fatal: skipped in non-interactive
+# shells (CI never pops a window) and when THRASH_MACHINE_NO_OPEN_DIR=1 (the
+# Android launchers set it for the nested build_standalone.sh subprocess so it
+# does not open an internal staging dir). Only warns when the opener is missing.
+open_output_dir() {
+    [ "${THRASH_MACHINE_NO_OPEN_DIR:-0}" = "1" ] && return 0
+    [ -t 1 ] || [ -t 2 ] || return 0
+    local dir="$1"
+    [ -d "$dir" ] || { warn "输出目录不存在，无法打开: $dir"; return 0; }
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*)
+            if command -v explorer >/dev/null 2>&1; then
+                explorer "$(win_path "$dir")" >/dev/null 2>&1 &
+            elif command -v cmd >/dev/null 2>&1; then
+                cmd //c start "" "$(win_path "$dir")" >/dev/null 2>&1 &
+            else
+                warn "未找到资源管理器，无法打开输出目录: $dir"
+            fi
+            ;;
+        Darwin*)
+            if command -v open >/dev/null 2>&1; then
+                open "$dir" >/dev/null 2>&1 &
+            else
+                warn "未找到 open，无法打开输出目录: $dir"
+            fi
+            ;;
+        *)
+            if command -v xdg-open >/dev/null 2>&1; then
+                xdg-open "$dir" >/dev/null 2>&1 &
+            else
+                warn "未找到 xdg-open，无法打开输出目录: $dir"
+            fi
+            ;;
+    esac
+}
+
 run_helper() {
     # LÖVE 11 drops positional args after the game path, so pass them in a
     # temp file (one argument per line). love.exe is a native binary, so msys
     # paths (/c/...) written here must be converted to Windows form first.
     local args_file arg status
-    args_file="$(mktemp)" || exit 1
+    args_file="$(mktemp)" || fail '无法创建临时文件（mktemp 失败）'
     : > "$args_file"
     for arg in "$@"; do
         win_path "$arg" >> "$args_file"
@@ -100,8 +149,12 @@ zip_dir() {
             fi
         fi
     else
-        printf '[build] zip not found; using LÖVE stored-zip helper for %s\n' \
-            "$(basename "$output")" >&2
+        # No system `zip` (Git Bash has none) — this is a normal fallback, not
+        # an error. Warn once per run so repeated archives stay quiet.
+        if [ "${THRASH_MACHINE_ZIP_FALLBACK_WARNED:-0}" != "1" ]; then
+            warn "未找到系统 zip，改用 LÖVE 内置压缩助手（正常，构建继续）"
+            THRASH_MACHINE_ZIP_FALLBACK_WARNED=1
+        fi
         run_helper zip-dir "$output" "$source" "$prefix"
         printf '[build] zip %s: done (LÖVE helper)\n' "$(basename "$output")" >&2
     fi
@@ -112,8 +165,8 @@ zip_dir() {
 # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME and no usable `java` is on PATH,
 # ensure_java downloads a portable Temurin JDK into .tools/jdk<version> and
 # exports JAVA_HOME/PATH. Disable the download with THRASH_MACHINE_FETCH_JDK=0.
-# These functions are self-contained (printf + exit, no log/fail dependency):
-# build_mod.sh sources this file before defining those helpers.
+# These functions use the warn/fail helpers defined at the top of this file, so
+# the sourcing scripts do not need to define their own before sourcing.
 THRASH_MACHINE_JDK_VERSION="${THRASH_MACHINE_JDK_VERSION:-17}"
 THRASH_MACHINE_JDK_DIR="${THRASH_MACHINE_JDK_DIR:-$THRASH_MACHINE_MOD_DIR/.tools/jdk$THRASH_MACHINE_JDK_VERSION}"
 THRASH_MACHINE_FETCH_JDK="${THRASH_MACHINE_FETCH_JDK:-1}"
@@ -139,15 +192,12 @@ ensure_java() {
     java_home="${THRASH_MACHINE_ANDROID_JAVA_HOME:-${JAVA_HOME:-}}"
     if [ -n "$java_home" ]; then
         [ -x "$java_home/bin/java" ] || {
-            printf 'Configured Java home has no Java executable: %s\n' "$java_home" >&2
-            exit 1
+            fail "Configured Java home has no Java executable: $java_home"
         }
         if [ -n "$exact" ]; then
             major="$(java_major "$java_home/bin/java")"
             [ "$major" = "$exact" ] || {
-                printf 'Java %s required, found %s at %s (set THRASH_MACHINE_ANDROID_JAVA_HOME to a JDK %s)\n' \
-                    "$exact" "${major:-unknown}" "$java_home" "$exact" >&2
-                exit 1
+                fail "Java $exact required, found ${major:-unknown} at $java_home (set THRASH_MACHINE_ANDROID_JAVA_HOME to a JDK $exact)"
             }
         fi
         export JAVA_HOME="$java_home"
@@ -188,24 +238,22 @@ install_portable_jdk() {
         return 0
     fi
     [ "$THRASH_MACHINE_FETCH_JDK" = "1" ] || {
-        printf 'No JDK %s found and THRASH_MACHINE_FETCH_JDK=0; install JDK %s or set THRASH_MACHINE_ANDROID_JAVA_HOME\n' \
-            "$version" "$version" >&2
-        exit 1
+        fail "No JDK $version found and THRASH_MACHINE_FETCH_JDK=0; install JDK $version or set THRASH_MACHINE_ANDROID_JAVA_HOME"
     }
     local os arch cache url cd_out archive extract top
     case "$(uname -s)" in
         Linux*) os=linux ;;
         Darwin*) os=mac ;;
         MINGW*|MSYS*|CYGWIN*) os=windows ;;
-        *) printf 'Unsupported OS for portable JDK: %s\n' "$(uname -s)" >&2; exit 1 ;;
+        *) fail "Unsupported OS for portable JDK: $(uname -s)" ;;
     esac
     case "$(uname -m)" in
         x86_64|amd64) arch=x64 ;;
         aarch64|arm64) arch=aarch64 ;;
-        *) printf 'Unsupported architecture for portable JDK: %s\n' "$(uname -m)" >&2; exit 1 ;;
+        *) fail "Unsupported architecture for portable JDK: $(uname -m)" ;;
     esac
-    command -v curl >/dev/null 2>&1 || { printf 'curl is required to download the portable JDK\n' >&2; exit 1; }
-    command -v unzip >/dev/null 2>&1 || { printf 'unzip is required to unpack the portable JDK\n' >&2; exit 1; }
+    command -v curl >/dev/null 2>&1 || fail 'curl is required to download the portable JDK'
+    command -v unzip >/dev/null 2>&1 || fail 'unzip is required to unpack the portable JDK'
 
     cache="$THRASH_MACHINE_MOD_DIR/.build/cache"
     mkdir -p "$cache"
@@ -217,13 +265,12 @@ install_portable_jdk() {
             --write-out '%{filename_effective}' "$url") > "$cd_out" 2> "$cd_err"; then
         err_tail="$(tr -d '\r' < "$cd_err" | grep . | tail -n 2)"
         rm -f "$cd_out" "$cd_err"
-        printf '下载 JDK %s 失败: %s\n%s\n' "$version" "$url" "${err_tail:+curl: $err_tail}" >&2
-        exit 1
+        fail "下载 JDK $version 失败: $url${err_tail:+（curl: $err_tail）}"
     fi
     rm -f "$cd_err"
     archive="$cache/$(cat "$cd_out")"
     rm -f "$cd_out"
-    [ -f "$archive" ] || { printf 'JDK 下载未产生文件（%s）\n' "$url" >&2; exit 1; }
+    [ -f "$archive" ] || fail "JDK 下载未产生文件（$url）"
 
     extract="$dest.extract"
     rm -rf "$extract" "$dest"
@@ -232,26 +279,22 @@ install_portable_jdk() {
         *.zip)
             unzip -q "$archive" -d "$extract" || {
                 rm -rf "$extract" "$dest"
-                printf '解压 JDK 失败: %s\n' "$archive" >&2
-                exit 1
+                fail "解压 JDK 失败: $archive"
             }
             ;;
         *.tar.gz|*.tgz)
             command -v tar >/dev/null 2>&1 || {
                 rm -rf "$extract" "$dest"
-                printf 'tar is required to unpack the portable JDK\n' >&2
-                exit 1
+                fail 'tar is required to unpack the portable JDK'
             }
             tar -xzf "$archive" -C "$extract" || {
                 rm -rf "$extract" "$dest"
-                printf '解压 JDK 失败: %s\n' "$archive" >&2
-                exit 1
+                fail "解压 JDK 失败: $archive"
             }
             ;;
         *)
             rm -rf "$extract" "$dest"
-            printf '无法识别的 JDK 包: %s\n' "$archive" >&2
-            exit 1
+            fail "无法识别的 JDK 包: $archive"
             ;;
     esac
     top="$(find "$extract" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
@@ -263,8 +306,7 @@ install_portable_jdk() {
     rm -rf "$extract"
     if [ ! -x "$dest/bin/java" ] && [ ! -x "$dest/bin/java.exe" ]; then
         rm -rf "$dest"
-        printf 'JDK %s 缺少 bin/java: %s\n' "$version" "$dest" >&2
-        exit 1
+        fail "JDK $version 缺少 bin/java: $dest"
     fi
     printf 'JDK %s 已就绪: %s\n' "$version" "$dest" >&2
 }
@@ -276,7 +318,7 @@ install_portable_jdk() {
 need_git() {
     command -v git >/dev/null 2>&1 && return 0
     cat >&2 <<'EOF'
-Missing required command: git
+[错误] Missing required command: git
 
 Git is needed to fetch the Kristal engine. Install it, then re-run:
 

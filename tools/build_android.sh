@@ -29,7 +29,7 @@ log() {
 }
 
 fail() {
-    printf '[android-build] %s\n' "$*" >&2
+    printf '[错误] %s\n' "$*" >&2
     exit 1
 }
 
@@ -224,6 +224,7 @@ build_love_archive() {
         THRASH_MACHINE_BUILD_VARIANTS=release \
         THRASH_MACHINE_BUILD_WINDOWS_EXE=0 \
         THRASH_MACHINE_OUTPUT_DIR="$love_output" \
+        THRASH_MACHINE_NO_OPEN_DIR=1 \
         "$THRASH_MACHINE_MOD_DIR/tools/build_standalone.sh"
     [ -s "$love_output/${THRASH_MACHINE_OUTPUT_BASENAME}-release.love" ] || fail \
         "The release .love archive was not created"
@@ -259,3 +260,4 @@ build_love_archive
 ensure_android_source
 stage_android_source
 build_apk
+open_output_dir "$THRASH_MACHINE_OUTPUT_DIR"

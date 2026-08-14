@@ -19,16 +19,22 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root = Split-Path -Parent $ScriptDir
 $Tools = Join-Path $Root '.tools'
 
+# Severity-labeled output: an unlabeled "zip not found" or bare error often
+# reads as a crash on Windows. Info/Warn/Fail make the severity explicit.
+function Info([string]$Msg) { Write-Host "[信息] $Msg" }
+function Warn([string]$Msg) { Write-Host "[警告] $Msg" -ForegroundColor Yellow }
+function Fail([string]$Msg) { Write-Host "[错误] $Msg" -ForegroundColor Red; exit 1 }
+
 # --- tiny helpers -------------------------------------------------------------
 
 function Invoke-Download([string]$Url, [string]$OutFile) {
-    Write-Host "正在下载 $(Split-Path -Leaf $OutFile) ..."
+    Info "正在下载 $(Split-Path -Leaf $OutFile) ..."
     $dir = Split-Path -Parent $OutFile
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -Uri $Url -OutFile $OutFile
     if (-not (Test-Path $OutFile) -or (Get-Item $OutFile).Length -eq 0) {
-        throw "下载失败: $Url"
+        Fail "下载失败: $Url"
     }
 }
 
@@ -61,11 +67,11 @@ function Get-GitBash {
     $url = "https://github.com/git-for-windows/git/releases/download/$tag/$sfxName"
     if (-not (Test-Path $sfx)) { Invoke-Download $url $sfx }
     $gitDir = Join-Path $Tools 'git'
-    Write-Host "解压 PortableGit 到 .tools\git ..."
+    Info "解压 PortableGit 到 .tools\git ..."
     & $sfx "-o$gitDir" -y | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw 'PortableGit 解压失败' }
+    if ($LASTEXITCODE -ne 0) { Fail 'PortableGit 解压失败' }
     $bash = Join-Path $gitDir 'bin\bash.exe'
-    if (-not (Test-Path $bash)) { throw "未找到 bash: $bash" }
+    if (-not (Test-Path $bash)) { Fail "未找到 bash: $bash" }
     return $bash
 }
 
@@ -98,11 +104,11 @@ function Get-JavaHome {
     $zip = Join-Path $Tools 'jdk-17.zip'
     $url = 'https://api.adoptium.net/v3/binary/latest/17/ga/windows/x64/jdk/hotspot/normal/eclipse?project=jdk'
     if (-not (Test-Path $zip)) { Invoke-Download $url $zip }
-    Write-Host '解压 JDK 17 到 .tools\jdk-17 ...'
+    Info '解压 JDK 17 到 .tools\jdk-17 ...'
     Expand-Zip $zip $jdkDir
     $sub = Get-ChildItem $jdkDir -Directory -ErrorAction SilentlyContinue |
         Where-Object { Test-Path (Join-Path $_.FullName 'bin\java.exe') } | Select-Object -First 1
-    if (-not $sub) { throw 'JDK 17 解压后未找到 bin\java.exe' }
+    if (-not $sub) { Fail 'JDK 17 解压后未找到 bin\java.exe' }
     return $sub.FullName
 }
 
@@ -118,11 +124,11 @@ function Get-Love {
     $url = 'https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip'
     if (-not (Test-Path $zip)) { Invoke-Download $url $zip }
     $loveDir = Join-Path $Tools 'love'
-    Write-Host '解压 LÖVE 11.5 到 .tools\love ...'
+    Info '解压 LÖVE 11.5 到 .tools\love ...'
     Expand-Zip $zip $loveDir
     $exe = Get-ChildItem $loveDir -Recurse -Filter love.exe -ErrorAction SilentlyContinue |
         Select-Object -First 1
-    if (-not $exe) { throw 'LÖVE 解压后未找到 love.exe' }
+    if (-not $exe) { Fail 'LÖVE 解压后未找到 love.exe' }
     return $exe.FullName
 }
 
@@ -139,10 +145,10 @@ function Get-AndroidSdk([string]$JavaHome) {
         $url = 'https://dl.google.com/android/repository/commandlinetools-win-9862592_latest.zip'
         if (-not (Test-Path $zip)) { Invoke-Download $url $zip }
         $tmp = Join-Path $sdkDir 'cmdline-tools-tmp'
-        Write-Host '解压 Android cmdline-tools ...'
+        Info '解压 Android cmdline-tools ...'
         Expand-Zip $zip $tmp
         $inner = Join-Path $tmp 'cmdline-tools'
-        if (-not (Test-Path $inner)) { throw 'cmdline-tools 压缩包结构异常' }
+        if (-not (Test-Path $inner)) { Fail 'cmdline-tools 压缩包结构异常' }
         $latest = Join-Path $sdkDir 'cmdline-tools\latest'
         if (Test-Path $latest) { Remove-Item $latest -Recurse -Force }
         New-Item -ItemType Directory -Path (Split-Path -Parent $latest) -Force | Out-Null
@@ -152,13 +158,13 @@ function Get-AndroidSdk([string]$JavaHome) {
     if (-not (Test-Path (Join-Path $sdkDir 'platforms\android-34')) -or
         -not (Test-Path (Join-Path $sdkDir 'build-tools\34.0.0')) -or
         -not (Test-Path (Join-Path $sdkDir 'ndk\25.2.9519653'))) {
-        Write-Host '安装 Android SDK 组件（platforms;android-34 / build-tools;34.0.0 / ndk;25.2.9519653，首次约 1.5 GB）...'
+        Info '安装 Android SDK 组件（platforms;android-34 / build-tools;34.0.0 / ndk;25.2.9519653，首次约 1.5 GB）...'
         $sdkManager = Join-Path $sdkDir 'cmdline-tools\latest\bin\sdkmanager.bat'
         $env:JAVA_HOME = $JavaHome
         (1..60 | ForEach-Object { 'y' }) | & $sdkManager --sdk_root="$sdkDir" --licenses | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw 'sdkmanager --licenses 失败' }
+        if ($LASTEXITCODE -ne 0) { Fail 'sdkmanager --licenses 失败' }
         & $sdkManager --sdk_root="$sdkDir" 'platforms;android-34' 'build-tools;34.0.0' 'ndk;25.2.9519653'
-        if ($LASTEXITCODE -ne 0) { throw 'sdkmanager 安装组件失败' }
+        if ($LASTEXITCODE -ne 0) { Fail 'sdkmanager 安装组件失败' }
     }
     return $sdkDir
 }
@@ -188,21 +194,24 @@ $loveDir = Split-Path -Parent $loveExe
 if (-not $env:PATH.Contains($loveDir)) { $env:PATH = "$loveDir;$env:PATH" }
 $env:THRASH_MACHINE_KRISTAL_SOURCE = 'tag'
 $env:THRASH_MACHINE_KRISTAL_REF = 'v0.10.0'
+# The bash scripts don't open the folder themselves: this launcher opens dist
+# below after a successful build (avoids a second explorer window).
+$env:THRASH_MACHINE_NO_OPEN_DIR = '1'
 if ($Mode -eq 'compile') {
     $env:ANDROID_SDK_ROOT = $sdkDir
 }
 
 $script = if ($Mode -eq 'compile') { './tools/build_android.sh' } else { './tools/build_android_wrap.sh' }
-Write-Host "启动 Git Bash: $script"
+Info "启动 Git Bash: $script"
 $rootFwd = $Root.Replace('\', '/')
 & $bash -lc "cd `"$rootFwd`" && $script"
 $code = $LASTEXITCODE
 if ($code -ne 0) {
-    Write-Host "构建失败（退出码 $code），请查看上方日志。" -ForegroundColor Red
+    Write-Host "[错误] 构建失败（退出码 $code），请查看上方日志。" -ForegroundColor Red
     exit $code
 }
 
 $dist = Join-Path $Root 'dist'
 if (Test-Path $dist) { Start-Process explorer.exe -ArgumentList $dist }
-Write-Host '构建完成！APK 在 dist 目录。'
+Write-Host "[信息] 构建完成！APK 在 dist 目录。" -ForegroundColor Green
 exit 0
