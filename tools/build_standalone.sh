@@ -61,6 +61,30 @@ fail() {
     exit 1
 }
 
+# Track the variant being built so an interrupted build (failure or Ctrl+C)
+# can remove its partial outputs from dist. A build that dies after writing
+# `-release.love` but before its win64 zip must not leave a lone release.love
+# behind — that reads as "only the release .love was built" when the real
+# situation is that the variant never finished. Cleanup keys off a completion
+# flag, not $?, because $? is unreliable inside signal traps.
+THRASH_MACHINE_CURRENT_VARIANT=""
+THRASH_MACHINE_BUILD_FINISHED=0
+cleanup_partial_build() {
+    local status=$?
+    if [ "$THRASH_MACHINE_BUILD_FINISHED" -ne 1 ] && [ -n "$THRASH_MACHINE_CURRENT_VARIANT" ]; then
+        local stem="$THRASH_MACHINE_OUTPUT_DIR/${THRASH_MACHINE_OUTPUT_BASENAME}-${THRASH_MACHINE_CURRENT_VARIANT}"
+        if [ -e "$stem.love" ] || [ -e "$stem-${THRASH_MACHINE_LOVE_ARCH}.zip" ] \
+            || [ -d "$stem-${THRASH_MACHINE_LOVE_ARCH}" ]; then
+            printf '[错误] 变体 %s 构建失败/中断，已移除 dist 中未完成的部分输出\n' \
+                "$THRASH_MACHINE_CURRENT_VARIANT" >&2
+            rm -f "$stem.love" "$stem-${THRASH_MACHINE_LOVE_ARCH}.zip"
+            rm -rf "$stem-${THRASH_MACHINE_LOVE_ARCH}"
+        fi
+    fi
+    exit "$status"
+}
+trap cleanup_partial_build EXIT INT TERM
+
 need_cmd() {
     command -v "$1" >/dev/null 2>&1 || fail "Missing required command: $1"
 }
@@ -754,9 +778,14 @@ ensure_love_windows() {
     mkdir -p "$THRASH_MACHINE_CACHE_DIR"
     love_zip="$THRASH_MACHINE_CACHE_DIR/love-${THRASH_MACHINE_LOVE_VERSION}-${THRASH_MACHINE_LOVE_ARCH}.zip"
     love_dir="$THRASH_MACHINE_CACHE_DIR/love-${THRASH_MACHINE_LOVE_VERSION}-${THRASH_MACHINE_LOVE_ARCH}"
-    if [ ! -f "$love_zip" ]; then
+    if [ ! -f "$love_zip" ] || [ ! -s "$love_zip" ]; then
+        rm -f "$love_zip"
         log "正在下载 LÖVE ${THRASH_MACHINE_LOVE_VERSION} ${THRASH_MACHINE_LOVE_ARCH}，用于生成 Windows 可执行文件"
-        curl --fail --location --output "$love_zip" "$THRASH_MACHINE_LOVE_WINDOWS_ZIP_URL"
+        curl --fail --location --retry 3 --retry-delay 2 \
+            --output "$love_zip" "$THRASH_MACHINE_LOVE_WINDOWS_ZIP_URL" || {
+            rm -f "$love_zip"
+            fail "下载 LÖVE ${THRASH_MACHINE_LOVE_VERSION} ${THRASH_MACHINE_LOVE_ARCH} 失败（$THRASH_MACHINE_LOVE_WINDOWS_ZIP_URL）。请检查网络后重试；也可手动下载并放到 $love_zip"
+        }
     fi
     if [ ! -d "$love_dir" ]; then
         extract_dir="$THRASH_MACHINE_CACHE_DIR/love-${THRASH_MACHINE_LOVE_VERSION}-${THRASH_MACHINE_LOVE_ARCH}.extract"
@@ -770,11 +799,16 @@ ensure_love_windows() {
         mv "$extracted" "$love_dir"
         rm -rf "$extract_dir"
     fi
-    test -f "$love_dir/love.exe"
+    if [ ! -f "$love_dir/love.exe" ]; then
+        rm -rf "$love_dir" "$love_zip"
+        fail "LÖVE ${THRASH_MACHINE_LOVE_VERSION} 缓存损坏（缺少 love.exe），已清除缓存，请重试构建"
+    fi
 }
 
 build_variant() {
     variant="$1"
+    THRASH_MACHINE_CURRENT_VARIANT="$variant"
+    log "开始构建变体: $variant"
     prepare_stage "$variant"
     if [ "$THRASH_MACHINE_BUILD_LOVE" = "1" ]; then
         love_output_dir="$THRASH_MACHINE_OUTPUT_DIR"
@@ -842,4 +876,8 @@ ensure_love_windows
 for variant in $THRASH_MACHINE_BUILD_VARIANTS; do
     build_variant "$variant"
 done
+# All variants succeeded: the EXIT/INT/TERM trap must not clean dist.
+THRASH_MACHINE_BUILD_FINISHED=1
+THRASH_MACHINE_CURRENT_VARIANT=""
+log "构建完成，输出目录: $THRASH_MACHINE_OUTPUT_DIR"
 open_output_dir "$THRASH_MACHINE_OUTPUT_DIR"
