@@ -373,11 +373,13 @@ end
 local DOS_TIME, DOS_DATE = u16(0), u16((2026 - 1980) * 512 + 1 * 32 + 1)
 
 -- Recursive file list: find on POSIX (works in Git Bash too), dir /s /b in
--- cmd — io.popen on Windows LuaJIT always goes through cmd.exe.
+-- cmd — io.popen on Windows LuaJIT always goes through cmd.exe. /a-d restricts
+-- dir to files (dir /s /b otherwise also emits directories, which io.open
+-- cannot read).
 local function file_list(source)
     local popen_cmd
     if love.system.getOS() == "Windows" then
-        popen_cmd = 'dir /s /b "' .. source:gsub('"', '""') .. '"'
+        popen_cmd = 'dir /s /b /a-d "' .. source:gsub('"', '""') .. '"'
     else
         popen_cmd = "find " .. "'" .. source:gsub("'", "'\\''") .. "' -type f"
     end
