@@ -68,10 +68,18 @@ open_output_dir() {
     [ -d "$dir" ] || { warn "输出目录不存在，无法打开: $dir"; return 0; }
     case "$(uname -s)" in
         MINGW*|MSYS*|CYGWIN*)
+            # explorer.exe needs backslashes: a forward-slash path (what
+            # win_path/cygpath -m produces) makes the shell fail to resolve it
+            # and fall back to a default folder (Documents). win_path keeps its
+            # forward slashes for the other callers, so convert again here.
+            local win_dir="$dir"
+            case "$dir" in
+                /*) command -v cygpath >/dev/null 2>&1 && win_dir="$(cygpath -w "$dir")" ;;
+            esac
             if command -v explorer >/dev/null 2>&1; then
-                explorer "$(win_path "$dir")" >/dev/null 2>&1 &
+                explorer "$win_dir" >/dev/null 2>&1 &
             elif command -v cmd >/dev/null 2>&1; then
-                cmd //c start "" "$(win_path "$dir")" >/dev/null 2>&1 &
+                cmd //c start "" "$win_dir" >/dev/null 2>&1 &
             else
                 warn "未找到资源管理器，无法打开输出目录: $dir"
             fi
