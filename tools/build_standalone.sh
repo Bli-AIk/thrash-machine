@@ -732,6 +732,13 @@ build_variant() {
         cp "$love_dir"/*.dll "$package_dir/"
         test ! -f "$love_dir/license.txt" || cp "$love_dir/license.txt" "$package_dir/"
         zip_dir "$THRASH_MACHINE_OUTPUT_DIR/${package_name}.zip" "$package_dir" "$package_name"
+        # The zip is the deliverable: drop the unpacked staging folder so dist
+        # stays clean (the folder holds exactly what the zip contains).
+        if [ -s "$THRASH_MACHINE_OUTPUT_DIR/${package_name}.zip" ]; then
+            rm -rf "$package_dir"
+        else
+            fail "Windows package zip was not created: $THRASH_MACHINE_OUTPUT_DIR/${package_name}.zip"
+        fi
     fi
 
     if [ "$THRASH_MACHINE_BUILD_LOVE" != "1" ] \
