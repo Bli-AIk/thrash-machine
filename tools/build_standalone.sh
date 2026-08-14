@@ -570,7 +570,13 @@ export_kristal() {
         git -C "$THRASH_MACHINE_KRISTAL_DIR" archive --format=tar "$THRASH_MACHINE_KRISTAL_REF" \
             | tar -x -C "$stage_dir"
     else
-        tar -cf - --exclude='./.git' -C "$THRASH_MACHINE_KRISTAL_DIR" . | tar -xf - -C "$stage_dir"
+        # Exclude mods/: a mod sitting inside the engine's mods/ folder (the
+        # walk-up engine detection supports this) would otherwise be archived
+        # into the stage, dragging along .build and re-copying the stage into
+        # itself (unbounded growth). The staged engine's mods/ is removed below
+        # anyway — the mod is inserted separately by copy_mod.
+        tar -cf - --exclude='./.git' --exclude='./mods' -C "$THRASH_MACHINE_KRISTAL_DIR" . \
+            | tar -xf - -C "$stage_dir"
     fi
     rm -rf "$stage_dir/.github" "$stage_dir/mods" "$stage_dir/build" "$stage_dir/output"
 }
