@@ -18,6 +18,7 @@
 ## 有什么
 
 - 直接可玩：starter 地图 + Dummy 战斗 + 对象事件
+- 图形化启动器（GUI）：Windows 双击 `gui.cmd` 打开（GUI 自动下载到 `.tools\gui\`，无需手动安装），点按钮即可运行游戏、传调试参数、一键打包
 - 中英双语（kristal-i18n），游戏内可切换
 - 开发期工具按子模块组织，生产包自动剔除
 
@@ -28,6 +29,8 @@
 | terminal-cli                 | 终端调试控制台（Linux/POSIX）                        |
 | kristal-debug-tools          | 战斗调试启动器（`--encounter` / `--wave` / `--tp`…） |
 | .emacs / .helix              | 项目级编辑器配置（LuaLS、Kristal 路径）              |
+
+这是**模板仓库**：建议先点仓库主页的 **Use this template** 按钮创建你自己的仓库（子模块引用会一并带上），再克隆你自己的仓库开始开发——这样版本历史和 Release 各自独立。
 
 ## 开始
 
@@ -41,13 +44,12 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 
 运行调试参数直接透传给 kristal-debug-tools：`just run --encounter`、`just run --wave 2 --tp 50`、`just run --lang zh-hans`。
 
-打包所需软件按系统区分（打包由 bash + tar + Lua `build-helper/` 完成，用 LÖVE 自带的 LuaJIT 运行，**所有系统都不需要 Python / rsync**）：
+打包所需软件按系统区分：
 
 | 系统        | 必需                                                             | 说明                                                                                  |
 | ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | **Windows** | Git for Windows（安装时选默认 PATH 选项）、LÖVE 11.5             | Git Bash 自带 bash/tar/curl/unzip/sed；Git Bash 不含 `zip`，缺省时由 Lua 助手写入 zip |
 | **Linux**   | git、tar、unzip、curl、love（如 Arch：`sudo pacman -S love`）    | `zip` 可选：有则用系统 zip，无则 Lua 助手                                             |
-| **macOS**   | Git（Xcode 命令行工具）、LÖVE 11.5（`brew install --cask love`） | tar/unzip/curl/zip 系统自带                                                           |
 
 `just` 仅在命令行打包时需要（GUI 自带内嵌 just）。**LÖVE 需在 PATH 中**（或装在默认位置——脚本会自动检查 Windows 的 `Program Files\LOVE` 与 `%LOCALAPPDATA%\Programs\LOVE`）。
 
@@ -57,6 +59,14 @@ Android 打包有**两种模式**：
 - **编译构建**：`just build-android`，从源码编译原生 APK，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653（配置较麻烦，且需联网获取 JDK/SDK/NDK）。
 
 ## 构建
+
+### 构建所需工具
+
+**Windows 用户**：只需手动装 **LÖVE**（开发用的桌面版，加进 PATH 或放默认位置即可，脚本会自动找到）；其他工具（Git 含 bash、just、JDK 17、Android 打包工具、Kristal 引擎）全部由脚本自动下载。安卓打包也会自动下载 LÖVE，但那是**移动端 LÖVE**（官方壳 APK），是打进安卓包用的，不是开发用的桌面 LÖVE。
+
+**Linux 用户**：自己装 git、love、just（缺了脚本会给出安装命令提示）；JDK 17、Android 打包工具、官方壳 APK、Kristal 引擎由脚本自动下载。编译版 APK 还需自己装 Android SDK/NDK。
+
+（可选）给 Windows exe 换图标还要 `rcedit`：Windows 上直接运行，Linux 上需要 `wine`；没有就跳过，不影响打包。
 
 ### 手动打包
 
@@ -91,7 +101,7 @@ tools\just.cmd build      # cmd / PowerShell
 ```
 
 - 解析顺序：`$JUST`（显式指定）→ Windows 上 GUI sidecar（`kristal-run just-task <justfile> <task>`）→ PATH 里的 `just`。
-- Linux/macOS 没有 sidecar，`tools/just` 要求 PATH 里有 `just`（`scoop install just` 或官方安装包）。
+- Linux 没有 sidecar，`tools/just` 要求 PATH 里有 `just`（`scoop install just` 或官方安装包）。
 - 想手动指定 sidecar：`KRISTAL_RUN=/path/to/kristal-run.exe tools/just build`。
 - 产物与直接 `just build` 完全一致（wrapper 先 `cd` 到项目根目录，recipe 行为不变）。
 
@@ -155,7 +165,7 @@ assets/icon/
 | 目标        | 所需工具                                                          | 说明                                                        |
 | ----------- | ----------------------------------------------------------------- | ----------------------------------------------------------- |
 | 游戏窗口    | 无                                                                | 自动复制到 mod 根目录（引擎只认根目录的 `window_icon.png`） |
-| Windows exe | `rcedit`（Linux/macOS 需 `wine`）+ `icotool`/ImageMagick 合成 PNG | 工具缺失时跳过并警告，不影响构建                            |
+| Windows exe | `rcedit`（Linux 需 `wine`）+ `icotool`/ImageMagick 合成 PNG | 工具缺失时跳过并警告，不影响构建                            |
 | Android APK | 无                                                                | 各 density 独立成图，缺失的自动用最近的补位                 |
 
 - `win/` 下放一组尺寸 PNG（至少 32 + 256 效果最佳）或直接放 `icon.ico`；脚本优先用现成 `.ico`。

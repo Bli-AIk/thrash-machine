@@ -18,6 +18,7 @@
 ## What's Inside
 
 - Playable starter map + Dummy battle + object event
+- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into `.tools\gui\`, no manual install); run the game, pass debug args, and package — all by clicking buttons
 - English / Simplified Chinese via kristal-i18n, switchable in-game
 - Dev tools as submodules, stripped from release packages
 
@@ -28,6 +29,8 @@
 | terminal-cli                 | Terminal debug console (Linux/POSIX)                       |
 | kristal-debug-tools          | Battle debug launcher (`--encounter` / `--wave` / `--tp`…) |
 | .emacs / .helix              | Project editor config (LuaLS, Kristal paths)               |
+
+This is a **template repository**: click **Use this template** on the repo page to create your own copy (the submodule references come along), then clone your own repo before you start — your version history and releases stay independent.
 
 ## Quick Start
 
@@ -41,13 +44,12 @@ KRISTAL_ROOT=/path/to/Kristal just run   # run (common local Kristal paths are a
 
 Debug arguments pass straight to kristal-debug-tools: `just run --encounter`, `just run --wave 2 --tp 50`, `just run --lang zh-hans`.
 
-Software requirements by OS (packaging is bash + tar + Lua `build-helper/`, run by LÖVE's bundled LuaJIT — **no Python or rsync on any OS**):
+Software requirements by OS:
 
 | OS          | Required                                                               | Notes                                                                                                             |
 | ----------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **Windows** | Git for Windows (default PATH option at install), LÖVE 11.5            | Git Bash provides bash/tar/curl/unzip/sed; Git Bash has no `zip`, so the Lua helper writes zips when it's missing |
 | **Linux**   | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`)         | `zip` optional: system zip when present, Lua helper otherwise                                                     |
-| **macOS**   | Git (Xcode Command Line Tools), LÖVE 11.5 (`brew install --cask love`) | tar/unzip/curl/zip are built in                                                                                   |
 
 `just` is only needed for command-line packaging (the GUI embeds its own). **LÖVE must be on PATH** (or installed in the default locations — the scripts check Windows' `Program Files\LOVE` and `%LOCALAPPDATA%\Programs\LOVE` automatically).
 
@@ -57,6 +59,14 @@ Android packaging has **two modes**:
 - **Compile build**: `just build-android` — compiles a native APK from source and needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653 (more setup involved, and the JDK/SDK/NDK must be fetched over the network).
 
 ## Builds
+
+### Build tools
+
+**Windows**: install **LÖVE** yourself (the desktop build you develop with — add it to PATH or use a default install location; the scripts find it automatically). Everything else — Git (with bash), `just`, JDK 17, Android packaging tools, the Kristal engine — is downloaded automatically by the build scripts. The Android build also downloads LÖVE, but that is the **mobile LÖVE** (the official shell APK) that goes inside the APK — not the desktop LÖVE you develop with.
+
+**Linux**: install git, love and `just` yourself (the scripts print the install commands if something is missing). JDK 17, Android packaging tools, the official shell APK and the Kristal engine are downloaded automatically by the build scripts. The compile-build APK additionally needs the Android SDK/NDK installed by hand.
+
+(Optional) Customizing the Windows exe icon uses `rcedit`: runs directly on Windows, needs `wine` on Linux; without it the icon is skipped and the build is unaffected.
 
 ### Manual packaging
 
@@ -91,7 +101,7 @@ tools\just.cmd build      # cmd / PowerShell
 ```
 
 - Resolution order: `$JUST` (explicit) → GUI sidecar on Windows (`kristal-run just-task <justfile> <task>`) → `just` on PATH.
-- Linux/macOS have no sidecar, so `tools/just` requires `just` on PATH (`scoop install just` or the official installer).
+- Linux has no sidecar, so `tools/just` requires `just` on PATH (`scoop install just` or the official installer).
 - To point at a specific sidecar: `KRISTAL_RUN=/path/to/kristal-run.exe tools/just build`.
 - Output is identical to running `just build` directly (the wrapper cd's to the project root first, so recipes behave the same).
 
@@ -155,7 +165,7 @@ assets/icon/
 | Target      | Tools required                                                                 | Notes                                                                                |
 | ----------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | Game window | none                                                                           | copied to the mod root automatically (the engine only reads `window_icon.png` there) |
-| Windows exe | `rcedit` (needs `wine` on Linux/macOS) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing                                                  |
+| Windows exe | `rcedit` (needs `wine` on Linux) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing                                                  |
 | Android APK | none                                                                           | per-density icons with automatic nearest-density fallback                            |
 
 - Under `win/` drop a set of size-named PNGs (32 + 256 gives the best result) or a ready-made `icon.ico`; the script prefers an existing `.ico`.
