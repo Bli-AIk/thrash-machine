@@ -28,11 +28,21 @@ function Fail([string]$Msg) { Write-Host "[错误] $Msg" -ForegroundColor Red; e
 # --- tiny helpers -------------------------------------------------------------
 
 function Invoke-Download([string]$Url, [string]$OutFile) {
-    Info "正在下载 $(Split-Path -Leaf $OutFile) ..."
+    $leaf = Split-Path -Leaf $OutFile
     $dir = Split-Path -Parent $OutFile
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-    $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $Url -OutFile $OutFile
+    Info "正在下载 $leaf ..."
+    if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+        # curl.exe (ships with Windows 10 1803+) draws a live progress bar on
+        # the console; Invoke-WebRequest's bar was disabled via
+        # $ProgressPreference='SilentlyContinue' (and IWR is far slower anyway).
+        & curl.exe --fail --location --retry 3 --output $OutFile $Url
+        if ($LASTEXITCODE -ne 0) { Fail "下载失败: $Url" }
+    } else {
+        # Pre-1803 fallback (no curl.exe): keep the old silent behavior.
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri $Url -OutFile $OutFile
+    }
     if (-not (Test-Path $OutFile) -or (Get-Item $OutFile).Length -eq 0) {
         Fail "下载失败: $Url"
     }
