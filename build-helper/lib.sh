@@ -106,3 +106,152 @@ zip_dir() {
         printf '[build] zip %s: done (LÖVE helper)\n' "$(basename "$output")" >&2
     fi
 }
+
+# --- portable JDK (used by the Android build scripts) -------------------------
+# A pristine machine usually has no JDK. When the caller did not pin one via
+# THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME and no usable `java` is on PATH,
+# ensure_java downloads a portable Temurin JDK into .tools/jdk<version> and
+# exports JAVA_HOME/PATH. Disable the download with THRASH_MACHINE_FETCH_JDK=0.
+# These functions are self-contained (printf + exit, no log/fail dependency):
+# build_mod.sh sources this file before defining those helpers.
+THRASH_MACHINE_JDK_VERSION="${THRASH_MACHINE_JDK_VERSION:-17}"
+THRASH_MACHINE_JDK_DIR="${THRASH_MACHINE_JDK_DIR:-$THRASH_MACHINE_MOD_DIR/.tools/jdk$THRASH_MACHINE_JDK_VERSION}"
+THRASH_MACHINE_FETCH_JDK="${THRASH_MACHINE_FETCH_JDK:-1}"
+
+java_major() {
+    # Quoted and unquoted variants: real JDKs print `version "17.0.11"` (with
+    # quotes); a few minimal builds omit them. Two POSIX BRE subs instead of an
+    # optional-quote token (not portable across BSD/GNU sed).
+    "$1" -version 2>&1 \
+        | sed -n 's/.*version "\([0-9][0-9]*\).*/\1/p; s/.*version \([0-9][0-9]*\).*/\1/p' \
+        | head -n 1
+}
+
+# Resolve a JDK and export JAVA_HOME/PATH for the rest of the script.
+#   ensure_java            — use any working Java (explicit home or PATH), else
+#                            download the default version.
+#   ensure_java <major>    — additionally require that major version (an
+#                            explicit home or PATH java of a different major is
+#                            an error / triggers the download), else download.
+# Exits 1 with a clear message when nothing usable is available.
+ensure_java() {
+    local exact="${1:-}" version="${1:-$THRASH_MACHINE_JDK_VERSION}" java_home major
+    java_home="${THRASH_MACHINE_ANDROID_JAVA_HOME:-${JAVA_HOME:-}}"
+    if [ -n "$java_home" ]; then
+        [ -x "$java_home/bin/java" ] || {
+            printf 'Configured Java home has no Java executable: %s\n' "$java_home" >&2
+            exit 1
+        }
+        if [ -n "$exact" ]; then
+            major="$(java_major "$java_home/bin/java")"
+            [ "$major" = "$exact" ] || {
+                printf 'Java %s required, found %s at %s (set THRASH_MACHINE_ANDROID_JAVA_HOME to a JDK %s)\n' \
+                    "$exact" "${major:-unknown}" "$java_home" "$exact" >&2
+                exit 1
+            }
+        fi
+        export JAVA_HOME="$java_home"
+        export PATH="$JAVA_HOME/bin:$PATH"
+        return 0
+    fi
+    if command -v java >/dev/null 2>&1; then
+        if [ -n "$exact" ]; then
+            major="$(java_major "$(command -v java)")"
+            if [ "$major" = "$exact" ]; then
+                use_path_java
+                return 0
+            fi
+        else
+            use_path_java
+            return 0
+        fi
+    fi
+    install_portable_jdk "$version"
+    export JAVA_HOME="$THRASH_MACHINE_JDK_DIR"
+    export PATH="$JAVA_HOME/bin:$PATH"
+}
+
+use_path_java() {
+    JAVA_HOME="$(CDPATH= cd -- "$(dirname -- "$(command -v java)")/.." && pwd -P)"
+    export JAVA_HOME
+    export PATH="$JAVA_HOME/bin:$PATH"
+}
+
+# Download + unpack a Temurin JDK of the given major version into
+# THRASH_MACHINE_JDK_DIR (archive cached in .build/cache).
+install_portable_jdk() {
+    local version="$1" dest="$THRASH_MACHINE_JDK_DIR"
+    [ "$THRASH_MACHINE_FETCH_JDK" = "1" ] || {
+        printf 'No JDK %s found and THRASH_MACHINE_FETCH_JDK=0; install JDK %s or set THRASH_MACHINE_ANDROID_JAVA_HOME\n' \
+            "$version" "$version" >&2
+        exit 1
+    }
+    local os arch cache url cd_out archive extract top
+    case "$(uname -s)" in
+        Linux*) os=linux ;;
+        Darwin*) os=mac ;;
+        MINGW*|MSYS*|CYGWIN*) os=windows ;;
+        *) printf 'Unsupported OS for portable JDK: %s\n' "$(uname -s)" >&2; exit 1 ;;
+    esac
+    case "$(uname -m)" in
+        x86_64|amd64) arch=x64 ;;
+        aarch64|arm64) arch=aarch64 ;;
+        *) printf 'Unsupported architecture for portable JDK: %s\n' "$(uname -m)" >&2; exit 1 ;;
+    esac
+    command -v curl >/dev/null 2>&1 || { printf 'curl is required to download the portable JDK\n' >&2; exit 1; }
+    command -v unzip >/dev/null 2>&1 || { printf 'unzip is required to unpack the portable JDK\n' >&2; exit 1; }
+
+    cache="$THRASH_MACHINE_MOD_DIR/.build/cache"
+    mkdir -p "$cache"
+    url="https://api.adoptium.net/v3/binary/latest/${version}/ga/${os}/${arch}/jdk/hotspot/normal/eclipse"
+    printf '下载便携 JDK %s（Temurin %s/%s，约 190 MB）…\n' "$version" "$os" "$arch" >&2
+    cd_out="$(mktemp)"
+    if ! (cd "$cache" && curl --fail --location --remote-name --remote-header-name \
+            --write-out '%{filename_effective}' "$url") > "$cd_out" 2>/dev/null; then
+        rm -f "$cd_out"
+        printf '下载 JDK %s 失败: %s\n' "$version" "$url" >&2
+        exit 1
+    fi
+    archive="$cache/$(cat "$cd_out")"
+    rm -f "$cd_out"
+    [ -f "$archive" ] || { printf 'JDK 下载未产生文件（%s）\n' "$url" >&2; exit 1; }
+
+    extract="$dest.extract"
+    rm -rf "$extract" "$dest"
+    mkdir -p "$extract"
+    case "$archive" in
+        *.zip)
+            unzip -q "$archive" -d "$extract" || {
+                rm -rf "$extract" "$dest"
+                printf '解压 JDK 失败: %s\n' "$archive" >&2
+                exit 1
+            }
+            ;;
+        *.tar.gz|*.tgz)
+            command -v tar >/dev/null 2>&1 || {
+                rm -rf "$extract" "$dest"
+                printf 'tar is required to unpack the portable JDK\n' >&2
+                exit 1
+            }
+            tar -xzf "$archive" -C "$extract" || {
+                rm -rf "$extract" "$dest"
+                printf '解压 JDK 失败: %s\n' "$archive" >&2
+                exit 1
+            }
+            ;;
+        *)
+            rm -rf "$extract" "$dest"
+            printf '无法识别的 JDK 包: %s\n' "$archive" >&2
+            exit 1
+            ;;
+    esac
+    top="$(find "$extract" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+    if [ -n "$top" ]; then
+        mv "$top" "$dest"
+    else
+        mv "$extract" "$dest"
+    fi
+    rm -rf "$extract"
+    [ -x "$dest/bin/java" ] || { rm -rf "$dest"; printf 'JDK %s 缺少 bin/java: %s\n' "$version" "$dest" >&2; exit 1; }
+    printf 'JDK %s 已就绪: %s\n' "$version" "$dest" >&2
+}

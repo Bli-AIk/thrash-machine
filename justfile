@@ -48,14 +48,16 @@ build:
     @THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 bash ./tools/build_standalone.sh
 
 # Compile the Android APK from source (full build; needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653).
-# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653）
+# A missing JDK 17 is auto-downloaded into .tools/jdk17.
+# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK 时自动下载到 .tools/jdk17）
 build-android:
     @bash ./tools/build_android.sh
 
 # Wrap-build a quick Android APK (official LÖVE shell + game.love, re-aligned and re-signed).
-# Only needs a JDK; build-tools are downloaded automatically. Faster, but cannot
-# change package id/icon/name and cannot be published on Google Play.
-# zh_hans: 套包构建 Android APK（官方 LÖVE 壳 + game.love，重对齐并重签名；只需 JDK，自动下载工具；不能改包名/图标/名称，不能上 Google Play）
+# Only needs a JDK (auto-downloaded into .tools/jdk17 when missing); build-tools are
+# downloaded automatically. Faster, but cannot change package id/icon/name and
+# cannot be published on Google Play.
+# zh_hans: 套包构建 Android APK（官方 LÖVE 壳 + game.love，重对齐并重签名；只需 JDK，缺则自动下载到 .tools/jdk17，工具自动下载；不能改包名/图标/名称，不能上 Google Play）
 build-android-wrap:
     @bash ./tools/build_android_wrap.sh
 

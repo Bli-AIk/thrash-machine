@@ -81,6 +81,20 @@ Android 打包有**两种模式**：
 - `THRASH_MACHINE_KRISTAL_REF` 指定 tag 或 commit hash
 - `THRASH_MACHINE_KRISTAL_REPO` 覆盖远程仓库
 
+### 没有安装 just？用 `tools/just`（Windows 免装，走 GUI 内嵌版）
+
+构建脚本通过 `just` 调用，但 Windows 上**不需要单独安装 just**：仓库里的 `tools/just`（Git Bash）或 `tools/just.cmd`（cmd / PowerShell）会自动使用 kristal-debug-tools GUI 内嵌的 just——`kristal-run` sidecar 的 `just-task` 模式，just 1.58.0 编译在内部。sidecar 缺失时按 `gui.cmd` 同一套 URL/SHA256 方案自动下载到 `.tools/gui/`，纯新机器开箱即用。
+
+```sh
+tools/just build-love     # Git Bash
+tools\just.cmd build      # cmd / PowerShell
+```
+
+- 解析顺序：`$JUST`（显式指定）→ Windows 上 GUI sidecar（`kristal-run just-task <justfile> <task>`）→ PATH 里的 `just`。
+- Linux/macOS 没有 sidecar，`tools/just` 要求 PATH 里有 `just`（`scoop install just` 或官方安装包）。
+- 想手动指定 sidecar：`KRISTAL_RUN=/path/to/kristal-run.exe tools/just build`。
+- 产物与直接 `just build` 完全一致（wrapper 先 `cd` 到项目根目录，recipe 行为不变）。
+
 ### GUI 打包
 
 用 kristal-debug-tools GUI 也可以打包（Windows 下 `gui.cmd`，或任意平台 `just gui`）：
@@ -118,9 +132,11 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 命令行（任意平台）等价用法：
 
 ```sh
-just build-android-wrap   # 套包构建（只需 JDK）
-just build-android        # 编译构建（需完整 Android SDK/NDK）
+just build-android-wrap   # 套包构建（只需 JDK，缺 JDK 时自动下载 Temurin 17 到 .tools/jdk17）
+just build-android        # 编译构建（需完整 Android SDK/NDK；JDK 同样自动补齐）
 ```
+
+JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到 `.tools/jdk17/`（`THRASH_MACHINE_FETCH_JDK=0` 禁用自动下载；`THRASH_MACHINE_JDK_VERSION` 改版本号）。
 
 ## 自定义图标（可选）
 

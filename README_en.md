@@ -81,6 +81,20 @@ All remote downloads use shallow clones (`--depth 1`), and the default checkout 
 - `THRASH_MACHINE_KRISTAL_REF` for a tag or commit hash
 - `THRASH_MACHINE_KRISTAL_REPO` to override the remote repository
 
+### No standalone `just`? Use `tools/just` (Windows: zero-install, GUI-embedded)
+
+The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into `.tools/gui/` using the same URL/SHA256 scheme as `gui.cmd`, so a pristine machine works out of the box.
+
+```sh
+tools/just build-love     # Git Bash
+tools\just.cmd build      # cmd / PowerShell
+```
+
+- Resolution order: `$JUST` (explicit) → GUI sidecar on Windows (`kristal-run just-task <justfile> <task>`) → `just` on PATH.
+- Linux/macOS have no sidecar, so `tools/just` requires `just` on PATH (`scoop install just` or the official installer).
+- To point at a specific sidecar: `KRISTAL_RUN=/path/to/kristal-run.exe tools/just build`.
+- Output is identical to running `just build` directly (the wrapper cd's to the project root first, so recipes behave the same).
+
 ### Packaging from the GUI
 
 The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just gui` anywhere):
@@ -118,9 +132,11 @@ It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_androi
 Equivalent commands on any platform:
 
 ```sh
-just build-android-wrap   # wrap build (only a JDK is needed)
-just build-android        # compile build (needs the full Android SDK/NDK)
+just build-android-wrap   # wrap build (only a JDK is needed; a missing JDK auto-downloads Temurin 17 into .tools/jdk17)
+just build-android        # compile build (needs the full Android SDK/NDK; the JDK is auto-supplemented too)
 ```
+
+JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in `.tools/jdk17/` (`THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
 
 ## Custom Icons (Optional)
 

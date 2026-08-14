@@ -62,15 +62,11 @@ source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 
 # --- Java -------------------------------------------------------------------
 resolve_java() {
-    local java_home
-    java_home="${THRASH_MACHINE_ANDROID_JAVA_HOME:-${JAVA_HOME:-}}"
-    if [ -n "$java_home" ]; then
-        [ -x "$java_home/bin/java" ] || fail \
-            "Configured Java home does not contain a Java executable: $java_home"
-        export JAVA_HOME="$java_home"
-        export PATH="$JAVA_HOME/bin:$PATH"
-    fi
-    need_cmd java
+    # The wrapper accepts any JDK (8+): an explicit
+    # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME or PATH java is used as-is,
+    # and a portable JDK 17 is downloaded into .tools/jdk17 only when the box
+    # has none.
+    ensure_java
     need_cmd keytool
     log "使用 Java: $(command -v java)"
 }

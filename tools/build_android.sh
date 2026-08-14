@@ -48,23 +48,15 @@ read_mod_version() {
 }
 
 check_inputs() {
-    local java_home java_version android_sdk ndk_dir
+    local android_sdk ndk_dir
 
     need_cmd git
-    need_cmd java
     need_cmd find
-
-    java_home="${THRASH_MACHINE_ANDROID_JAVA_HOME:-${JAVA_HOME:-}}"
-    if [ -n "$java_home" ]; then
-        [ -x "$java_home/bin/java" ] || fail \
-            "Configured Java home does not contain a Java executable: $java_home"
-        export JAVA_HOME="$java_home"
-        export PATH="$JAVA_HOME/bin:$PATH"
-    fi
-
-    java_version="$(java -version 2>&1 | sed -n 's/.*version "\([0-9][0-9]*\).*/\1/p' | head -n 1)"
-    [ "$java_version" = "17" ] || fail \
-        "LÖVE Android 11.5 requires JDK 17; detected ${java_version:-unknown}. Set JAVA_HOME or THRASH_MACHINE_ANDROID_JAVA_HOME to a JDK 17 installation."
+    # LÖVE Android 11.5 requires JDK 17. ensure_java honors an explicit
+    # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME (wrong version is an error) or
+    # a matching `java` on PATH, and auto-downloads a portable JDK 17 into
+    # .tools/jdk17 when the box has none.
+    ensure_java 17
 
     android_sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
     [ -n "$android_sdk" ] || fail \
