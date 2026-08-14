@@ -23,6 +23,8 @@ THRASH_MACHINE_ANDROID_ICON="${THRASH_MACHINE_ANDROID_ICON:-}"
 THRASH_MACHINE_ANDROID_ICON_DIR="${THRASH_MACHINE_ANDROID_ICON_DIR:-$THRASH_MACHINE_MOD_DIR/assets/icon/android}"
 THRASH_MACHINE_ANDROID_NDK_DIR="${THRASH_MACHINE_ANDROID_NDK_DIR:-}"
 THRASH_MACHINE_OUTPUT_BASENAME="${THRASH_MACHINE_OUTPUT_BASENAME:-thrash-machine}"
+THRASH_MACHINE_ANDROID_SDK_DIR="${THRASH_MACHINE_ANDROID_SDK_DIR:-$THRASH_MACHINE_MOD_DIR/.tools/android-sdk}"
+THRASH_MACHINE_FETCH_SDK="${THRASH_MACHINE_FETCH_SDK:-1}"
 
 log() {
     printf '[android-build] %s\n' "$*" >&2
@@ -47,8 +49,119 @@ read_mod_version() {
     printf '%s\n' "${version#v}"
 }
 
+# --- Android SDK auto-install -------------------------------------------------
+# A fresh machine usually has no Android SDK. When ANDROID_SDK_ROOT/ANDROID_HOME
+# is unset (or set but missing a required component), download cmdline-tools and
+# let sdkmanager install the required platform / build-tools / NDK into
+# THRASH_MACHINE_ANDROID_SDK_DIR (.tools/android-sdk by default — the same
+# location the Windows launcher build_android.ps1 uses). Disable with
+# THRASH_MACHINE_FETCH_SDK=0.
+
+android_sdk_complete() {
+    local sdk="$1"
+    [ -d "$sdk/platforms/android-34" ] || return 1
+    [ -d "$sdk/build-tools/34.0.0" ] || return 1
+    [ -d "$sdk/ndk/25.2.9519653" ] || return 1
+    [ -f "$sdk/ndk/25.2.9519653/source.properties" ] || return 1
+}
+
+# sdkmanager is a native .bat (Windows) / sh script (POSIX): the SDK root must
+# reach it in host path form. win_path leaves C:/... unchanged and converts the
+# /c/... MSYS form Git Bash would otherwise hand to cmd; package ids carry no
+# slashes, so nothing else needs converting.
+run_sdkmanager() {
+    local sdkmanager="$1"
+    shift
+    MSYS2_ARG_CONV_EXCL='*' "$sdkmanager" --sdk_root="$(win_path "$ANDROID_SDK_ROOT")" "$@"
+}
+
+install_android_sdk() {
+    local sdk="$THRASH_MACHINE_ANDROID_SDK_DIR"
+    local os url archive extract top
+    local sdkmanager_cmd="$sdk/cmdline-tools/latest/bin/sdkmanager"
+    local sdkmanager
+
+    # sdkmanager is a sh script (POSIX) or sdkmanager.bat (Windows). Test with
+    # -f, not -x: MSYS does not mark extracted .bat files executable, so -x
+    # would report a perfectly good sdkmanager.bat as missing.
+    if [ -f "$sdkmanager_cmd" ] || [ -f "$sdkmanager_cmd.bat" ]; then
+        log "Android SDK cmdline-tools 已存在: $sdk"
+    else
+        case "$(uname -s)" in
+            Linux*) os=linux ;;
+            # The download URL spells the Windows channel "win" (three letters),
+            # not "windows" — e.g. commandlinetools-win-11076708_latest.zip.
+            MINGW*|MSYS*|CYGWIN*) os=win ;;
+            *) fail "Unsupported OS for Android SDK download: $(uname -s)" ;;
+        esac
+        need_cmd curl
+        need_cmd unzip
+
+        archive="$THRASH_MACHINE_MOD_DIR/.build/cache/commandlinetools-${os}-11076708_latest.zip"
+        if [ ! -f "$archive" ]; then
+            mkdir -p "$(dirname "$archive")"
+            url="https://dl.google.com/android/repository/commandlinetools-${os}-11076708_latest.zip"
+            log "下载 Android SDK cmdline-tools（约 130 MB）…"
+            curl --fail --location --output "$archive" "$url" || fail \
+                "下载 Android cmdline-tools 失败: $url"
+        fi
+
+        extract="$sdk/.cmdline-tools.extract"
+        rm -rf "$extract"
+        mkdir -p "$extract"
+        unzip -q "$archive" -d "$extract" || {
+            rm -rf "$extract"
+            fail "解压 Android cmdline-tools 失败: $archive"
+        }
+        # The zip unpacks a single cmdline-tools/ directory; move it to the
+        # latest/ slot sdkmanager expects.
+        rm -rf "$sdk/cmdline-tools"
+        mkdir -p "$sdk/cmdline-tools/latest"
+        if [ -d "$extract/cmdline-tools" ]; then
+            cp -R "$extract/cmdline-tools/." "$sdk/cmdline-tools/latest/"
+        else
+            cp -R "$extract/." "$sdk/cmdline-tools/latest/"
+        fi
+        rm -rf "$extract"
+        [ -f "$sdkmanager_cmd" ] || [ -f "$sdkmanager_cmd.bat" ] || fail \
+            "Android cmdline-tools 解压后未找到 sdkmanager"
+    fi
+
+    if [ -f "$sdkmanager_cmd" ]; then
+        sdkmanager="$sdkmanager_cmd"
+    else
+        sdkmanager="$sdkmanager_cmd.bat"
+    fi
+
+    log "接受 Android SDK 许可协议…"
+    # A bounded stream of 'y' lines: unlike `yes`, it writes into the pipe
+    # buffer and exits before sdkmanager closes stdin, so pipefail never sees a
+    # spurious SIGPIPE (141) on a successful run.
+    printf 'y\n%.0s' {1..100} | run_sdkmanager "$sdkmanager" --licenses || fail "sdkmanager --licenses 失败"
+    log "安装 Android SDK 组件（platforms;android-34 / build-tools;34.0.0 / ndk;25.2.9519653，首次约 1.5 GB）…"
+    run_sdkmanager "$sdkmanager" "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653" || fail "sdkmanager 安装组件失败"
+}
+
+ensure_android_sdk() {
+    local sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+
+    if [ -n "$sdk" ] && android_sdk_complete "$sdk"; then
+        export ANDROID_SDK_ROOT="$sdk"
+        return 0
+    fi
+    if [ -n "$sdk" ]; then
+        warn "Android SDK 位于 $sdk 但缺少必需组件，改用自动安装的 SDK"
+    fi
+    [ "$THRASH_MACHINE_FETCH_SDK" = "1" ] || fail \
+        "缺少完整的 Android SDK 且 THRASH_MACHINE_FETCH_SDK=0；请设置 ANDROID_SDK_ROOT 指向含 API 34 和 NDK 25.2.9519653 的 SDK"
+
+    # Point sdkmanager at the target dir before installing into it.
+    export ANDROID_SDK_ROOT="$THRASH_MACHINE_ANDROID_SDK_DIR"
+    install_android_sdk
+}
+
 check_inputs() {
-    local android_sdk ndk_dir
+    local ndk_dir
 
     need_git
     need_cmd find
@@ -58,10 +171,9 @@ check_inputs() {
     # .tools/jdk17 when the box has none.
     ensure_java 17
 
-    android_sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
-    [ -n "$android_sdk" ] || fail \
-        "Set ANDROID_SDK_ROOT to an Android SDK containing API 34 and NDK 25.2.9519653"
-    export ANDROID_SDK_ROOT="$android_sdk"
+    # Resolve the SDK (auto-installing a missing one — see ensure_android_sdk),
+    # then strictly verify every piece the build needs is actually there.
+    ensure_android_sdk
     [ -d "$ANDROID_SDK_ROOT/platforms/android-34" ] || fail \
         "Missing Android SDK platform android-34 under $ANDROID_SDK_ROOT"
     [ -d "$ANDROID_SDK_ROOT/build-tools/34.0.0" ] || fail \
@@ -247,7 +359,9 @@ build_apk() {
     # Use the jar directly instead of the apksigner shell wrapper: the wrapper
     # has no .bat counterpart on Windows (only apksigner.bat exists there), so
     # `java -jar` is the portable way to run it on every host.
-    apksigner_jar="$ANDROID_SDK_ROOT/build-tools/34.0.0/lib/apksigner.jar"
+    # java is a native Windows binary: give it a host path, not an MSYS /c/...
+    # one (win_path is a no-op for already-host paths and on POSIX).
+    apksigner_jar="$(win_path "$ANDROID_SDK_ROOT/build-tools/34.0.0/lib/apksigner.jar")"
     [ -f "$apksigner_jar" ] || fail \
         "Android build-tools apksigner.jar is missing: $apksigner_jar"
     java -jar "$apksigner_jar" verify "$apk_output" >/dev/null 2>&1 || fail \

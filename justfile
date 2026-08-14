@@ -48,8 +48,9 @@ build:
     @THRASH_MACHINE_BUILD_LOVE=1 THRASH_MACHINE_BUILD_WINDOWS_EXE=1 bash ./tools/build_standalone.sh
 
 # Compile the Android APK from source (full build; needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653).
-# A missing JDK 17 is auto-downloaded into .tools/jdk17.
-# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK 时自动下载到 .tools/jdk17）
+# A missing JDK 17 or Android SDK (API 34 + build-tools 34.0.0 + NDK 25.2.9519653) is
+# auto-downloaded into .tools/jdk17 / .tools/android-sdk on first use.
+# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 .tools/jdk17 / .tools/android-sdk）
 build-android:
     @bash ./tools/build_android.sh
 
