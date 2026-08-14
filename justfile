@@ -51,7 +51,9 @@ build:
 # A missing JDK 17 or Android SDK (API 34 + build-tools 34.0.0 + NDK 25.2.9519653) is
 # auto-downloaded into the shared tools dir next to the Kristal engine on first use
 # (<kristal-root>/.tools/jdk17 / <kristal-root>/.tools/android-sdk; mod-root .tools as fallback).
-# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 Kristal 根 .tools/jdk17 / .tools/android-sdk，无引擎时回退 mod 根 .tools）
+# Like `build`, asks which Kristal engine source to use when run interactively
+# (local / path / tag / commit / branch); set THRASH_MACHINE_KRISTAL_SOURCE=… to skip.
+# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 Kristal 根 .tools/jdk17 / .tools/android-sdk，无引擎时回退 mod 根 .tools；交互运行时与 build 一样询问 Kristal 引擎来源（本地/路径/tag/commit/分支），设 THRASH_MACHINE_KRISTAL_SOURCE=… 可跳过）
 build-android:
     @bash ./tools/build_android.sh
 

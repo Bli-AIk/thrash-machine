@@ -306,6 +306,54 @@ choose_kristal_commit() {
     THRASH_MACHINE_KRISTAL_REF="$hash"
 }
 
+choose_kristal_branch() {
+    local branches=() branch answer default_branch found i
+
+    default_branch="${THRASH_MACHINE_KRISTAL_REF_ENV:-main}"
+
+    while IFS= read -r branch; do
+        branches+=("$branch")
+    done < <(git ls-remote --heads "$THRASH_MACHINE_KRISTAL_REPO" \
+        | sed -n 's#.*refs/heads/##p' | sort)
+
+    found=0
+    for branch in "${branches[@]}"; do
+        if [ "$branch" = "$default_branch" ]; then
+            found=1
+            break
+        fi
+    done
+    if [ "${#branches[@]}" -gt 0 ] && [ "$found" -eq 0 ]; then
+        default_branch="${branches[0]}"
+    fi
+
+    if [ "${#branches[@]}" -gt 0 ]; then
+        printf '远程分支列表：\n'
+        for i in "${!branches[@]}"; do
+            printf '  %2d) %s\n' "$((i + 1))" "${branches[$i]}"
+        done
+        printf '输入编号或分支名（取该分支最新提交）[%s]: ' "$default_branch"
+    else
+        printf '（无法列出远程分支）输入分支名（取该分支最新提交）[%s]: ' "$default_branch"
+    fi
+    IFS= read -r answer || return 1
+    answer="${answer:-$default_branch}"
+
+    case "$answer" in
+        *[!0-9]*)
+            THRASH_MACHINE_KRISTAL_REF="$answer"
+            ;;
+        *)
+            if [ "$answer" -ge 1 ] && [ "$answer" -le "${#branches[@]}" ]; then
+                THRASH_MACHINE_KRISTAL_REF="${branches[$((answer - 1))]}"
+            else
+                THRASH_MACHINE_KRISTAL_REF="$answer"
+            fi
+            ;;
+    esac
+    [ -n "$THRASH_MACHINE_KRISTAL_REF" ] || THRASH_MACHINE_KRISTAL_REF="$default_branch"
+}
+
 choose_kristal_source() {
     local local_path choice default_choice custom_path
 
@@ -325,7 +373,8 @@ choose_kristal_source() {
         printf '  2) 自己输入本地路径\n'
         printf '  3) 从 Git 远程选择 tag（列出远程 tag）\n'
         printf '  4) 从 Git 远程输入 commit hash\n'
-        printf '请选择 [1-4，默认 %s]: ' "$default_choice"
+        printf '  5) 从 Git 远程选择分支（取该分支最新提交，默认 main）\n'
+        printf '请选择 [1-5，默认 %s]: ' "$default_choice"
         IFS= read -r choice || return 1
         choice="${choice:-$default_choice}"
 
@@ -380,6 +429,12 @@ choose_kristal_source() {
                     continue
                 fi
                 ;;
+            5)
+                THRASH_MACHINE_KRISTAL_SOURCE=branch
+                if ! choose_kristal_branch; then
+                    continue
+                fi
+                ;;
             *)
                 printf '无效选项: %s\n' "$choice" >&2
                 continue
@@ -423,6 +478,10 @@ resolve_kristal_source() {
                 [ -n "$THRASH_MACHINE_KRISTAL_REF" ] \
                     || fail "THRASH_MACHINE_KRISTAL_SOURCE=tag requires THRASH_MACHINE_KRISTAL_REF"
                 ;;
+            branch)
+                [ -n "$THRASH_MACHINE_KRISTAL_REF" ] \
+                    || fail "THRASH_MACHINE_KRISTAL_SOURCE=branch requires THRASH_MACHINE_KRISTAL_REF"
+                ;;
         esac
         if [ -z "$THRASH_MACHINE_KRISTAL_EXPECTED_VERSION_ENV" ] \
             && [ -z "$THRASH_MACHINE_KRISTAL_VERIFY_VERSION_ENV" ]; then
@@ -434,9 +493,9 @@ resolve_kristal_source() {
         return 0
     fi
 
-    # Ask only when the terminal is interactive. CI and `build_android.sh`
-    # (which runs this script as a subprocess) stay non-interactive and keep
-    # the pinned default below.
+    # Ask only when the terminal is interactive. CI and non-interactive
+    # callers keep the pinned default below; `build_android.sh` opts into the
+    # same prompt by exporting THRASH_MACHINE_KRISTAL_SOURCE=ask.
     if [ -t 0 ] && [ -t 1 ]; then
         choose_kristal_source
         return 0
@@ -478,6 +537,14 @@ fetch_kristal_ref() {
 
     if [ "$THRASH_MACHINE_KRISTAL_SOURCE" = "tag" ]; then
         git -C "$dir" fetch --depth 1 "$remote" "refs/tags/${ref}:refs/tags/${ref}"
+    elif [ "$THRASH_MACHINE_KRISTAL_SOURCE" = "branch" ]; then
+        # Mirror the branch tip into a local branch of the same name so every
+        # later use of $ref (checkout --detach / git show / git archive) resolves.
+        # The '+' force-prefix is required: on a shallow --depth 1 fetch the new
+        # tip shares no history with the cached local branch, so without it git
+        # rejects the update (non-fast-forward) and "latest commit" would fail
+        # on the second and later runs.
+        git -C "$dir" fetch --depth 1 "$remote" "+refs/heads/${ref}:refs/heads/${ref}"
     else
         git -C "$dir" fetch --depth 1 "$remote" "$ref"
     fi
@@ -505,7 +572,7 @@ ensure_kristal() {
                 THRASH_MACHINE_KRISTAL_IS_GIT=0
             fi
             ;;
-        tag|commit)
+        tag|commit|branch)
             if git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
                 THRASH_MACHINE_KRISTAL_IS_GIT=1
                 if [ "$THRASH_MACHINE_UPDATE_REPOS" = "1" ]; then
@@ -515,7 +582,11 @@ ensure_kristal() {
                         git -C "$dir" fetch --depth 1 --tags "$remote"
                     fi
                 fi
-                if ! git -C "$dir" rev-parse --verify --quiet "${THRASH_MACHINE_KRISTAL_REF}^{commit}" >/dev/null; then
+                if [ "$THRASH_MACHINE_KRISTAL_SOURCE" = "branch" ]; then
+                    # A branch means "latest commit": always refresh the tip so a
+                    # cached checkout never silently serves an older commit.
+                    fetch_kristal_ref "$dir" "$THRASH_MACHINE_KRISTAL_REF"
+                elif ! git -C "$dir" rev-parse --verify --quiet "${THRASH_MACHINE_KRISTAL_REF}^{commit}" >/dev/null; then
                     fetch_kristal_ref "$dir" "$THRASH_MACHINE_KRISTAL_REF"
                 fi
                 git -C "$dir" -c advice.detachedHead=false checkout --detach "$THRASH_MACHINE_KRISTAL_REF" >/dev/null
@@ -529,7 +600,11 @@ ensure_kristal() {
                     git -c advice.detachedHead=false clone --depth 1 --branch "$THRASH_MACHINE_KRISTAL_REF" --single-branch \
                         "$THRASH_MACHINE_KRISTAL_REPO" "$dir"
                 else
-                    log "Shallow-fetching Kristal commit ${THRASH_MACHINE_KRISTAL_REF} from $THRASH_MACHINE_KRISTAL_REPO"
+                    if [ "$THRASH_MACHINE_KRISTAL_SOURCE" = "branch" ]; then
+                        log "Shallow-fetching Kristal branch ${THRASH_MACHINE_KRISTAL_REF} from $THRASH_MACHINE_KRISTAL_REPO"
+                    else
+                        log "Shallow-fetching Kristal commit ${THRASH_MACHINE_KRISTAL_REF} from $THRASH_MACHINE_KRISTAL_REPO"
+                    fi
                     git init -q "$dir"
                     git -C "$dir" remote add origin "$THRASH_MACHINE_KRISTAL_REPO"
                     fetch_kristal_ref "$dir" "$THRASH_MACHINE_KRISTAL_REF"
