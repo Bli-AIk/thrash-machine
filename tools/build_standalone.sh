@@ -187,9 +187,30 @@ stage_window_icon() {
 }
 
 detect_kristal_path() {
-    local candidates=() candidate
+    local candidates=() candidate dir parent
     [ -n "$THRASH_MACHINE_KRISTAL_DIR_ENV" ] && candidates+=("$THRASH_MACHINE_KRISTAL_DIR_ENV")
     [ -n "$KRISTAL_ROOT_ENV" ] && candidates+=("$KRISTAL_ROOT_ENV")
+    for candidate in "${candidates[@]}"; do
+        [ -n "$candidate" ] || continue
+        if [ -f "$candidate/main.lua" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    # Same probe as the game launcher (libraries/kristal-debug-tools/bin/kristal-run):
+    # walk up from the mod root for the nearest engine, so a mod sitting inside an
+    # engine's mods/ (e.g. .../Kristal-0.10.0/mods/thrash-machine) is found without
+    # env vars. Explicit env vars above still win.
+    dir="$THRASH_MACHINE_MOD_DIR"
+    while :; do
+        if [ -f "$dir/main.lua" ] && [ -f "$dir/src/kristal.lua" ]; then
+            printf '%s\n' "$dir"
+            return 0
+        fi
+        parent=$(dirname "$dir")
+        [ "$parent" = "$dir" ] && break
+        dir=$parent
+    done
     candidates+=(
         "$THRASH_MACHINE_MOD_DIR/.build/Kristal"
         "$THRASH_MACHINE_MOD_DIR/../Kristal"
