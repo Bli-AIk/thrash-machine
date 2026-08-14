@@ -104,13 +104,20 @@ exit /b %ERRORLEVEL%
 rem %1 = base URL of this release's assets (latest/... or downloads/<tag>/)
 rem Downloads to .tmp names and only moves them into place after the SHA256
 rem check, so a failed attempt never corrupts a cached release.
+rem Per-file progress is printed so a slow download does not look stuck:
+rem Invoke-WebRequest shows a live percentage bar (ProgressPreference is left
+rem at its default Continue), bracketed by explicit "Downloading <name>" and
+rem "done (<size> MB)" lines.
 if not exist "%DL_DIR%" mkdir "%DL_DIR%"
 powershell -NoProfile -Command ^
-  "$ProgressPreference='SilentlyContinue';" ^
   "$base='%~1';" ^
   "$dir='%DL_DIR%';" ^
   "$files=@('kristal-debug-tools-gui-windows-%ARCH%.exe','kristal-run-windows-%ARCH%.exe','checksums-windows-%ARCH%.txt');" ^
-  "foreach($f in $files){ Invoke-WebRequest -Uri ($base+$f) -OutFile (Join-Path $dir ($f+'.tmp')) };" ^
+  "foreach($f in $files){" ^
+  "  Write-Host ('Downloading '+$f);" ^
+  "  Invoke-WebRequest -Uri ($base+$f) -OutFile (Join-Path $dir ($f+'.tmp'));" ^
+  "  $sz=(Get-Item (Join-Path $dir ($f+'.tmp'))).Length;" ^
+  "  Write-Host ('  done - '+[math]::Round($sz/1MB,1)+' MB') };" ^
   "$sums=Get-Content (Join-Path $dir ('checksums-windows-%ARCH%.txt'+'.tmp'));" ^
   "foreach($f in $files){ if($f -eq 'checksums-windows-%ARCH%.txt'){continue};" ^
   "  $h=(Get-FileHash (Join-Path $dir ($f+'.tmp')) -Algorithm SHA256).Hash.ToLower();" ^
