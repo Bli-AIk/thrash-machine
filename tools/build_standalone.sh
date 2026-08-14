@@ -674,7 +674,16 @@ export_kristal() {
         # into the stage, dragging along .build and re-copying the stage into
         # itself (unbounded growth). The staged engine's mods/ is removed below
         # anyway — the mod is inserted separately by copy_mod.
-        tar -cf - --exclude='./.git' --exclude='./mods' -C "$THRASH_MACHINE_KRISTAL_DIR" . \
+        #
+        # Exclude .tools/ too: it is the shared per-machine tool cache
+        # (<kristal-root>/.tools, auto-downloaded JDK/Android SDK/GUI/PortableGit),
+        # not part of the game. On Windows the Temurin JDK's broken junctions
+        # (same PHYSFS family as the filesystemutils.lua crash) make the LÖVE zip
+        # helper's file scan die mid-zip, aborting the build with a partial .love.
+        # The git path above never sees these (untracked); the tar fallback must
+        # drop them explicitly. .build/ is defensive (never ship build artifacts).
+        tar -cf - --exclude='./.git' --exclude='./mods' --exclude='./.tools' \
+            --exclude='./.build' -C "$THRASH_MACHINE_KRISTAL_DIR" . \
             | tar -xf - -C "$stage_dir"
     fi
     rm -rf "$stage_dir/.github" "$stage_dir/mods" "$stage_dir/build" "$stage_dir/output"
