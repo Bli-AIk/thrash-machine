@@ -35,7 +35,7 @@ assets/icon/
 | Android APK | none | density fallback is automatic |
 
 - Windows: run `rcedit` directly. Linux/macOS: `sudo apt install wine icoutils` (or equivalent).
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` auto-downloads rcedit into `.tools/rcedit/`.
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` auto-downloads rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the mod root is the fallback).
 - Missing Android densities fall back to the nearest available one.
 - The whole `assets/icon/` directory is excluded from `.love` / mod packages;
   `window_icon.png` is copied to the mod root during the build so the engine

@@ -18,7 +18,7 @@
 ## What's Inside
 
 - Playable starter map + Dummy battle + object event
-- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into `.tools\gui\`, no manual install); run the game, pass debug args, and package — all by clicking buttons
+- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into the shared `.tools\gui\` next to the Kristal engine, no manual install); run the game, pass debug args, and package — all by clicking buttons
 - English / Simplified Chinese via kristal-i18n, switchable in-game
 - Dev tools as submodules, stripped from release packages
 
@@ -93,7 +93,7 @@ All remote downloads use shallow clones (`--depth 1`), and the default checkout 
 
 ### No standalone `just`? Use `tools/just` (Windows: zero-install, GUI-embedded)
 
-The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into `.tools/gui/` using the same URL/SHA256 scheme as `gui.cmd`, so a pristine machine works out of the box.
+The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into the shared `.tools/gui/` (next to the Kristal engine) using the same URL/SHA256 scheme as `gui.cmd`, so a pristine machine works out of the box.
 
 ```sh
 tools/just build-love     # Git Bash
@@ -134,7 +134,7 @@ GitHub's automated builds check that the project packages correctly on every pus
 
 Double-click **`tools\build_android.cmd`** in the project root and pick:
 
-1. **Quick wrap build** — automatically installs whatever is missing into `.tools\` (PortableGit Git Bash, JDK 17, LÖVE 11.5) and produces the APK;
+1. **Quick wrap build** — automatically installs whatever is missing into the shared `.tools\` next to the Kristal engine (PortableGit Git Bash, JDK 17, LÖVE 11.5; the mod root is the fallback) and produces the APK;
 2. **Full compile build** — additionally downloads the Android cmdline-tools/SDK/NDK (first run ~1.5 GB).
 
 It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
@@ -142,11 +142,11 @@ It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_androi
 Equivalent commands on any platform:
 
 ```sh
-just build-android-wrap   # wrap build (only a JDK is needed; a missing JDK auto-downloads Temurin 17 into .tools/jdk17)
+just build-android-wrap   # wrap build (only a JDK is needed; a missing JDK auto-downloads Temurin 17 into the shared .tools/jdk17)
 just build-android        # compile build (needs the full Android SDK/NDK; the JDK is auto-supplemented too)
 ```
 
-JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in `.tools/jdk17/` (`THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
+JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across mods; the mod root `.tools` is the fallback when no engine is found. `THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
 
 ## Custom Icons (Optional)
 
@@ -169,7 +169,7 @@ assets/icon/
 | Android APK | none                                                                           | per-density icons with automatic nearest-density fallback                            |
 
 - Under `win/` drop a set of size-named PNGs (32 + 256 gives the best result) or a ready-made `icon.ico`; the script prefers an existing `.ico`.
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into `.tools/rcedit/` automatically.
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the mod root is the fallback) automatically.
 - The whole `assets/icon/` directory is excluded from `.love` / mod packages; `window_icon.png` is copied to the mod root during the build and then packaged.
 - Paths can be overridden: `THRASH_MACHINE_ICON_DIR`, `THRASH_MACHINE_WINDOW_ICON`, `THRASH_MACHINE_WIN_ICON_DIR`, `THRASH_MACHINE_RCEDit`, `THRASH_MACHINE_ANDROID_ICON_DIR`, `THRASH_MACHINE_ANDROID_ICON`.
 

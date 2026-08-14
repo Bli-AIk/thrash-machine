@@ -49,16 +49,17 @@ build:
 
 # Compile the Android APK from source (full build; needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653).
 # A missing JDK 17 or Android SDK (API 34 + build-tools 34.0.0 + NDK 25.2.9519653) is
-# auto-downloaded into .tools/jdk17 / .tools/android-sdk on first use.
-# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 .tools/jdk17 / .tools/android-sdk）
+# auto-downloaded into the shared tools dir next to the Kristal engine on first use
+# (<kristal-root>/.tools/jdk17 / <kristal-root>/.tools/android-sdk; mod-root .tools as fallback).
+# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 Kristal 根 .tools/jdk17 / .tools/android-sdk，无引擎时回退 mod 根 .tools）
 build-android:
     @bash ./tools/build_android.sh
 
 # Wrap-build a quick Android APK (official LÖVE shell + game.love, re-aligned and re-signed).
-# Only needs a JDK (auto-downloaded into .tools/jdk17 when missing); build-tools are
-# downloaded automatically. Faster, but cannot change package id/icon/name and
+# Only needs a JDK (auto-downloaded into the shared tools dir when missing, see build-android);
+# build-tools are downloaded automatically. Faster, but cannot change package id/icon/name and
 # cannot be published on Google Play.
-# zh_hans: 套包构建 Android APK（官方 LÖVE 壳 + game.love，重对齐并重签名；只需 JDK，缺则自动下载到 .tools/jdk17，工具自动下载；不能改包名/图标/名称，不能上 Google Play）
+# zh_hans: 套包构建 Android APK（官方 LÖVE 壳 + game.love，重对齐并重签名；只需 JDK，缺则自动下载到 Kristal 根 .tools/jdk17，工具自动下载；不能改包名/图标/名称，不能上 Google Play）
 build-android-wrap:
     @bash ./tools/build_android_wrap.sh
 

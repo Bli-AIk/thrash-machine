@@ -44,7 +44,7 @@ THRASH_MACHINE_UPDATE_REPOS="${THRASH_MACHINE_UPDATE_REPOS:-0}"
 THRASH_MACHINE_ICON_DIR="${THRASH_MACHINE_ICON_DIR:-$THRASH_MACHINE_MOD_DIR/assets/icon}"
 THRASH_MACHINE_WINDOW_ICON="${THRASH_MACHINE_WINDOW_ICON:-$THRASH_MACHINE_ICON_DIR/window_icon.png}"
 THRASH_MACHINE_WIN_ICON_DIR="${THRASH_MACHINE_WIN_ICON_DIR:-$THRASH_MACHINE_ICON_DIR/win}"
-THRASH_MACHINE_RCEDit="${THRASH_MACHINE_RCEDit:-}"          # empty → probe .tools/ and PATH
+THRASH_MACHINE_RCEDit="${THRASH_MACHINE_RCEDit:-}"          # empty → probe $THRASH_MACHINE_TOOLS_DIR/rcedit/ and PATH
 THRASH_MACHINE_ICON_FETCH_TOOLS="${THRASH_MACHINE_ICON_FETCH_TOOLS:-0}"  # 1 = auto-download rcedit
 THRASH_MACHINE_RCEDit_URL="${THRASH_MACHINE_RCEDit_URL:-https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe}"
 # wine prefix lives OUTSIDE the mod tree: wine creates a `z: -> /` symlink
@@ -76,7 +76,7 @@ is_windows_host() {
     esac
 }
 
-# Resolve the rcedit binary: 1) THRASH_MACHINE_RCEDit 2) .tools/rcedit/
+# Resolve the rcedit binary: 1) THRASH_MACHINE_RCEDit 2) $THRASH_MACHINE_TOOLS_DIR/rcedit/
 # 3) rcedit on PATH. Returns the path or exits 1.
 resolve_rcedit() {
     local bin="${THRASH_MACHINE_RCEDit:-}"
@@ -85,17 +85,18 @@ resolve_rcedit() {
         command -v "$bin" >/dev/null 2>&1 && { command -v "$bin"; return 0; }
         return 1
     fi
-    if [ -f "$THRASH_MACHINE_MOD_DIR/.tools/rcedit/rcedit-x64.exe" ]; then
-        printf '%s\n' "$THRASH_MACHINE_MOD_DIR/.tools/rcedit/rcedit-x64.exe"
+    if [ -f "$THRASH_MACHINE_TOOLS_DIR/rcedit/rcedit-x64.exe" ]; then
+        printf '%s\n' "$THRASH_MACHINE_TOOLS_DIR/rcedit/rcedit-x64.exe"
         return 0
     fi
     command -v rcedit >/dev/null 2>&1 && { command -v rcedit; return 0; }
     return 1
 }
 
-# Auto-download rcedit into .tools/rcedit/ (gated by THRASH_MACHINE_ICON_FETCH_TOOLS=1).
+# Auto-download rcedit into $THRASH_MACHINE_TOOLS_DIR/rcedit/ (gated by
+# THRASH_MACHINE_ICON_FETCH_TOOLS=1).
 fetch_rcedit() {
-    local dest="$THRASH_MACHINE_MOD_DIR/.tools/rcedit/rcedit-x64.exe"
+    local dest="$THRASH_MACHINE_TOOLS_DIR/rcedit/rcedit-x64.exe"
     [ -f "$dest" ] && { printf '%s\n' "$dest"; return 0; }
     [ "$THRASH_MACHINE_ICON_FETCH_TOOLS" = "1" ] || return 1
     command -v curl >/dev/null 2>&1 || return 1

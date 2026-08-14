@@ -64,8 +64,8 @@ source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 resolve_java() {
     # The wrapper accepts any JDK (8+): an explicit
     # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME or PATH java is used as-is,
-    # and a portable JDK 17 is downloaded into .tools/jdk17 only when the box
-    # has none.
+    # and a portable JDK 17 is downloaded into $THRASH_MACHINE_TOOLS_DIR/jdk17
+    # (the shared tools dir outside the mod tree) only when the box has none.
     ensure_java
     need_cmd keytool
     log "使用 Java: $(command -v java)"

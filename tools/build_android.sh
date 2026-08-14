@@ -23,7 +23,6 @@ THRASH_MACHINE_ANDROID_ICON="${THRASH_MACHINE_ANDROID_ICON:-}"
 THRASH_MACHINE_ANDROID_ICON_DIR="${THRASH_MACHINE_ANDROID_ICON_DIR:-$THRASH_MACHINE_MOD_DIR/assets/icon/android}"
 THRASH_MACHINE_ANDROID_NDK_DIR="${THRASH_MACHINE_ANDROID_NDK_DIR:-}"
 THRASH_MACHINE_OUTPUT_BASENAME="${THRASH_MACHINE_OUTPUT_BASENAME:-thrash-machine}"
-THRASH_MACHINE_ANDROID_SDK_DIR="${THRASH_MACHINE_ANDROID_SDK_DIR:-$THRASH_MACHINE_MOD_DIR/.tools/android-sdk}"
 THRASH_MACHINE_FETCH_SDK="${THRASH_MACHINE_FETCH_SDK:-1}"
 
 log() {
@@ -42,6 +41,10 @@ need_cmd() {
 # shellcheck source=build-helper/lib.sh
 source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 
+# Defaulted here rather than in the top variable block: the shared tools dir
+# (THRASH_MACHINE_TOOLS_DIR) is only resolved when lib.sh is sourced above.
+THRASH_MACHINE_ANDROID_SDK_DIR="${THRASH_MACHINE_ANDROID_SDK_DIR:-$THRASH_MACHINE_TOOLS_DIR/android-sdk}"
+
 read_mod_version() {
     version="$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
         "$THRASH_MACHINE_MOD_DIR/mod.json" | head -n 1)"
@@ -53,9 +56,9 @@ read_mod_version() {
 # A fresh machine usually has no Android SDK. When ANDROID_SDK_ROOT/ANDROID_HOME
 # is unset (or set but missing a required component), download cmdline-tools and
 # let sdkmanager install the required platform / build-tools / NDK into
-# THRASH_MACHINE_ANDROID_SDK_DIR (.tools/android-sdk by default — the same
-# location the Windows launcher build_android.ps1 uses). Disable with
-# THRASH_MACHINE_FETCH_SDK=0.
+# THRASH_MACHINE_ANDROID_SDK_DIR ($THRASH_MACHINE_TOOLS_DIR/android-sdk by
+# default — the shared tools dir outside the mod tree, same location the Windows
+# launcher build_android.ps1 uses). Disable with THRASH_MACHINE_FETCH_SDK=0.
 
 android_sdk_complete() {
     local sdk="$1"
@@ -168,7 +171,7 @@ check_inputs() {
     # LÖVE Android 11.5 requires JDK 17. ensure_java honors an explicit
     # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME (wrong version is an error) or
     # a matching `java` on PATH, and auto-downloads a portable JDK 17 into
-    # .tools/jdk17 when the box has none.
+    # $THRASH_MACHINE_TOOLS_DIR/jdk17 (shared tools dir) when the box has none.
     ensure_java 17
 
     # Resolve the SDK (auto-installing a missing one — see ensure_android_sdk),

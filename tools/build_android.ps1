@@ -4,9 +4,9 @@
 #   build_android.cmd wrap       -> quick wrapper APK  (official LÖVE shell + game.love)
 #   build_android.cmd compile    -> full APK from source (needs Android SDK + NDK)
 #
-# The launcher installs whatever is missing into .tools\ (PortableGit, JDK 17,
-# LÖVE 11.5, and for compile mode the Android cmdline-tools/SDK/NDK), then runs
-# the matching bash script through Git Bash.
+# The launcher installs whatever is missing into the shared tools dir
+# (PortableGit, JDK 17, LÖVE 11.5, and for compile mode the Android
+# cmdline-tools/SDK/NDK), then runs the matching bash script through Git Bash.
 
 param(
     [ValidateSet('menu', 'wrap', 'compile')]
@@ -17,7 +17,36 @@ $ErrorActionPreference = 'Stop'
 # Script lives in tools/; the mod root is two levels up.
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root = Split-Path -Parent $ScriptDir
-$Tools = Join-Path $Root '.tools'
+
+# Shared tools dir, hosted OUTSIDE the mod tree (next to the Kristal engine) so
+# every mod based on this template shares one cache and the mod tree stays free
+# of the JDK's symlinks that crash Kristal's mod loader on Windows. Resolution:
+# explicit KRISTAL_ROOT/THRASH_MACHINE_KRISTAL_DIR → nearest engine by walking
+# up from the mod root → fall back to the mod root.
+$KristalRoot = $null
+foreach ($candidate in @($env:KRISTAL_ROOT, $env:THRASH_MACHINE_KRISTAL_DIR)) {
+    if ($candidate -and (Test-Path (Join-Path $candidate 'main.lua'))) {
+        # THRASH_MACHINE_KRISTAL_DIR defaults to the mod-root clone
+        # .build\Kristal — inside the mod, not a shared host. Skip it.
+        if (-not ($candidate -eq (Join-Path $Root '.build\Kristal'))) {
+            $KristalRoot = $candidate
+            break
+        }
+    }
+}
+if (-not $KristalRoot) {
+    $dir = $Root
+    while ($true) {
+        if ((Test-Path (Join-Path $dir 'main.lua')) -and (Test-Path (Join-Path $dir 'src\kristal.lua'))) {
+            $KristalRoot = $dir
+            break
+        }
+        $parent = Split-Path -Parent $dir
+        if ($parent -eq $dir) { break }
+        $dir = $parent
+    }
+}
+$Tools = if ($KristalRoot) { Join-Path $KristalRoot '.tools' } else { Join-Path $Root '.tools' }
 
 # Severity-labeled output: an unlabeled "zip not found" or bare error often
 # reads as a crash on Windows. Info/Warn/Fail make the severity explicit.
@@ -77,7 +106,7 @@ function Get-GitBash {
     $url = "https://github.com/git-for-windows/git/releases/download/$tag/$sfxName"
     if (-not (Test-Path $sfx)) { Invoke-Download $url $sfx }
     $gitDir = Join-Path $Tools 'git'
-    Info "解压 PortableGit 到 .tools\git ..."
+    Info "解压 PortableGit 到 $Tools\git ..."
     & $sfx "-o$gitDir" -y | Out-Null
     if ($LASTEXITCODE -ne 0) { Fail 'PortableGit 解压失败' }
     $bash = Join-Path $gitDir 'bin\bash.exe'
@@ -114,7 +143,7 @@ function Get-JavaHome {
     $zip = Join-Path $Tools 'jdk-17.zip'
     $url = 'https://api.adoptium.net/v3/binary/latest/17/ga/windows/x64/jdk/hotspot/normal/eclipse?project=jdk'
     if (-not (Test-Path $zip)) { Invoke-Download $url $zip }
-    Info '解压 JDK 17 到 .tools\jdk-17 ...'
+    Info "解压 JDK 17 到 $Tools\jdk-17 ..."
     Expand-Zip $zip $jdkDir
     $sub = Get-ChildItem $jdkDir -Directory -ErrorAction SilentlyContinue |
         Where-Object { Test-Path (Join-Path $_.FullName 'bin\java.exe') } | Select-Object -First 1
@@ -134,7 +163,7 @@ function Get-Love {
     $url = 'https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip'
     if (-not (Test-Path $zip)) { Invoke-Download $url $zip }
     $loveDir = Join-Path $Tools 'love'
-    Info '解压 LÖVE 11.5 到 .tools\love ...'
+    Info "解压 LÖVE 11.5 到 $Tools\love ..."
     Expand-Zip $zip $loveDir
     $exe = Get-ChildItem $loveDir -Recurse -Filter love.exe -ErrorAction SilentlyContinue |
         Select-Object -First 1

@@ -41,6 +41,45 @@ if [ -z "$THRASH_MACHINE_LOVE" ]; then
     }
 fi
 
+# --- shared tools dir (hosted outside the mod tree) -----------------------------
+# Auto-downloaded tools (JDK, Android SDK, rcedit, GUI, PortableGit) live under
+# <kristal-root>/.tools so every mod based on this template shares one cache AND
+# the mod tree stays free of the JDK's symlinks, which crash Kristal's mod
+# loader on Windows (filesystemutils.lua: getInfo returns nil for the broken
+# junctions; the engine has no nil guard and must not be patched).
+# Resolution: explicit KRISTAL_ROOT / THRASH_MACHINE_KRISTAL_DIR → nearest engine
+# by walking up from the mod root (the "mod inside engine/mods/" layout) → fall
+# back to <mod>/.tools (a Linux template without a shared engine; .tools is
+# untouched by `clean-build`, and Linux PHYSFS resolves the symlinks fine).
+# Set THRASH_MACHINE_TOOLS_DIR to pin the location explicitly.
+detect_kristal_root() {
+    local candidate dir parent
+    # `:-` keeps this safe when sourced by a `set -u` script (build_*.sh all do).
+    for candidate in "${KRISTAL_ROOT:-}" "${THRASH_MACHINE_KRISTAL_DIR:-}"; do
+        [ -n "$candidate" ] || continue
+        # THRASH_MACHINE_KRISTAL_DIR defaults to the mod-root clone
+        # .build/Kristal — inside the mod, not a shared host. Skip it.
+        [ "$candidate" = "$THRASH_MACHINE_MOD_DIR/.build/Kristal" ] && continue
+        [ -f "$candidate/main.lua" ] && { printf '%s\n' "$candidate"; return 0; }
+    done
+    dir="$THRASH_MACHINE_MOD_DIR"
+    while :; do
+        if [ -f "$dir/main.lua" ] && [ -f "$dir/src/kristal.lua" ]; then
+            printf '%s\n' "$dir"; return 0
+        fi
+        parent=$(dirname "$dir")
+        [ "$parent" = "$dir" ] && break
+        dir=$parent
+    done
+    return 1
+}
+THRASH_MACHINE_TOOLS_DIR="${THRASH_MACHINE_TOOLS_DIR:-}"
+if [ -z "$THRASH_MACHINE_TOOLS_DIR" ]; then
+    _kr="$(detect_kristal_root || true)"
+    THRASH_MACHINE_TOOLS_DIR="${_kr:+$_kr/.tools}"
+    : "${THRASH_MACHINE_TOOLS_DIR:=$THRASH_MACHINE_MOD_DIR/.tools}"
+fi
+
 # Native Windows binaries (love.exe) cannot open msys-style paths such as
 # /c/Users/... Convert absolute paths to Windows form (C:/...) when running
 # under Git Bash / msys; no-op on Linux and for relative or non-path args.
@@ -171,12 +210,13 @@ zip_dir() {
 # --- portable JDK (used by the Android build scripts) -------------------------
 # A pristine machine usually has no JDK. When the caller did not pin one via
 # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME and no usable `java` is on PATH,
-# ensure_java downloads a portable Temurin JDK into .tools/jdk<version> and
-# exports JAVA_HOME/PATH. Disable the download with THRASH_MACHINE_FETCH_JDK=0.
+# ensure_java downloads a portable Temurin JDK into $THRASH_MACHINE_TOOLS_DIR/jdk<version>
+# (the shared tools dir outside the mod tree) and exports JAVA_HOME/PATH. Disable
+# the download with THRASH_MACHINE_FETCH_JDK=0.
 # These functions use the warn/fail helpers defined at the top of this file, so
 # the sourcing scripts do not need to define their own before sourcing.
 THRASH_MACHINE_JDK_VERSION="${THRASH_MACHINE_JDK_VERSION:-17}"
-THRASH_MACHINE_JDK_DIR="${THRASH_MACHINE_JDK_DIR:-$THRASH_MACHINE_MOD_DIR/.tools/jdk$THRASH_MACHINE_JDK_VERSION}"
+THRASH_MACHINE_JDK_DIR="${THRASH_MACHINE_JDK_DIR:-$THRASH_MACHINE_TOOLS_DIR/jdk$THRASH_MACHINE_JDK_VERSION}"
 THRASH_MACHINE_FETCH_JDK="${THRASH_MACHINE_FETCH_JDK:-1}"
 
 java_major() {
@@ -320,9 +360,10 @@ install_portable_jdk() {
 }
 
 # git is required to fetch the Kristal engine. The GUI sidecar auto-downloads
-# PortableGit into .tools/portablegit on Windows, but a plain bash invocation
-# has no such fallback (installing system git needs root and is distro-specific,
-# so we only point the user at the right command). Self-contained: no log/fail.
+# PortableGit into the shared tools dir (.tools/portablegit next to the Kristal
+# root) on Windows, but a plain bash invocation has no such fallback (installing
+# system git needs root and is distro-specific, so we only point the user at the
+# right command). Self-contained: no log/fail.
 need_git() {
     command -v git >/dev/null 2>&1 && return 0
     cat >&2 <<'EOF'
@@ -331,7 +372,7 @@ need_git() {
 Git is needed to fetch the Kristal engine. Install it, then re-run:
 
   - Windows:  winget install Git.Git
-              (or run the GUI — it auto-downloads PortableGit into .tools/portablegit)
+              (or run the GUI — it auto-downloads PortableGit into the shared .tools/portablegit)
   - Linux:    sudo apt install git        # Debian / Ubuntu
               sudo dnf install git        # Fedora
               sudo pacman -S git          # Arch

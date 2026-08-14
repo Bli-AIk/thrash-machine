@@ -18,7 +18,7 @@
 ## 有什么
 
 - 直接可玩：starter 地图 + Dummy 战斗 + 对象事件
-- 图形化启动器（GUI）：Windows 双击 `gui.cmd` 打开（GUI 自动下载到 `.tools\gui\`，无需手动安装），点按钮即可运行游戏、传调试参数、一键打包
+- 图形化启动器（GUI）：Windows 双击 `gui.cmd` 打开（GUI 自动下载到 Kristal 引擎旁的共享 `.tools\gui\`，无需手动安装），点按钮即可运行游戏、传调试参数、一键打包
 - 中英双语（kristal-i18n），游戏内可切换
 - 开发期工具按子模块组织，生产包自动剔除
 
@@ -93,7 +93,7 @@ Android 打包有**两种模式**：
 
 ### 没有安装 just？用 `tools/just`（Windows 免装，走 GUI 内嵌版）
 
-构建脚本通过 `just` 调用，但 Windows 上**不需要单独安装 just**：仓库里的 `tools/just`（Git Bash）或 `tools/just.cmd`（cmd / PowerShell）会自动使用 kristal-debug-tools GUI 内嵌的 just——`kristal-run` sidecar 的 `just-task` 模式，just 1.58.0 编译在内部。sidecar 缺失时按 `gui.cmd` 同一套 URL/SHA256 方案自动下载到 `.tools/gui/`，纯新机器开箱即用。
+构建脚本通过 `just` 调用，但 Windows 上**不需要单独安装 just**：仓库里的 `tools/just`（Git Bash）或 `tools/just.cmd`（cmd / PowerShell）会自动使用 kristal-debug-tools GUI 内嵌的 just——`kristal-run` sidecar 的 `just-task` 模式，just 1.58.0 编译在内部。sidecar 缺失时按 `gui.cmd` 同一套 URL/SHA256 方案自动下载到共享 `.tools/gui/`（Kristal 引擎旁），纯新机器开箱即用。
 
 ```sh
 tools/just build-love     # Git Bash
@@ -134,7 +134,7 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 
 双击项目根目录的 **`tools\build_android.cmd`**，按提示选择：
 
-1. **快速套包构建** —— 自动下载/安装缺失的 Git Bash（PortableGit）、JDK 17、LÖVE 到 `.tools\`，然后直接出包；
+1. **快速套包构建** —— 自动下载/安装缺失的 Git Bash（PortableGit）、JDK 17、LÖVE 到 Kristal 引擎旁的共享 `.tools\`（无引擎时回退 mod 根），然后直接出包；
 2. **完整编译构建** —— 额外自动下载 Android cmdline-tools/SDK/NDK（首次约 1.5 GB）。
 
 也支持带参数运行：`tools\build_android.cmd wrap` 或 `tools\build_android.cmd compile`。构建完成后会自动打开 `dist\` 目录。
@@ -142,11 +142,11 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 命令行（任意平台）等价用法：
 
 ```sh
-just build-android-wrap   # 套包构建（只需 JDK，缺 JDK 时自动下载 Temurin 17 到 .tools/jdk17）
+just build-android-wrap   # 套包构建（只需 JDK，缺 JDK 时自动下载 Temurin 17 到共享 .tools/jdk17）
 just build-android        # 编译构建（需完整 Android SDK/NDK；JDK 同样自动补齐）
 ```
 
-JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到 `.tools/jdk17/`（`THRASH_MACHINE_FETCH_JDK=0` 禁用自动下载；`THRASH_MACHINE_JDK_VERSION` 改版本号）。
+JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到共享 `.tools/jdk17/`（位于 Kristal 引擎旁，多模共享；无引擎时回退 mod 根 `.tools`。`THRASH_MACHINE_FETCH_JDK=0` 禁用自动下载；`THRASH_MACHINE_JDK_VERSION` 改版本号）。
 
 ## 自定义图标（可选）
 
@@ -169,7 +169,7 @@ assets/icon/
 | Android APK | 无                                                                | 各 density 独立成图，缺失的自动用最近的补位                 |
 
 - `win/` 下放一组尺寸 PNG（至少 32 + 256 效果最佳）或直接放 `icon.ico`；脚本优先用现成 `.ico`。
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` 时脚本自动下载 rcedit 到 `.tools/rcedit/`。
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` 时脚本自动下载 rcedit 到共享 `.tools/rcedit/`（Kristal 引擎旁，无引擎时回退 mod 根）。
 - 完整 `assets/icon/` 目录会被排除出 `.love` / mod 包；`window_icon.png` 会在构建时复制到 mod 根目录后进包。
 - 可用环境变量覆盖路径：`THRASH_MACHINE_ICON_DIR`、`THRASH_MACHINE_WINDOW_ICON`、`THRASH_MACHINE_WIN_ICON_DIR`、`THRASH_MACHINE_RCEDit`、`THRASH_MACHINE_ANDROID_ICON_DIR`、`THRASH_MACHINE_ANDROID_ICON`。
 
