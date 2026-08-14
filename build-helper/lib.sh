@@ -268,3 +268,25 @@ install_portable_jdk() {
     fi
     printf 'JDK %s 已就绪: %s\n' "$version" "$dest" >&2
 }
+
+# git is required to fetch the Kristal engine. The GUI sidecar auto-downloads
+# PortableGit into .tools/portablegit on Windows, but a plain bash invocation
+# has no such fallback (installing system git needs root and is distro-specific,
+# so we only point the user at the right command). Self-contained: no log/fail.
+need_git() {
+    command -v git >/dev/null 2>&1 && return 0
+    cat >&2 <<'EOF'
+Missing required command: git
+
+Git is needed to fetch the Kristal engine. Install it, then re-run:
+
+  - Windows:  winget install Git.Git
+              (or run the GUI — it auto-downloads PortableGit into .tools/portablegit)
+  - Linux:    sudo apt install git        # Debian / Ubuntu
+              sudo dnf install git        # Fedora
+              sudo pacman -S git          # Arch
+  - macOS:    xcode-select --install
+
+EOF
+    exit 1
+}

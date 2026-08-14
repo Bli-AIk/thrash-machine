@@ -260,7 +260,7 @@ resolve_keystore() {
 main() {
     local embed_apk love_apk bt_dir zipalign apk_unsigned apk_aligned apk_output apksigner_jar
 
-    need_cmd git
+    need_git
     need_cmd curl
     need_cmd unzip
     need_cmd tar

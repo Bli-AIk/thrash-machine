@@ -743,14 +743,14 @@ build_variant() {
     fi
 }
 
-need_cmd git
+# shellcheck source=build-helper/lib.sh
+source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
+need_git
 need_cmd tar
 need_cmd unzip
 need_cmd curl
 # `zip` is optional: when missing, zip_dir falls back to the build-helper
 # (LÖVE) which writes stored zips.
-# shellcheck source=build-helper/lib.sh
-source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 if [ "$THRASH_MACHINE_BUILD_LOVE" != "1" ] \
     && [ "$THRASH_MACHINE_BUILD_WINDOWS_EXE" != "1" ]; then
     fail "Nothing to build: set THRASH_MACHINE_BUILD_LOVE=1 and/or THRASH_MACHINE_BUILD_WINDOWS_EXE=1"

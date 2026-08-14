@@ -50,7 +50,7 @@ read_mod_version() {
 check_inputs() {
     local android_sdk ndk_dir
 
-    need_cmd git
+    need_git
     need_cmd find
     # LÖVE Android 11.5 requires JDK 17. ensure_java honors an explicit
     # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME (wrong version is an error) or
