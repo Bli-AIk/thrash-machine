@@ -29,13 +29,32 @@ if [ -z "$THRASH_MACHINE_LOVE" ]; then
     }
 fi
 
+# Native Windows binaries (love.exe) cannot open msys-style paths such as
+# /c/Users/... Convert absolute paths to Windows form (C:/...) when running
+# under Git Bash / msys; no-op on Linux and for relative or non-path args.
+win_path() {
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*)
+            case "$1" in
+                /*) command -v cygpath >/dev/null 2>&1 && cygpath -m "$1" || printf '%s\n' "$1" ;;
+                *) printf '%s\n' "$1" ;;
+            esac
+            ;;
+        *) printf '%s\n' "$1" ;;
+    esac
+}
+
 run_helper() {
     # LÖVE 11 drops positional args after the game path, so pass them in a
-    # temp file (one argument per line).
-    local args_file
+    # temp file (one argument per line). love.exe is a native binary, so msys
+    # paths (/c/...) written here must be converted to Windows form first.
+    local args_file arg status
     args_file="$(mktemp)" || exit 1
-    printf '%s\n' "$@" > "$args_file"
-    THRASH_MACHINE_HELPER_ARGS="$args_file" \
+    : > "$args_file"
+    for arg in "$@"; do
+        win_path "$arg" >> "$args_file"
+    done
+    THRASH_MACHINE_HELPER_ARGS="$(win_path "$args_file")" \
         "$THRASH_MACHINE_LOVE" "$THRASH_MACHINE_MOD_DIR/build-helper"
     status=$?
     rm -f "$args_file"

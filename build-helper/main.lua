@@ -393,6 +393,9 @@ end
 
 local function zip_dir(args)
     local output, source, prefix = args[2], args[3], args[4] or ""
+    -- Normalize Windows separators: cygpath -m hands us C:/... but `dir /s /b`
+    -- (the file_list implementation on Windows) emits backslashes.
+    source = source:gsub("\\", "/")
     prefix = prefix:gsub("^/+", ""):gsub("/+$", "")
 
     -- Prepare output.
@@ -405,7 +408,8 @@ local function zip_dir(args)
 
     local files = file_list(source)
     table.sort(files)
-    for _, file in ipairs(files) do
+    for _, raw in ipairs(files) do
+        local file = raw:gsub("\\", "/") -- dir /s /b uses backslashes
         local relative = file:sub(#source + 2) -- strip "<source>/"
         if relative ~= "" then
             local skip = false
