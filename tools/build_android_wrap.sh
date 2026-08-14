@@ -211,7 +211,17 @@ PS_EOF
         return 0
     fi
 
-    fail "Neither 'zip' nor Windows PowerShell is available to update the APK"
+    # No `zip` on Linux/macOS either — fall back to the JDK's jar tool (the JDK
+    # is already resolved/bootstrapped by resolve_java, so this adds no new
+    # dependency). zipalign + apksigner below re-align and re-sign regardless.
+    if command -v jar >/dev/null 2>&1; then
+        cp "$love" "$work_dir/assets/game.love"
+        log "用 JDK jar 替换 assets/game.love（无 zip）…"
+        (cd "$work_dir" && jar -uf "$apk" assets)
+        return 0
+    fi
+
+    fail "Neither 'zip' nor a JDK jar tool is available to update the APK"
 }
 
 # --- signing -------------------------------------------------------------------
