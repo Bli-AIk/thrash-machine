@@ -26,6 +26,7 @@ mkdir -p "$STAGE_DIR" "$THRASH_MACHINE_OUTPUT_DIR"
 tar -cf - \
     --exclude='*.git' \
     --exclude='./.github' \
+    --exclude='./libraries/*/.github' \
     --exclude='./.build' \
     --exclude='./dist*' \
     --exclude='./.tools' \
