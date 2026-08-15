@@ -90,6 +90,9 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_android_wrap }}
         run: ./tools/build_android_wrap.sh
 
+      - name: Package full source with submodules
+        run: ./.github/scripts/package_full_source.sh "$RELEASE_TAG"
+
       - name: Generate and verify SHA-256 manifest
         run: |
           .github/scripts/generate_sha256sums.sh dist
@@ -107,5 +110,5 @@ jobs:
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release create "$RELEASE_TAG" --title "Thrash Machine $RELEASE_TAG" --generate-notes
           fi
-          files=(dist/*.love dist/*-win64.zip dist/*-mod.zip dist/*.apk dist/SHA256SUMS)
+          files=(dist/*.love dist/*-win64.zip dist/*-mod.zip dist/*.apk dist/*-full-source.tar.gz dist/*-full-source.zip dist/SHA256SUMS)
           gh release upload "$RELEASE_TAG" "${files[@]}" --clobber

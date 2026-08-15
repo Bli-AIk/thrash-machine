@@ -84,6 +84,9 @@ jobs:
       - name: Build Android APK (compile)
         run: ./tools/build_android.sh
 
+      - name: Package full source with submodules
+        run: ./.github/scripts/package_full_source.sh "${{ needs.release.outputs.tag_name }}"
+
       - name: Generate and verify SHA-256 manifest
         run: |
           .github/scripts/generate_sha256sums.sh dist
@@ -99,5 +102,5 @@ jobs:
           RELEASE_TAG: ${{ needs.release.outputs.tag_name }}
         run: |
           set -euo pipefail
-          files=(dist/*.love dist/*-win64.zip dist/*-mod.zip dist/*.apk dist/SHA256SUMS)
+          files=(dist/*.love dist/*-win64.zip dist/*-mod.zip dist/*.apk dist/*-full-source.tar.gz dist/*-full-source.zip dist/SHA256SUMS)
           gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
