@@ -85,7 +85,16 @@ jobs:
         run: ./tools/build_android.sh
 
       - name: Package full source with submodules
-        run: ./.github/scripts/package_full_source.sh "${{ needs.release.outputs.tag_name }}"
+        run: |
+          set -euo pipefail
+          TAG="${{ needs.release.outputs.tag_name }}"
+          mkdir -p dist
+          # Unlike GitHub's auto-generated archives, include the checked-out
+          # submodule contents so the mod is complete and usable as-is.
+          tar --exclude='.git' --exclude='.build' --exclude='dist*' --exclude='.tools' --exclude='.worktrees' \
+            -czf "dist/thrash-machine-$TAG-full-source.tar.gz" -C "$PWD" .
+          (cd "$PWD" && zip -qr "dist/thrash-machine-$TAG-full-source.zip" . \
+            -x '.git*' '.build*' 'dist*' '.tools*' '.worktrees*')
 
       - name: Generate and verify SHA-256 manifest
         run: |
