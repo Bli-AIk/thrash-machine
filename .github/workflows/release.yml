@@ -47,7 +47,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq love luajit rsync unzip xvfb zip
+          sudo apt-get install -y just jq love luajit rsync unzip xvfb zip
       - name: Verify source and version
         run: |
           make test
