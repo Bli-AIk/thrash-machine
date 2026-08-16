@@ -47,21 +47,19 @@ fi
 # the mod tree stays free of the JDK's symlinks, which crash Kristal's mod
 # loader on Windows (filesystemutils.lua: getInfo returns nil for the broken
 # junctions; the engine has no nil guard and must not be patched).
-# Resolution: explicit KRISTAL_ROOT / THRASH_MACHINE_KRISTAL_DIR → nearest engine
-# by walking up from the mod root (the "mod inside engine/mods/" layout) → fall
-# back to <mod>/.tools (a Linux template without a shared engine; .tools is
-# untouched by `clean-build`, and Linux PHYSFS resolves the symlinks fine).
-# Set THRASH_MACHINE_TOOLS_DIR to pin the location explicitly.
+# Resolution is local-first: nearest engine by walking up from the mod root
+# (the "mod inside engine/mods/" layout) wins, so a mod living inside its own
+# engine fork is never hijacked by a KRISTAL_ROOT inherited from the shell
+# profile; explicit KRISTAL_ROOT / THRASH_MACHINE_KRISTAL_DIR are only a
+# fallback for mods outside an engine tree; finally <mod>/.tools (a Linux
+# template without a shared engine; .tools is untouched by `clean-build`, and
+# Linux PHYSFS resolves the symlinks fine). Set THRASH_MACHINE_TOOLS_DIR to
+# pin the location explicitly.
 detect_kristal_root() {
     local candidate dir parent
-    # `:-` keeps this safe when sourced by a `set -u` script (build_*.sh all do).
-    for candidate in "${KRISTAL_ROOT:-}" "${THRASH_MACHINE_KRISTAL_DIR:-}"; do
-        [ -n "$candidate" ] || continue
-        # THRASH_MACHINE_KRISTAL_DIR defaults to the mod-root clone
-        # .build/Kristal — inside the mod, not a shared host. Skip it.
-        [ "$candidate" = "$THRASH_MACHINE_MOD_DIR/.build/Kristal" ] && continue
-        [ -f "$candidate/main.lua" ] && { printf '%s\n' "$candidate"; return 0; }
-    done
+    # Local-first, mirroring bin/kristal-run: the nearest engine by walking up
+    # from the mod root wins, so a mod inside its own engine fork is never
+    # hijacked by a KRISTAL_ROOT inherited from the shell profile.
     dir="$THRASH_MACHINE_MOD_DIR"
     while :; do
         if [ -f "$dir/main.lua" ] && [ -f "$dir/src/kristal.lua" ]; then
@@ -70,6 +68,15 @@ detect_kristal_root() {
         parent=$(dirname "$dir")
         [ "$parent" = "$dir" ] && break
         dir=$parent
+    done
+    # Explicit env vars are only a fallback for mods outside an engine tree.
+    # `:-` keeps this safe when sourced by a `set -u` script (build_*.sh all do).
+    for candidate in "${KRISTAL_ROOT:-}" "${THRASH_MACHINE_KRISTAL_DIR:-}"; do
+        [ -n "$candidate" ] || continue
+        # THRASH_MACHINE_KRISTAL_DIR defaults to the mod-root clone
+        # .build/Kristal — inside the mod, not a shared host. Skip it.
+        [ "$candidate" = "$THRASH_MACHINE_MOD_DIR/.build/Kristal" ] && continue
+        [ -f "$candidate/main.lua" ] && { printf '%s\n' "$candidate"; return 0; }
     done
     return 1
 }
