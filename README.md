@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/v/release/Bli-AIk/thrash-machine.svg"/> <br>
 <img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
 
-**Thrash Machine** 是一个开箱即用的标准 Lua Kristal v0.10 模板：自带能跑的 starter 地图、Dummy 战斗和对象事件，中文本地化和开发期工具按子模块组织好。
+**Thrash Machine** 是一个开箱即用的标准 Lua Kristal 0.11.0-dev 模板：自带能跑的 starter 地图、Dummy 战斗和对象事件，中文本地化和开发期工具按子模块组织好。
 
 | 简体中文 | English                 |
 | -------- | ----------------------- |
@@ -11,9 +11,9 @@
 
 ## Kristal 版本支持
 
-| `kristal`                                                                                                                  | `thrash-machine` |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23) | v0.0.0           |
+| `kristal`                                                                                                                         | `thrash-machine` |
+| --------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | v0.0.0           |
 
 ## 有什么
 
@@ -70,21 +70,21 @@ Android 打包有**两种模式**：
 
 ### 手动打包
 
-- `just build` —— 同时生成 release/debug `.love` 与 Windows x64 包（老用法，默认固定 Kristal v0.10.0，产出在 `dist/`）
+- `just build` —— 同时生成 release/debug `.love` 与 Windows x64 包（老用法，默认固定 Kristal 0.11.0-dev，产出在 `dist/`）
 - `just build-win` —— 只生成 Windows x64 包
 - `just build-love` —— 只生成 release/debug `.love`，不生成 Windows exe、也不下载 LÖVE
 - `just build-mod` —— 可直接放进 mods/ 的 Mod ZIP（自动剔除开发期工具）
 - `just build-android` —— **编译构建** Android APK（需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
 - `just build-android-wrap` —— **套包构建** Android APK（官方 LÖVE 壳 + 游戏 .love，自动下载工具并重签名；只需 JDK、速度更快，**但是**不能自定义包名/图标/名称，也不能上架 Google Play）
 
-在交互式终端运行 `just build`、`just build-win` 或 `just build-love`（或直接 `./tools/build_standalone.sh`）时，脚本会先询问 Kristal 引擎来源：
+构建默认固定 Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`（`0.11.0-dev`），远程下载使用浅克隆（`--depth 1`），默认克隆到 `.build/Kristal`。若需改用其他来源，在交互式终端设置 `THRASH_MACHINE_KRISTAL_SOURCE=ask` 后运行 `just build`、`just build-win` 或 `just build-love`：
 
 1. 使用本地 Kristal（自动检测 `.build/Kristal`、`KRISTAL_ROOT` 和常见路径）
 2. 自己输入本地路径（Git 检出或普通目录均可）
 3. 从 Git 远程选择 tag（自动列出远程 tag 列表）
 4. 从 Git 远程输入完整 commit hash（40 位十六进制）
 
-远程下载一律使用浅克隆（`--depth 1`），默认克隆到 `.build/Kristal`。CI 和非交互环境不会提问，仍使用 v0.10.0。需要跳过提问时可用环境变量指定：
+CI 与非交互环境同样使用该固定 commit。也可用环境变量指定其他来源：
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` 指定来源
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` 指定本地路径

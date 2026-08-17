@@ -32,10 +32,10 @@ THRASH_MACHINE_ANDROID_EMBED_APK_SHA256="${THRASH_MACHINE_ANDROID_EMBED_APK_SHA2
 THRASH_MACHINE_ANDROID_BUILD_TOOLS_VERSION="${THRASH_MACHINE_ANDROID_BUILD_TOOLS_VERSION:-34.0.0}"
 THRASH_MACHINE_ANDROID_BUILD_TOOLS_DIR="${THRASH_MACHINE_ANDROID_BUILD_TOOLS_DIR:-}"
 
-# Kristal is always fetched non-interactively (tag v0.10.0 by default), so the
-# one-click Windows launcher never sees the interactive source prompt.
-THRASH_MACHINE_KRISTAL_SOURCE="${THRASH_MACHINE_KRISTAL_SOURCE:-tag}"
-THRASH_MACHINE_KRISTAL_REF="${THRASH_MACHINE_KRISTAL_REF:-v0.10.0}"
+# Explicit Kristal source settings keep their normal precedence. Without an
+# override, build_standalone uses the pinned 0.11.0-dev commit without a prompt.
+THRASH_MACHINE_KRISTAL_SOURCE="${THRASH_MACHINE_KRISTAL_SOURCE:-}"
+THRASH_MACHINE_KRISTAL_REF="${THRASH_MACHINE_KRISTAL_REF:-}"
 
 log() {
     printf '[android-wrap] %s\n' "$*" >&2

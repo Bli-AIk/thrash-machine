@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/v/release/Bli-AIk/thrash-machine.svg"/> <br>
 <img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
 
-**Thrash Machine** is a ready-to-use standard Lua Kristal v0.10 template: a playable starter map, Dummy battle and object event out of the box, with Simplified Chinese localization and development tools organized as submodules.
+**Thrash Machine** is a ready-to-use standard Lua Kristal 0.11.0-dev template: a playable starter map, Dummy battle and object event out of the box, with Simplified Chinese localization and development tools organized as submodules.
 
 | English | 简体中文                |
 | ------- | ----------------------- |
@@ -11,9 +11,9 @@
 
 ## Kristal Version Support
 
-| `kristal`                                                                                                                  | `thrash-machine` |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23) | v0.0.0           |
+| `kristal`                                                                                                                         | `thrash-machine` |
+| --------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | v0.0.0           |
 
 ## What's Inside
 
@@ -70,21 +70,21 @@ Android packaging has **two modes**:
 
 ### Manual packaging
 
-- `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal v0.10.0 by default, output in `dist/`)
+- `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal 0.11.0-dev by default, output in `dist/`)
 - `just build-win` — Windows x64 package only
 - `just build-love` — release/debug `.love` only, without Windows executables or a LÖVE download
 - `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
 - `just build-android` — **compile-build** Android APK (needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
 - `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; only a JDK is required and it is faster, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
 
-When `just build`, `just build-win`, or `just build-love` (or `./tools/build_standalone.sh`) runs in an interactive terminal, the script first asks where the Kristal engine should come from:
+Builds pin Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81` (`0.11.0-dev`), shallow-clone remote sources (`--depth 1`), and use `.build/Kristal` by default. To choose another source interactively, run `just build`, `just build-win`, or `just build-love` with `THRASH_MACHINE_KRISTAL_SOURCE=ask`:
 
 1. Use a local Kristal checkout (auto-detects `.build/Kristal`, `KRISTAL_ROOT`, and common paths)
 2. Enter a local path yourself (a Git checkout or a plain directory both work)
 3. Pick a tag from the Git remote (the tag list is fetched and shown)
 4. Enter a full commit hash from the Git remote (40 hex characters)
 
-All remote downloads use shallow clones (`--depth 1`), and the default checkout location is `.build/Kristal`. CI and non-interactive environments do not prompt and keep using v0.10.0. To skip the prompt, set:
+CI and non-interactive environments use the same pinned commit. To select another source explicitly, set:
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit`
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` for a local path

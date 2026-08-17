@@ -1,6 +1,6 @@
 # Kristal virtualkeyboard
 
-This is an optional Kristal v0.10 library for Android builds. It provides a
+This is an optional Kristal 0.11.0-dev library for Android builds. It provides a
 touch joystick or button layout that feeds normal Kristal `Input` key events.
 
 The library is enabled by default only when `love.system.getOS()` returns
@@ -43,7 +43,8 @@ and `c` buttons. A mod can also call `VirtualKeyboard:setVisible(false)` or
 `VirtualKeyboard:toggle()` at runtime. `toggle_key` is disabled by default;
 Android Back is intentionally not used as the control toggle.
 
-The adapter draws in Kristal's side areas when available, falls back to the
+The adapter targets Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`
+(`0.11.0-dev`). It draws in Kristal's side areas when available, falls back to the
 existing 640x480 game canvas with the same edge spacing, and converts touch
 coordinates through Kristal's game scale and side offsets. It is not an API
 compatibility layer for Kristal or LÖVE on Android.
