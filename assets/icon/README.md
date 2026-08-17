@@ -8,7 +8,7 @@ file or the required tool is missing, so the default build is unchanged.
 
 ```
 assets/icon/
-├── window_icon.png      # Game window icon → copied to the mod root + setWindowTitleAndIcon
+├── window_icon.png      # Game window icon → copied to the project root + setWindowTitleAndIcon
 ├── win/                 # Windows .exe icon
 │   ├── icon.ico         #   ready-made icon (optional shortcut)
 │   ├── 16x16.png        #   ...or a set of sizes (16/32/48/64/128/256 px)
@@ -35,8 +35,8 @@ assets/icon/
 | Android APK | none | density fallback is automatic |
 
 - Windows: run `rcedit` directly. Linux/macOS: `sudo apt install wine icoutils` (or equivalent).
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` auto-downloads rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the mod root is the fallback).
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` auto-downloads rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the project root is the fallback).
 - Missing Android densities fall back to the nearest available one.
-- The whole `assets/icon/` directory is excluded from `.love` / mod packages;
-  `window_icon.png` is copied to the mod root during the build so the engine
+- The whole `assets/icon/` directory is excluded from `.love` / project packages;
+  `window_icon.png` is copied to the project root during the build so the engine
   can find it.

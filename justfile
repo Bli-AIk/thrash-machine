@@ -1,9 +1,9 @@
-# Run the mod with a local Kristal checkout and shared debug tools.
-# zh_hans: 用本地 Kristal 引擎启动 mod（带共享调试工具）
+# Run the project with a local Kristal checkout and shared debug tools.
+# zh_hans: 用本地 Kristal 引擎启动项目（带共享调试工具）
 default: test
 
-# Run the mod with debug launcher arguments.
-# zh_hans: 启动游戏，可带调试参数（如 -w 波次、-tp 初始 TP）
+# Run the project with debug launcher arguments.
+# zh_hans: 启动项目，可带调试参数（如 -w 波次、-tp 初始 TP）
 run *args:
     @just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
 
@@ -22,8 +22,8 @@ gui-dev:
 gui-dev-release:
     @just --justfile libraries/kristal-debug-tools/justfile gui-dev-release
 
-# Run the mod's test suite.
-# zh_hans: 运行 mod 测试
+# Run the project's test suite.
+# zh_hans: 运行项目测试
 test:
     @make test
 
@@ -50,10 +50,10 @@ build:
 # Compile the Android APK from source (full build; needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653).
 # A missing JDK 17 or Android SDK (API 34 + build-tools 34.0.0 + NDK 25.2.9519653) is
 # auto-downloaded into the shared tools dir next to the Kristal engine on first use
-# (<kristal-root>/.tools/jdk17 / <kristal-root>/.tools/android-sdk; mod-root .tools as fallback).
+# (<kristal-root>/.tools/jdk17 / <kristal-root>/.tools/android-sdk; project-root .tools as fallback).
 # Uses the pinned Kristal commit by default; set THRASH_MACHINE_KRISTAL_SOURCE=ask
 # to choose a local path, tag, commit, or branch interactively.
-# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 Kristal 根 .tools/jdk17 / .tools/android-sdk，无引擎时回退 mod 根 .tools；默认使用固定 Kristal commit；设 THRASH_MACHINE_KRISTAL_SOURCE=ask 可交互选择本地路径、tag、commit 或分支）
+# zh_hans: 编译构建 Android APK（完整构建，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；缺 JDK/SDK 时首次自动下载到 Kristal 根 .tools/jdk17 / .tools/android-sdk，无引擎时回退 project 根 .tools；默认使用固定 Kristal commit；设 THRASH_MACHINE_KRISTAL_SOURCE=ask 可交互选择本地路径、tag、commit 或分支）
 build-android:
     @bash ./tools/build_android.sh
 
@@ -65,8 +65,8 @@ build-android:
 build-android-wrap:
     @bash ./tools/build_android_wrap.sh
 
-# Build the mod-only distribution.
-# zh_hans: 构建 mod 单包分发版
+# Build the project-only distribution (recipe name retained for Kristal compatibility).
+# zh_hans: 构建项目单包分发版（recipe 名称为兼容 Kristal 保留）
 build-mod:
     @bash ./.github/scripts/build_mod.sh
 

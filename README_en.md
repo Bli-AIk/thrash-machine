@@ -73,7 +73,7 @@ Android packaging has **two modes**:
 - `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal 0.11.0-dev by default, output in `dist/`)
 - `just build-win` — Windows x64 package only
 - `just build-love` — release/debug `.love` only, without Windows executables or a LÖVE download
-- `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
+- `just build-mod` — a project ZIP for `mods/` (dev tools stripped; the recipe and filename keep Kristal's compatibility suffix)
 - `just build-android` — **compile-build** Android APK (needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
 - `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; only a JDK is required and it is faster, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
 
@@ -120,7 +120,7 @@ GitHub's automated builds check that the project packages correctly on every pus
 
 ### Distribution matrix
 
-|                                      | Windows            | `.love`                | Mod                            | Android compile                           | Android wrap                        |
+|                                      | Windows            | `.love`                | Project                        | Android compile                           | Android wrap                        |
 | ------------------------------------ | ------------------ | ---------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------- |
 | Recipe                               | `just build-win`   | `just build-love`      | `just build-mod`               | `just build-android`                      | `just build-android-wrap`           |
 | Output                               | `dist/*-win64.zip` | `dist/*.love`          | `dist/*-mod.zip`               | `dist/*-android.apk`                      | `dist/*-android-wrap.apk`           |
@@ -128,13 +128,13 @@ GitHub's automated builds check that the project packages correctly on every pus
 | Build deps                           | git, LÖVE, curl    | LÖVE                   | git, LÖVE                      | JDK 17 + SDK/NDK                          | A JDK only                          |
 | Custom package id / icon / name      | —                  | —                      | —                              | ✅ env overrides                          | ❌ official shell                   |
 | Modify the LÖVE engine / native code | —                  | —                      | —                              | ✅                                        | ❌                                  |
-| Best for                             | Desktop players    | Unix users/developers  | Players installing mods        | Official distribution, deep customization | Casual users, quick personal builds |
+| Best for                             | Desktop players    | Unix users/developers  | Players installing projects    | Official distribution, deep customization | Casual users, quick personal builds |
 
 ### One-click packaging on Windows
 
 Double-click **`tools\build_android.cmd`** in the project root and pick:
 
-1. **Quick wrap build** — automatically installs whatever is missing into the shared `.tools\` next to the Kristal engine (PortableGit Git Bash, JDK 17, LÖVE 11.5; the mod root is the fallback) and produces the APK;
+1. **Quick wrap build** — automatically installs whatever is missing into the shared `.tools\` next to the Kristal engine (PortableGit Git Bash, JDK 17, LÖVE 11.5; the project root is the fallback) and produces the APK;
 2. **Full compile build** — additionally downloads the Android cmdline-tools/SDK/NDK (first run ~1.5 GB).
 
 It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
@@ -146,7 +146,7 @@ just build-android-wrap   # wrap build (only a JDK is needed; a missing JDK auto
 just build-android        # compile build (needs the full Android SDK/NDK; the JDK is auto-supplemented too)
 ```
 
-JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across mods; the mod root `.tools` is the fallback when no engine is found. `THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
+JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across projects; the project root `.tools` is the fallback when no engine is found. `THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
 
 ## Custom Icons (Optional)
 
@@ -154,7 +154,7 @@ The build scripts read custom icons from `assets/icon/` by **directory conventio
 
 ```
 assets/icon/
-├── window_icon.png      # Game window icon → copied to the mod root + setWindowTitleAndIcon=true
+├── window_icon.png      # Game window icon → copied to the project root + setWindowTitleAndIcon=true
 ├── win/                 # Windows exe icon
 │   ├── icon.ico         #   ready-made .ico (optional shortcut)
 │   └── 16x16.png 32x32.png 48x48.png 64x64.png 128x128.png 256x256.png
@@ -164,13 +164,13 @@ assets/icon/
 
 | Target      | Tools required                                                                 | Notes                                                                                |
 | ----------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Game window | none                                                                           | copied to the mod root automatically (the engine only reads `window_icon.png` there) |
+| Game window | none                                                                           | copied to the project root automatically (the engine only reads `window_icon.png` there) |
 | Windows exe | `rcedit` (needs `wine` on Linux) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing                                                  |
 | Android APK | none                                                                           | per-density icons with automatic nearest-density fallback                            |
 
 - Under `win/` drop a set of size-named PNGs (32 + 256 gives the best result) or a ready-made `icon.ico`; the script prefers an existing `.ico`.
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the mod root is the fallback) automatically.
-- The whole `assets/icon/` directory is excluded from `.love` / mod packages; `window_icon.png` is copied to the mod root during the build and then packaged.
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the project root is the fallback) automatically.
+- The whole `assets/icon/` directory is excluded from `.love` / project packages; `window_icon.png` is copied to the project root during the build and then packaged.
 - Paths can be overridden: `THRASH_MACHINE_ICON_DIR`, `THRASH_MACHINE_WINDOW_ICON`, `THRASH_MACHINE_WIN_ICON_DIR`, `THRASH_MACHINE_RCEDit`, `THRASH_MACHINE_ANDROID_ICON_DIR`, `THRASH_MACHINE_ANDROID_ICON`.
 
 ## Commit Convention

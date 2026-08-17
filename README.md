@@ -73,7 +73,7 @@ Android 打包有**两种模式**：
 - `just build` —— 同时生成 release/debug `.love` 与 Windows x64 包（老用法，默认固定 Kristal 0.11.0-dev，产出在 `dist/`）
 - `just build-win` —— 只生成 Windows x64 包
 - `just build-love` —— 只生成 release/debug `.love`，不生成 Windows exe、也不下载 LÖVE
-- `just build-mod` —— 可直接放进 mods/ 的 Mod ZIP（自动剔除开发期工具）
+- `just build-mod` —— 可直接放进 `mods/` 的项目 ZIP（自动剔除开发期工具；recipe 和文件名保留 Kristal 兼容后缀）
 - `just build-android` —— **编译构建** Android APK（需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
 - `just build-android-wrap` —— **套包构建** Android APK（官方 LÖVE 壳 + 游戏 .love，自动下载工具并重签名；只需 JDK、速度更快，**但是**不能自定义包名/图标/名称，也不能上架 Google Play）
 
@@ -120,7 +120,7 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 
 ### 分发产物对比
 
-|                         | Windows 版         | `.love` 版           | Mod 版                      | Android 编译版       | Android 套包版            |
+|                         | Windows 版         | `.love` 版           | Project 版                  | Android 编译版       | Android 套包版            |
 | ----------------------- | ------------------ | -------------------- | --------------------------- | -------------------- | ------------------------- |
 | 命令                    | `just build-win`   | `just build-love`    | `just build-mod`            | `just build-android` | `just build-android-wrap` |
 | 产物                    | `dist/*-win64.zip` | `dist/*.love`        | `dist/*-mod.zip`            | `dist/*-android.apk` | `dist/*-android-wrap.apk` |
@@ -128,13 +128,13 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 | 构建依赖                | git、LÖVE、curl    | LÖVE                 | git、LÖVE                   | JDK 17 + SDK/NDK     | 只需 JDK                  |
 | 自定义包名/图标/名称    | —                  | —                    | —                           | ✅ 环境变量可覆盖    | ❌ 沿用官方壳             |
 | 修改 LÖVE 引擎/原生代码 | —                  | —                    | —                           | ✅ 可改              | ❌ 不能                   |
-| 适合                    | 桌面玩家           | Unix 系用户/开发者   | 玩家安装 mod                | 正式分发、深度定制   | 普通玩家快速自用          |
+| 适合                    | 桌面玩家           | Unix 系用户/开发者   | 玩家安装项目                | 正式分发、深度定制   | 普通玩家快速自用          |
 
 ### Windows 一键打包
 
 双击项目根目录的 **`tools\build_android.cmd`**，按提示选择：
 
-1. **快速套包构建** —— 自动下载/安装缺失的 Git Bash（PortableGit）、JDK 17、LÖVE 到 Kristal 引擎旁的共享 `.tools\`（无引擎时回退 mod 根），然后直接出包；
+1. **快速套包构建** —— 自动下载/安装缺失的 Git Bash（PortableGit）、JDK 17、LÖVE 到 Kristal 引擎旁的共享 `.tools\`（无引擎时回退项目根），然后直接出包；
 2. **完整编译构建** —— 额外自动下载 Android cmdline-tools/SDK/NDK（首次约 1.5 GB）。
 
 也支持带参数运行：`tools\build_android.cmd wrap` 或 `tools\build_android.cmd compile`。构建完成后会自动打开 `dist\` 目录。
@@ -146,7 +146,7 @@ just build-android-wrap   # 套包构建（只需 JDK，缺 JDK 时自动下载 
 just build-android        # 编译构建（需完整 Android SDK/NDK；JDK 同样自动补齐）
 ```
 
-JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到共享 `.tools/jdk17/`（位于 Kristal 引擎旁，多模共享；无引擎时回退 mod 根 `.tools`。`THRASH_MACHINE_FETCH_JDK=0` 禁用自动下载；`THRASH_MACHINE_JDK_VERSION` 改版本号）。
+JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到共享 `.tools/jdk17/`（位于 Kristal 引擎旁，多项目共享；无引擎时回退项目根 `.tools`。`THRASH_MACHINE_FETCH_JDK=0` 禁用自动下载；`THRASH_MACHINE_JDK_VERSION` 改版本号）。
 
 ## 自定义图标（可选）
 
@@ -154,7 +154,7 @@ JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指�
 
 ```
 assets/icon/
-├── window_icon.png      # 游戏窗口图标 → 构建时复制到 mod 根目录并置 setWindowTitleAndIcon=true
+├── window_icon.png      # 游戏窗口图标 → 构建时复制到项目根目录并置 setWindowTitleAndIcon=true
 ├── win/                 # Windows exe 图标
 │   ├── icon.ico         #   现成 .ico（可选捷径）
 │   └── 16x16.png 32x32.png 48x48.png 64x64.png 128x128.png 256x256.png
@@ -164,13 +164,13 @@ assets/icon/
 
 | 目标        | 所需工具                                                          | 说明                                                        |
 | ----------- | ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| 游戏窗口    | 无                                                                | 自动复制到 mod 根目录（引擎只认根目录的 `window_icon.png`） |
+| 游戏窗口    | 无                                                                | 自动复制到项目根目录（引擎只认根目录的 `window_icon.png`） |
 | Windows exe | `rcedit`（Linux 需 `wine`）+ `icotool`/ImageMagick 合成 PNG | 工具缺失时跳过并警告，不影响构建                            |
 | Android APK | 无                                                                | 各 density 独立成图，缺失的自动用最近的补位                 |
 
 - `win/` 下放一组尺寸 PNG（至少 32 + 256 效果最佳）或直接放 `icon.ico`；脚本优先用现成 `.ico`。
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` 时脚本自动下载 rcedit 到共享 `.tools/rcedit/`（Kristal 引擎旁，无引擎时回退 mod 根）。
-- 完整 `assets/icon/` 目录会被排除出 `.love` / mod 包；`window_icon.png` 会在构建时复制到 mod 根目录后进包。
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` 时脚本自动下载 rcedit 到共享 `.tools/rcedit/`（Kristal 引擎旁，无引擎时回退项目根）。
+- 完整 `assets/icon/` 目录会被排除出 `.love` / 项目包；`window_icon.png` 会在构建时复制到项目根目录后进包。
 - 可用环境变量覆盖路径：`THRASH_MACHINE_ICON_DIR`、`THRASH_MACHINE_WINDOW_ICON`、`THRASH_MACHINE_WIN_ICON_DIR`、`THRASH_MACHINE_RCEDit`、`THRASH_MACHINE_ANDROID_ICON_DIR`、`THRASH_MACHINE_ANDROID_ICON`。
 
 ## 提交规范

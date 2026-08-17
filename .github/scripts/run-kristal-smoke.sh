@@ -23,10 +23,10 @@ test -d "$KRISTAL"
 test -d "$KRISTAL/mods"
 
 if [ -e "$mod_path" ]; then
-    # The mod already lives inside this engine checkout (the common dev layout
-    # where the engine is the parent of the mod). Smoke-test it in place; do
+    # The project already lives inside this engine checkout (the common dev layout
+    # where the engine is the parent of the project). Smoke-test it in place; do
     # not copy over a live working tree.
-    printf 'mod %s already present in engine — testing in place\n' "$mod_id" >&2
+    printf 'project %s already present in engine — testing in place\n' "$mod_id" >&2
 else
     mkdir "$mod_path"
     copied=1
