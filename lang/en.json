@@ -26,7 +26,7 @@
  "world_room1_starwalker_2": "* I'm the original   [color:yellow][name:starwalker][color:reset]",
  "world_room1_savepoint_1": "* Silence echoes in the darkness\nof this familiar-yet-different\nscenery.",
  "world_room1_savepoint_2": "* The power of avoiding copying\nofficial music shines within\nyou.",
- "world_room1_wall_guardian_1": "* I Am the [name:wall] Guardian.[wait:5]\n* This [name:wall] is Off Limits for you\nno-good wall slammers.",
+ "world_room1_wall_guardian_1": "* I am the wall guardian.[wait:5]\n* This wall is off limits for you\nno-good wall slammers.",
  "item_ultimate_candy_name": "UltimatCandy",
  "item_ultimate_candy_useName": "ULTIMATE CANDY",
  "item_ultimate_candy_effect": "Best\nhealing",

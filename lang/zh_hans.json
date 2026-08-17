@@ -26,7 +26,7 @@
  "world_room1_starwalker_2": "* 我是正牌的   [color:yellow][name:starwalker][color:reset]",
  "world_room1_savepoint_1": "* 寂静在这片熟悉却又陌生的\n黑暗景色中\n回响。",
  "world_room1_savepoint_2": "* 避免复制官方音乐的力量\n在你心中闪耀。",
- "world_room1_wall_guardian_1": "* 吾乃[name:wall]守卫。[wait:5]\n* 此[name:wall]禁止你们这些\n没规矩的撞墙者靠近。",
+ "world_room1_wall_guardian_1": "* 吾乃墙壁守卫。[wait:5]\n* 此墙禁止你们这些\n没规矩的撞墙者靠近。",
  "item_ultimate_candy_name": "终极糖果",
  "item_ultimate_candy_useName": "终极糖果",
  "item_ultimate_candy_effect": "最佳\n治疗",
