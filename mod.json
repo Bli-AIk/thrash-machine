@@ -7,7 +7,7 @@
     "subtitle": "Kristal Lua template",
 
     // The version of your project.
-    "version": "v0.1.0", // x-release-please-version
+    "version": "v0.2.0", // x-release-please-version
     // What version of the engine your project was made with.
     "engineVer": "v0.11.0-dev",
 
