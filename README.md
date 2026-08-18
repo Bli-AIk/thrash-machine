@@ -11,9 +11,10 @@
 
 ## Kristal 版本支持
 
-| `kristal`                                                                                                                  | `thrash-machine` |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23) | v0.0.0           |
+| `kristal`                                                                                                                    | `thrash-machine` |
+| -------------------------------------------------------------------------------------------------------------------------------| ------ |
+| [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | 0.2.0  |
+| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23)    | v0.0.0 |
 
 ## 有什么
 
