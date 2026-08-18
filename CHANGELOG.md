@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.0](https://github.com/Bli-AIk/thrash-machine/compare/v0.1.0...v0.2.0) (2026-08-18)
+
+
+### Features
+
+* **gui:** align tools with Kristal 0.11 ([b359c48](https://github.com/Bli-AIk/thrash-machine/commit/b359c48e1cf7320f63f0ed9920f5342eba6f0351))
+* support Kristal 0.11.0-dev ([183e8bf](https://github.com/Bli-AIk/thrash-machine/commit/183e8bfb978077f791db510e03ddcf0d24d8e09c))
+* update chapter from 4 to 5 in mod.json configuration ([da52aa8](https://github.com/Bli-AIk/thrash-machine/commit/da52aa8c544b3d7089c97901f39d41804a16ff51))
+
+
+### Bug Fixes
+
+* **build:** resolve the local engine fork first (local-first) ([0ef6abe](https://github.com/Bli-AIk/thrash-machine/commit/0ef6abe6a3fe494b3a68bbfcbc21fa5a95da8560))
+* **cjk:** halve CJK spacing in dark config menu ([7d18da1](https://github.com/Bli-AIk/thrash-machine/commit/7d18da14f292f79179f8e149e71fa7279f78773f))
+* **gui-dev:** allow dirty GUI source ([dc914ec](https://github.com/Bli-AIk/thrash-machine/commit/dc914ec3739182d90fc51a4f2373e7a259dee717))
+* **i18n:** align language settings menu ([acb653b](https://github.com/Bli-AIk/thrash-machine/commit/acb653b40ceeab610d27eee89626c0767964faa7))
+* **i18n:** balance language settings layout ([52a4cb9](https://github.com/Bli-AIk/thrash-machine/commit/52a4cb98c497abd56cc9ff38d3318e7a6ab40f7d))
+* **i18n:** bump kristal-i18n (healing stat, dark menu spacing) ([c267162](https://github.com/Bli-AIk/thrash-machine/commit/c2671621c59bdae1ff42d8d68815938548bc48b4))
+* **i18n:** localize healing and dog power stats ([422dc88](https://github.com/Bli-AIk/thrash-machine/commit/422dc883f016906f13b95c69514627e4baf78ca8))
+* **i18n:** shorten names label ([45630e7](https://github.com/Bli-AIk/thrash-machine/commit/45630e78694d2fe44de66faa55b9c7b5852f9860))
+* **i18n:** translate debug invincibility options ([9f789f4](https://github.com/Bli-AIk/thrash-machine/commit/9f789f466db03dea6d4c66286ca0a9297c060c6d))
+* **lang:** drop wall name entry, inline guard dialogue ([3424f26](https://github.com/Bli-AIk/thrash-machine/commit/3424f26cdfda1cd681ea296b5f2aace7a0151417))
+
 ## [0.1.0](https://github.com/Bli-AIk/thrash-machine/compare/v0.0.0...v0.1.0) (2026-08-15)
 
 
