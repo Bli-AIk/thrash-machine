@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/v/release/Bli-AIk/thrash-machine.svg"/> <br>
 <img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
 
-**Thrash Machine** is a ready-to-use standard Lua Kristal v0.10 template: a playable starter map, Dummy battle and object event out of the box, with Simplified Chinese localization and development tools organized as submodules.
+**Thrash Machine** is a ready-to-use Kristal template: a playable starter map, Dummy battle and object event out of the box, with Simplified Chinese localization and development tools organized as submodules.
 
 | English | 简体中文                |
 | ------- | ----------------------- |
@@ -18,7 +18,7 @@
 ## What's Inside
 
 - Playable starter map + Dummy battle + object event
-- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into the shared `.tools\gui\` next to the Kristal engine, no manual install); run the game, pass debug args, and package — all by clicking buttons
+- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into the shared `.tools\gui\` next to the Kristal engine, no manual install); it selects `0.10.0 -> v0.1.5` or `0.11.0-dev -> v0.2.0` from the engine `VERSION` and clearly rejects other versions
 - English / Simplified Chinese via kristal-i18n, switchable in-game
 - Dev tools as submodules, stripped from release packages
 
@@ -70,21 +70,21 @@ Android packaging has **two modes**:
 
 ### Manual packaging
 
-- `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal v0.10.0 by default, output in `dist/`)
+- `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal 0.11.0-dev by default, output in `dist/`)
 - `just build-win` — Windows x64 package only
 - `just build-love` — release/debug `.love` only, without Windows executables or a LÖVE download
-- `just build-mod` — a mod ZIP for `mods/` (dev tools stripped)
+- `just build-mod` — a project ZIP for `mods/` (dev tools stripped; the recipe and filename keep Kristal's compatibility suffix)
 - `just build-android` — **compile-build** Android APK (needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
 - `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; only a JDK is required and it is faster, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
 
-When `just build`, `just build-win`, or `just build-love` (or `./tools/build_standalone.sh`) runs in an interactive terminal, the script first asks where the Kristal engine should come from:
+Builds pin Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81` (`0.11.0-dev`), shallow-clone remote sources (`--depth 1`), and use `.build/Kristal` by default. To choose another source interactively, run `just build`, `just build-win`, or `just build-love` with `THRASH_MACHINE_KRISTAL_SOURCE=ask`:
 
 1. Use a local Kristal checkout (auto-detects `.build/Kristal`, `KRISTAL_ROOT`, and common paths)
 2. Enter a local path yourself (a Git checkout or a plain directory both work)
 3. Pick a tag from the Git remote (the tag list is fetched and shown)
 4. Enter a full commit hash from the Git remote (40 hex characters)
 
-All remote downloads use shallow clones (`--depth 1`), and the default checkout location is `.build/Kristal`. CI and non-interactive environments do not prompt and keep using v0.10.0. To skip the prompt, set:
+CI and non-interactive environments use the same pinned commit. To select another source explicitly, set:
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit`
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` for a local path
@@ -93,7 +93,7 @@ All remote downloads use shallow clones (`--depth 1`), and the default checkout 
 
 ### No standalone `just`? Use `tools/just` (Windows: zero-install, GUI-embedded)
 
-The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into the shared `.tools/gui/` (next to the Kristal engine) using the same URL/SHA256 scheme as `gui.cmd`, so a pristine machine works out of the box.
+The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into the shared `.tools/gui/` next to the Kristal engine with the same fixed release mapping and URL/SHA256 scheme as `gui.cmd`: `0.10.0 -> v0.1.5`, `0.11.0-dev -> v0.2.0`; other engine versions stop with a clear error.
 
 ```sh
 tools/just build-love     # Git Bash
@@ -112,7 +112,7 @@ The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just 
 1. Expand the "RUN LIST (ADVANCED)" panel → **PROJECT BUILDS** group
 2. Click `build` / `build-mod` / `build-android` — the task runs in a separate terminal window with live output
 
-Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it). If the latest release was just cut while CI is still building (assets not uploaded yet), the script falls back to the previous release; if the previous release was already downloaded, it asks before using the cached copy.
+Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it). The launcher downloads only the fixed GUI release for the current engine version: it never requests `latest` or falls back to a different release. Retry later when the selected release has not uploaded its assets yet.
 
 GitHub's automated builds check that the project packages correctly on every push and merge; when a new version is released, the packaged files (including the Windows x64 package, the .love package, and the **compiled APK**) are uploaded to the GitHub Release page automatically. The **wrap APK is not built automatically by default** — enable it by checking `build_android_wrap` when triggering a build manually on GitHub. Don't want to install JDK or Android SDK on your own machine? Just merge the version-release PR on GitHub — packaging and uploading are fully automatic.
 
@@ -120,7 +120,7 @@ GitHub's automated builds check that the project packages correctly on every pus
 
 ### Distribution matrix
 
-|                                      | Windows            | `.love`                | Mod                            | Android compile                           | Android wrap                        |
+|                                      | Windows            | `.love`                | Project                        | Android compile                           | Android wrap                        |
 | ------------------------------------ | ------------------ | ---------------------- | ------------------------------ | ----------------------------------------- | ----------------------------------- |
 | Recipe                               | `just build-win`   | `just build-love`      | `just build-mod`               | `just build-android`                      | `just build-android-wrap`           |
 | Output                               | `dist/*-win64.zip` | `dist/*.love`          | `dist/*-mod.zip`               | `dist/*-android.apk`                      | `dist/*-android-wrap.apk`           |
@@ -128,13 +128,13 @@ GitHub's automated builds check that the project packages correctly on every pus
 | Build deps                           | git, LÖVE, curl    | LÖVE                   | git, LÖVE                      | JDK 17 + SDK/NDK                          | A JDK only                          |
 | Custom package id / icon / name      | —                  | —                      | —                              | ✅ env overrides                          | ❌ official shell                   |
 | Modify the LÖVE engine / native code | —                  | —                      | —                              | ✅                                        | ❌                                  |
-| Best for                             | Desktop players    | Unix users/developers  | Players installing mods        | Official distribution, deep customization | Casual users, quick personal builds |
+| Best for                             | Desktop players    | Unix users/developers  | Players installing projects    | Official distribution, deep customization | Casual users, quick personal builds |
 
 ### One-click packaging on Windows
 
 Double-click **`tools\build_android.cmd`** in the project root and pick:
 
-1. **Quick wrap build** — automatically installs whatever is missing into the shared `.tools\` next to the Kristal engine (PortableGit Git Bash, JDK 17, LÖVE 11.5; the mod root is the fallback) and produces the APK;
+1. **Quick wrap build** — automatically installs whatever is missing into the shared `.tools\` next to the Kristal engine (PortableGit Git Bash, JDK 17, LÖVE 11.5; the project root is the fallback) and produces the APK;
 2. **Full compile build** — additionally downloads the Android cmdline-tools/SDK/NDK (first run ~1.5 GB).
 
 It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
@@ -146,7 +146,7 @@ just build-android-wrap   # wrap build (only a JDK is needed; a missing JDK auto
 just build-android        # compile build (needs the full Android SDK/NDK; the JDK is auto-supplemented too)
 ```
 
-JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across mods; the mod root `.tools` is the fallback when no engine is found. `THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
+JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across projects; the project root `.tools` is the fallback when no engine is found. `THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
 
 ## Custom Icons (Optional)
 
@@ -154,7 +154,7 @@ The build scripts read custom icons from `assets/icon/` by **directory conventio
 
 ```
 assets/icon/
-├── window_icon.png      # Game window icon → copied to the mod root + setWindowTitleAndIcon=true
+├── window_icon.png      # Game window icon → copied to the project root + setWindowTitleAndIcon=true
 ├── win/                 # Windows exe icon
 │   ├── icon.ico         #   ready-made .ico (optional shortcut)
 │   └── 16x16.png 32x32.png 48x48.png 64x64.png 128x128.png 256x256.png
@@ -164,13 +164,13 @@ assets/icon/
 
 | Target      | Tools required                                                                 | Notes                                                                                |
 | ----------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Game window | none                                                                           | copied to the mod root automatically (the engine only reads `window_icon.png` there) |
+| Game window | none                                                                           | copied to the project root automatically (the engine only reads `window_icon.png` there) |
 | Windows exe | `rcedit` (needs `wine` on Linux) + `icotool`/ImageMagick to combine PNGs | skipped with a warning when missing                                                  |
 | Android APK | none                                                                           | per-density icons with automatic nearest-density fallback                            |
 
 - Under `win/` drop a set of size-named PNGs (32 + 256 gives the best result) or a ready-made `icon.ico`; the script prefers an existing `.ico`.
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the mod root is the fallback) automatically.
-- The whole `assets/icon/` directory is excluded from `.love` / mod packages; `window_icon.png` is copied to the mod root during the build and then packaged.
+- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` makes the script download rcedit into the shared `.tools/rcedit/` (next to the Kristal engine; the project root is the fallback) automatically.
+- The whole `assets/icon/` directory is excluded from `.love` / project packages; `window_icon.png` is copied to the project root during the build and then packaged.
 - Paths can be overridden: `THRASH_MACHINE_ICON_DIR`, `THRASH_MACHINE_WINDOW_ICON`, `THRASH_MACHINE_WIN_ICON_DIR`, `THRASH_MACHINE_RCEDit`, `THRASH_MACHINE_ANDROID_ICON_DIR`, `THRASH_MACHINE_ANDROID_ICON`.
 
 ## Commit Convention

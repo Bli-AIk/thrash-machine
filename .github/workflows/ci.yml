@@ -36,7 +36,7 @@ jobs:
         run: THRASH_MACHINE_OUTPUT_DIR=dist-win just build-win
       - name: Build .love-only package
         run: THRASH_MACHINE_OUTPUT_DIR=dist-love just build-love
-      - name: Build Mod package
+      - name: Build project package
         run: ./.github/scripts/build_mod.sh
       - name: Run Kristal smoke test
         run: KRISTAL="$PWD/.build/Kristal" make test-kristal
@@ -66,11 +66,11 @@ jobs:
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
           # Custom-icon contract: build-time icon sources never leak into packages.
-          # Inside the .love the mod lives under mods/<id>/, so the leaked path
+          # Inside the .love the project lives under mods/<id>/, so the leaked path
           # would be mods/thrash-machine/assets/icon/ — not a root-level one.
           test -z "$(unzip -Z1 dist/thrash-machine-release.love | grep '^mods/thrash-machine/assets/icon/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^assets/icon/' || true)"
-          # When a window icon is provided, it must land at the mod root and enable the flag.
+          # When a window icon is provided, it must land at the project root and enable the flag.
           if [ -f assets/icon/window_icon.png ]; then
             unzip -p dist/thrash-machine-release.love mods/thrash-machine/mod.json \
               | grep -q '"setWindowTitleAndIcon": true'

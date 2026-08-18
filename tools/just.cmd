@@ -1,8 +1,8 @@
 @echo off
 rem tools\just.cmd - run the mod's justfile recipes from cmd/PowerShell/Explorer.
-rem Delegates to tools\just (the bash wrapper), which uses the debug-tools GUI's
-rem embedded just on Windows, so no standalone just install is needed. Requires
-rem Git Bash (the build scripts need bash/tar/curl anyway).
+rem Delegates to tools\just (the bash wrapper), which selects the GUI sidecar
+rem from the detected Kristal VERSION. No standalone just install is needed.
+rem Requires Git Bash (the build scripts need bash/tar/curl anyway).
 setlocal EnableExtensions
 set "BASH="
 for %%P in ("%ProgramFiles%\Git\bin\bash.exe" "%ProgramFiles(x86)%\Git\bin\bash.exe" "%LocalAppData%\Programs\Git\bin\bash.exe") do (

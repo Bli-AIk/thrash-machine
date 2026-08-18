@@ -9,9 +9,9 @@ THRASH_MACHINE_BUILD_ROOT="${THRASH_MACHINE_BUILD_ROOT:-$THRASH_MACHINE_MOD_DIR/
 THRASH_MACHINE_OUTPUT_DIR="${THRASH_MACHINE_OUTPUT_DIR:-$THRASH_MACHINE_MOD_DIR/dist}"
 THRASH_MACHINE_CACHE_DIR="${THRASH_MACHINE_CACHE_DIR:-$THRASH_MACHINE_MOD_DIR/.build/cache}"
 
-# Remember what the user actually set before we fill in defaults. This lets
-# the interactive prompt treat an explicit KRISTAL_ROOT/THRASH_MACHINE_KRISTAL_DIR
-# as a deliberate local source while still asking when nothing is configured.
+# Remember what the user actually set before we fill in defaults. This keeps
+# an explicit KRISTAL_ROOT/THRASH_MACHINE_KRISTAL_DIR as a deliberate local
+# source while an unconfigured build uses the pinned commit below.
 THRASH_MACHINE_KRISTAL_REF_ENV="${THRASH_MACHINE_KRISTAL_REF:-}"
 THRASH_MACHINE_KRISTAL_EXPECTED_VERSION_ENV="${THRASH_MACHINE_KRISTAL_EXPECTED_VERSION:-}"
 THRASH_MACHINE_KRISTAL_DIR_ENV="${THRASH_MACHINE_KRISTAL_DIR:-}"
@@ -19,8 +19,8 @@ KRISTAL_ROOT_ENV="${KRISTAL_ROOT:-}"
 THRASH_MACHINE_KRISTAL_VERIFY_VERSION_ENV="${THRASH_MACHINE_KRISTAL_VERIFY_VERSION:-}"
 
 THRASH_MACHINE_KRISTAL_REPO="${THRASH_MACHINE_KRISTAL_REPO:-https://github.com/KristalTeam/Kristal.git}"
-THRASH_MACHINE_KRISTAL_REF="${THRASH_MACHINE_KRISTAL_REF:-v0.10.0}"
-THRASH_MACHINE_KRISTAL_EXPECTED_VERSION="${THRASH_MACHINE_KRISTAL_EXPECTED_VERSION:-0.10.0}"
+THRASH_MACHINE_KRISTAL_REF="${THRASH_MACHINE_KRISTAL_REF:-f62afea63ccab02f468c24ac0d096bd8a2c9aa81}"
+THRASH_MACHINE_KRISTAL_EXPECTED_VERSION="${THRASH_MACHINE_KRISTAL_EXPECTED_VERSION:-0.11.0-dev}"
 THRASH_MACHINE_KRISTAL_DIR="${THRASH_MACHINE_KRISTAL_DIR:-${KRISTAL_ROOT:-$THRASH_MACHINE_MOD_DIR/.build/Kristal}}"
 THRASH_MACHINE_KRISTAL_SOURCE="${THRASH_MACHINE_KRISTAL_SOURCE:-}"
 THRASH_MACHINE_KRISTAL_VERIFY_VERSION="${THRASH_MACHINE_KRISTAL_VERIFY_VERSION:-1}"
@@ -267,7 +267,7 @@ choose_kristal_tag() {
         return 1
     fi
 
-    default_tag="${THRASH_MACHINE_KRISTAL_REF_ENV:-v0.10.0}"
+    default_tag="${THRASH_MACHINE_KRISTAL_REF_ENV:-}"
     found=0
     for tag in "${tags[@]}"; do
         if [ "$tag" = "$default_tag" ]; then
@@ -276,7 +276,7 @@ choose_kristal_tag() {
         fi
     done
     if [ "$found" -eq 0 ]; then
-        default_tag="${tags[0]}"
+        default_tag="${tags[$((${#tags[@]} - 1))]}"
     fi
 
     printf '远程 tag 列表：\n'
@@ -472,7 +472,7 @@ choose_kristal_source() {
     if [ -z "$THRASH_MACHINE_KRISTAL_EXPECTED_VERSION_ENV" ] \
         && [ -z "$THRASH_MACHINE_KRISTAL_VERIFY_VERSION_ENV" ]; then
         case "$THRASH_MACHINE_KRISTAL_SOURCE:$THRASH_MACHINE_KRISTAL_REF" in
-            tag:v0.10.0) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=1 ;;
+            commit:f62afea63ccab02f468c24ac0d096bd8a2c9aa81) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=1 ;;
             *) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=0 ;;
         esac
     fi
@@ -480,7 +480,9 @@ choose_kristal_source() {
 
 resolve_kristal_source() {
     if [ "$THRASH_MACHINE_KRISTAL_SOURCE" = "ask" ]; then
-        THRASH_MACHINE_KRISTAL_SOURCE=
+        THRASH_MACHINE_KRISTAL_SOURCE=""
+        choose_kristal_source
+        return 0
     fi
 
     if [ -n "$THRASH_MACHINE_KRISTAL_SOURCE" ]; then
@@ -512,23 +514,17 @@ resolve_kristal_source() {
         if [ -z "$THRASH_MACHINE_KRISTAL_EXPECTED_VERSION_ENV" ] \
             && [ -z "$THRASH_MACHINE_KRISTAL_VERIFY_VERSION_ENV" ]; then
             case "$THRASH_MACHINE_KRISTAL_SOURCE:$THRASH_MACHINE_KRISTAL_REF" in
-                tag:v0.10.0) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=1 ;;
+                commit:f62afea63ccab02f468c24ac0d096bd8a2c9aa81) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=1 ;;
                 *) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=0 ;;
             esac
         fi
         return 0
     fi
 
-    # Ask only when the terminal is interactive. CI and non-interactive
-    # callers keep the pinned default below; `build_android.sh` opts into the
-    # same prompt by exporting THRASH_MACHINE_KRISTAL_SOURCE=ask.
-    if [ -t 0 ] && [ -t 1 ]; then
-        choose_kristal_source
-        return 0
-    fi
-
+    # Explicit paths and refs retain their inferred source type. With no
+    # override, both interactive and CI builds use the pinned commit below.
     if [ -n "$THRASH_MACHINE_KRISTAL_REF_ENV" ] \
-        && [ "$THRASH_MACHINE_KRISTAL_REF_ENV" != "v0.10.0" ]; then
+        && [ "$THRASH_MACHINE_KRISTAL_REF_ENV" != "f62afea63ccab02f468c24ac0d096bd8a2c9aa81" ]; then
         case "$THRASH_MACHINE_KRISTAL_REF_ENV" in
             *[!0-9a-fA-F]*)
                 THRASH_MACHINE_KRISTAL_SOURCE=tag
@@ -543,13 +539,13 @@ resolve_kristal_source() {
             THRASH_MACHINE_KRISTAL_REF=HEAD
         fi
     else
-        THRASH_MACHINE_KRISTAL_SOURCE=tag
+        THRASH_MACHINE_KRISTAL_SOURCE=commit
     fi
 
     if [ -z "$THRASH_MACHINE_KRISTAL_EXPECTED_VERSION_ENV" ] \
         && [ -z "$THRASH_MACHINE_KRISTAL_VERIFY_VERSION_ENV" ]; then
         case "$THRASH_MACHINE_KRISTAL_SOURCE:$THRASH_MACHINE_KRISTAL_REF" in
-            tag:v0.10.0) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=1 ;;
+            commit:f62afea63ccab02f468c24ac0d096bd8a2c9aa81) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=1 ;;
             *) THRASH_MACHINE_KRISTAL_VERIFY_VERSION=0 ;;
         esac
     fi
