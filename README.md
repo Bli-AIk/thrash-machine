@@ -18,7 +18,7 @@
 ## 有什么
 
 - 直接可玩：starter 地图 + Dummy 战斗 + 对象事件
-- 图形化启动器（GUI）：Windows 双击 `gui.cmd` 打开（GUI 自动下载到 Kristal 引擎旁的共享 `.tools\gui\`，无需手动安装），点按钮即可运行游戏、传调试参数、一键打包
+- 图形化启动器（GUI）：Windows 双击 `gui.cmd` 打开（GUI 自动下载到 Kristal 引擎旁的共享 `.tools\gui\`，无需手动安装）；按引擎 `VERSION` 固定选择 `0.10.0 -> v0.1.5`、`0.11.0-dev -> v0.2.0`，其他版本会明确报错
 - 中英双语（kristal-i18n），游戏内可切换
 - 开发期工具按子模块组织，生产包自动剔除
 
@@ -93,7 +93,7 @@ CI 与非交互环境同样使用该固定 commit。也可用环境变量指定�
 
 ### 没有安装 just？用 `tools/just`（Windows 免装，走 GUI 内嵌版）
 
-构建脚本通过 `just` 调用，但 Windows 上**不需要单独安装 just**：仓库里的 `tools/just`（Git Bash）或 `tools/just.cmd`（cmd / PowerShell）会自动使用 kristal-debug-tools GUI 内嵌的 just——`kristal-run` sidecar 的 `just-task` 模式，just 1.58.0 编译在内部。sidecar 缺失时按 `gui.cmd` 同一套 URL/SHA256 方案自动下载到共享 `.tools/gui/`（Kristal 引擎旁），纯新机器开箱即用。
+构建脚本通过 `just` 调用，但 Windows 上**不需要单独安装 just**：仓库里的 `tools/just`（Git Bash）或 `tools/just.cmd`（cmd / PowerShell）会自动使用 kristal-debug-tools GUI 内嵌的 just——`kristal-run` sidecar 的 `just-task` 模式，just 1.58.0 编译在内部。sidecar 缺失时按 `gui.cmd` 相同的固定版本映射和 URL/SHA256 方案下载到共享 `.tools/gui/`（Kristal 引擎旁）：`0.10.0 -> v0.1.5`，`0.11.0-dev -> v0.2.0`；其他引擎版本会停止并说明原因。
 
 ```sh
 tools/just build-love     # Git Bash
@@ -112,7 +112,7 @@ tools\just.cmd build      # cmd / PowerShell
 1. 展开"运行项列表（高级）"→ **项目构建** 组
 2. 点 `build` / `build-mod` / `build-android` —— 任务在独立终端窗口运行，输出实时可见
 
-要求与手动打包相同：Windows 需 Git Bash 在 PATH、LÖVE 已安装；`just` 无需安装（GUI 自带）。如果最新版刚发布而 CI 还在构建（release 资源尚未上传），会自动回退下载上一个版本的包；若上一个版本之前已下载过，会先询问你是否使用缓存的旧版本。
+要求与手动打包相同：Windows 需 Git Bash 在 PATH、LÖVE 已安装；`just` 无需安装（GUI 自带）。启动器只下载当前引擎版本对应的固定 GUI release，不会请求 `latest`，也不会回退到另一个 release；目标 release 尚未上传时请稍后重试。
 
 GitHub 的自动构建会在每次推送和合并时自动检查项目能否正常打包；发布新版本时，打包好的文件（包括 Windows x64 包、.love 包、编译版 APK）会自动上传到 GitHub 的 Release 页面。**套包版默认不会自动构建**，需要时可在 GitHub 上手动触发构建并勾选 `build_android_wrap`。不想在自己电脑上安装 JDK、Android SDK 这些环境？直接合并 GitHub 上的版本发布 PR 就行，打包和上传全自动完成。
 

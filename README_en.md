@@ -18,7 +18,7 @@
 ## What's Inside
 
 - Playable starter map + Dummy battle + object event
-- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into the shared `.tools\gui\` next to the Kristal engine, no manual install); run the game, pass debug args, and package — all by clicking buttons
+- GUI launcher: double-click `gui.cmd` on Windows to open it (the GUI auto-downloads into the shared `.tools\gui\` next to the Kristal engine, no manual install); it selects `0.10.0 -> v0.1.5` or `0.11.0-dev -> v0.2.0` from the engine `VERSION` and clearly rejects other versions
 - English / Simplified Chinese via kristal-i18n, switchable in-game
 - Dev tools as submodules, stripped from release packages
 
@@ -93,7 +93,7 @@ CI and non-interactive environments use the same pinned commit. To select anothe
 
 ### No standalone `just`? Use `tools/just` (Windows: zero-install, GUI-embedded)
 
-The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into the shared `.tools/gui/` (next to the Kristal engine) using the same URL/SHA256 scheme as `gui.cmd`, so a pristine machine works out of the box.
+The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into the shared `.tools/gui/` next to the Kristal engine with the same fixed release mapping and URL/SHA256 scheme as `gui.cmd`: `0.10.0 -> v0.1.5`, `0.11.0-dev -> v0.2.0`; other engine versions stop with a clear error.
 
 ```sh
 tools/just build-love     # Git Bash
@@ -112,7 +112,7 @@ The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just 
 1. Expand the "RUN LIST (ADVANCED)" panel → **PROJECT BUILDS** group
 2. Click `build` / `build-mod` / `build-android` — the task runs in a separate terminal window with live output
 
-Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it). If the latest release was just cut while CI is still building (assets not uploaded yet), the script falls back to the previous release; if the previous release was already downloaded, it asks before using the cached copy.
+Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it). The launcher downloads only the fixed GUI release for the current engine version: it never requests `latest` or falls back to a different release. Retry later when the selected release has not uploaded its assets yet.
 
 GitHub's automated builds check that the project packages correctly on every push and merge; when a new version is released, the packaged files (including the Windows x64 package, the .love package, and the **compiled APK**) are uploaded to the GitHub Release page automatically. The **wrap APK is not built automatically by default** — enable it by checking `build_android_wrap` when triggering a build manually on GitHub. Don't want to install JDK or Android SDK on your own machine? Just merge the version-release PR on GitHub — packaging and uploading are fully automatic.
 
