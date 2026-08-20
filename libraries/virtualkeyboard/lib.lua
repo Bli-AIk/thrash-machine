@@ -1,3 +1,16 @@
+---@class VirtualKeyboard
+---@field visible boolean Whether the virtual controls are currently visible.
+---@field enabled boolean Whether the library is active at runtime.
+---@field virtual_keys table<string, boolean> Currently pressed virtual key state.
+---@field source_keys table<integer, table<string, boolean>> Touch source to key mapping.
+---@field key_sources table<string, integer> Virtual key to touch source mapping.
+---@field touches table<integer, any> Active touch state.
+---@field buttons table[] Virtual control buttons built from the layout.
+---@field direction_pad table? Directional pad state.
+---@field joystick table? Joystick state.
+---@field screen_scale number Current screen scale factor.
+---@field side_layout boolean Whether the layout is side-by-side.
+---@field image_cache table<string, any> Loaded button image cache.
 local lib = {}
 
 local LIB_ID = "virtualkeyboard"
