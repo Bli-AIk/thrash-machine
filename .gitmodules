@@ -4,6 +4,7 @@
 [submodule "libraries/kristal-i18n"]
 	path = libraries/kristal-i18n
 	url = https://github.com/Bli-AIk/kristal-i18n.git
+	branch = feat/mgr
 [submodule ".emacs"]
 	path = .emacs
 	url = https://github.com/Bli-AIk/kristal-emacs-config.git
@@ -20,8 +21,8 @@
 [submodule "libraries/MagicalGlassRedux"]
 	path = libraries/MagicalGlassRedux
 	url = https://github.com/Bli-AIk/MagicalGlassRedux.git
-	branch = main
+	branch = feat/mgr
 [submodule "libraries/UndertaleMonstersRecreation"]
 	path = libraries/UndertaleMonstersRecreation
 	url = https://github.com/Bli-AIk/UndertaleMonstersRecreation.git
-	branch = main
+	branch = feat/mgr
