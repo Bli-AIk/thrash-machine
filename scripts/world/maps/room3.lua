@@ -10,7 +10,7 @@ return {
   tilewidth = 40,
   tileheight = 40,
   nextlayerid = 6,
-  nextobjectid = 17,
+  nextobjectid = 18,
   properties = {
     ["light"] = true,
     ["name"] = "Test Map - Room 2",

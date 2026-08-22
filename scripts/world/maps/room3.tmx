@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.11" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="17" height="12" tilewidth="40" tileheight="40" infinite="0" nextlayerid="6" nextobjectid="17">
+<map version="1.11" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="17" height="12" tilewidth="40" tileheight="40" infinite="0" nextlayerid="6" nextobjectid="18">
  <editorsettings>
   <export target="room3.lua" format="lua"/>
  </editorsettings>
