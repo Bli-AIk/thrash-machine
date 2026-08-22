@@ -2,6 +2,7 @@
  "mod.loaded": "已加载 [var:name]！",
  "map_room1_name": "测试地图 - 房间 1",
  "map_room2_name": "测试地图 - 房间 2",
+ "map_room3_name": "光之草地",
  "encounter_dummy_start": "* 教学开始了...？",
  "enemy_dummy_check": "攻击 4 防御 0\n* 棉花心和纽扣眼。\n* 看起来就像个毛茸茸的小家伙。",
  "enemy_dummy_turn_1": "* [name:dummy]露出了柔和的\n微笑。",

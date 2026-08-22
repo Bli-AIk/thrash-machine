@@ -60,6 +60,10 @@ tar -cf - \
 rm -rf "$STAGE_DIR/libraries/kristal-object-selector-plus"
 rm -rf "$STAGE_DIR/libraries/terminal-cli"
 rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
+# Optional UT content packs (MagicalGlassRedux + UndertaleMonstersRecreation):
+# dev-only submodules, excluded from release packages (see README/THIRD_PARTY.md).
+rm -rf "$STAGE_DIR/libraries/MagicalGlassRedux"
+rm -rf "$STAGE_DIR/libraries/UndertaleMonstersRecreation"
 run_helper patch-mod-manifest "$STAGE_DIR/mod.json" false false
 if [ -f "$THRASH_MACHINE_WINDOW_ICON" ]; then
     cp "$THRASH_MACHINE_WINDOW_ICON" "$STAGE_DIR/window_icon.png"

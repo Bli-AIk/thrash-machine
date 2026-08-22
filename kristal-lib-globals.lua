@@ -8,10 +8,64 @@
 -- straight to the library source file.
 
 ---@diagnostic disable-next-line: undefined-global
+AUTO_LANGUAGE = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+CJK_DIALOGUE_TEXT_SPACING = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+CJK_DIALOGUE_Y_OFFSET = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+CJK_FIXED_TEXT_SPACING = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+CJK_TYPEWRITER_SPEED_MULTIPLIER = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+DEFAULT_LANGUAGE = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+DEFAULT_LANGUAGE_TOGGLE_KEY = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+FALLBACK_LANGUAGE = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
+ID_INTERP_PATTERN = require("libraries/kristal-i18n/lib")
+
+---@diagnostic disable-next-line: undefined-global
 KristalDebugTools = require("libraries/kristal-debug-tools/lib")
 
 ---@diagnostic disable-next-line: undefined-global
+LIGHT_BATTLE_LAYERS = require("libraries/MagicalGlassRedux/lib")
+
+---@diagnostic disable-next-line: undefined-global
+LightBattle = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightRecruit = require("libraries/MagicalGlassRedux/scripts/globals/LightRecruit.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LIGHT_SHOP_LAYERS = require("libraries/MagicalGlassRedux/lib")
+
+---@diagnostic disable-next-line: undefined-global
+LightShop = require("libraries/MagicalGlassRedux/scripts/globals/LightShop.lua")
+
+---@diagnostic disable-next-line: undefined-global
+MG_EVENT = require("libraries/MagicalGlassRedux/lib")
+
+---@diagnostic disable-next-line: undefined-global
+MG_GAMEOVERS = require("libraries/MagicalGlassRedux/lib")
+
+---@diagnostic disable-next-line: undefined-global
+MG_PALETTE = require("libraries/MagicalGlassRedux/lib")
+
+---@diagnostic disable-next-line: undefined-global
 ObjectEditor = require("libraries/kristal-object-selector-plus/lib")
+
+---@diagnostic disable-next-line: undefined-global
+RandomEncounter = require("libraries/MagicalGlassRedux/scripts/globals/RandomEncounter.lua")
 
 ---@diagnostic disable-next-line: undefined-global
 VirtualKeyboard = require("libraries/virtualkeyboard/lib")

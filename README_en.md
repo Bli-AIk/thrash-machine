@@ -29,7 +29,25 @@
 | kristal-object-selector-plus | Scene object editor (Blender-style G/R/S)                  |
 | terminal-cli                 | Terminal debug console (Linux/POSIX)                       |
 | kristal-debug-tools          | Battle debug launcher (`--encounter` / `--wave` / `--tp`…) |
+| MagicalGlassRedux            | **Optional** UT light battle pack (fork, Kristal 0.11-dev) |
+| UndertaleMonstersRecreation  | **Optional** UT monsters (Froggit etc.), needs MGR       |
 | .emacs / .helix              | Project editor config (LuaLS, Kristal paths)               |
+
+## Optional UT content pack (dev only)
+
+`libraries/MagicalGlassRedux` and `libraries/UndertaleMonstersRecreation` are
+**optional submodules, excluded from release packages**. To enable the light
+battle demo:
+
+```sh
+git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
+```
+
+The demo is `room3` (a light-world meadow with a Froggit encounter zone). Both
+libraries are forks maintained by this project's author (upstream:
+FireRainV/Noelle-Libraries-Pack — see the submodules' `LICENSE-UPSTREAM.md`:
+upstream code retains all rights; fork additions are MIT or Apache-2.0).
+The room3 → room1 walk wiring (`entry1` marker) is still TODO.
 
 This is a **template repository**: click **Use this template** on the repo page to create your own copy (the submodule references come along), then clone your own repo before you start — your version history and releases stay independent.
 

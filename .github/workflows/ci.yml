@@ -24,6 +24,8 @@ jobs:
           test -s libraries/kristal-object-selector-plus/lib.lua
           test -s libraries/terminal-cli/lib.lua
           test -s libraries/kristal-debug-tools/lib.lua
+          test -s libraries/MagicalGlassRedux/lib.lua
+          test -s libraries/UndertaleMonstersRecreation/lib.json
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -65,6 +67,8 @@ jobs:
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-object-selector-plus/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/MagicalGlassRedux/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/UndertaleMonstersRecreation/' || true)"
           # Custom-icon contract: build-time icon sources never leak into packages.
           # Inside the .love the project lives under mods/<id>/, so the leaked path
           # would be mods/thrash-machine/assets/icon/ — not a root-level one.

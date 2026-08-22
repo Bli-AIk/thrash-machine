@@ -2,6 +2,7 @@
  "mod.loaded": "Loaded [var:name]!",
  "map_room1_name": "Test Map - Room 1",
  "map_room2_name": "Test Map - Room 2",
+ "map_room3_name": "Light Meadow",
  "encounter_dummy_start": "* The tutorial begins...?",
  "enemy_dummy_check": "AT 4 DF 0\n* Cotton heart and button eye\n* Looks just like a fluffy guy.",
  "enemy_dummy_turn_1": "* The [name:dummy] gives you a soft\nsmile.",

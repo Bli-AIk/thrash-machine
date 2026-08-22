@@ -17,3 +17,11 @@
 [submodule "libraries/kristal-debug-tools"]
 	path = libraries/kristal-debug-tools
 	url = https://github.com/Bli-AIk/kristal-debug-tools.git
+[submodule "libraries/MagicalGlassRedux"]
+	path = libraries/MagicalGlassRedux
+	url = https://github.com/Bli-AIk/MagicalGlassRedux.git
+	branch = main
+[submodule "libraries/UndertaleMonstersRecreation"]
+	path = libraries/UndertaleMonstersRecreation
+	url = https://github.com/Bli-AIk/UndertaleMonstersRecreation.git
+	branch = main
