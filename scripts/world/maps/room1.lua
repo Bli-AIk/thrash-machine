@@ -1,5 +1,5 @@
 return {
-  version = "1.10",
+  version = "1.11",
   luaversion = "5.1",
   tiledversion = "1.12.2",
   class = "",
@@ -10,7 +10,7 @@ return {
   tilewidth = 40,
   tileheight = 40,
   nextlayerid = 6,
-  nextobjectid = 37,
+  nextobjectid = 40,
   properties = {
     ["name"] = "Test Map - Room 1",
     ["name_id"] = "map_room1_name"
@@ -47,8 +47,8 @@ return {
         0, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 0, 0, 0, 0, 0, 0,
         0, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 0, 0, 0, 0, 0, 0,
         0, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 0, 0, 0, 0, 0, 0,
-        0, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 7, 7, 7, 7, 7, 7,
-        0, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 15, 15, 15, 15, 15, 15,
+        7, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 7, 7, 7, 7, 7, 7,
+        15, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 15, 15, 15, 15, 15, 15,
         0, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 0, 0, 0, 0, 0, 0,
         0, 14, 15, 15, 11, 11, 11, 11, 11, 11, 11, 15, 15, 16, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 14, 15, 11, 11, 11, 15, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -330,7 +330,7 @@ return {
           x = 0,
           y = 120,
           width = 40,
-          height = 240,
+          height = 80,
           rotation = 0,
           opacity = 1,
           visible = true,
@@ -415,6 +415,20 @@ return {
           y = 800,
           width = 160,
           height = 40,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 37,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 0,
+          y = 280,
+          width = 40,
+          height = 80,
           rotation = 0,
           opacity = 1,
           visible = true,
@@ -536,6 +550,23 @@ return {
             ["flagcheck"] = "wall_hit",
             ["text1"] = "{world_room1_wall_guardian_1}"
           }
+        },
+        {
+          id = 38,
+          name = "transition",
+          type = "",
+          shape = "rectangle",
+          x = -40,
+          y = 200,
+          width = 40,
+          height = 80,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["map"] = "room3",
+            ["marker"] = "entry"
+          }
         }
       }
     },
@@ -573,6 +604,20 @@ return {
           type = "",
           shape = "point",
           x = 760,
+          y = 240,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 39,
+          name = "entry1",
+          type = "",
+          shape = "point",
+          x = 40,
           y = 240,
           width = 0,
           height = 0,

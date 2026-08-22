@@ -1,5 +1,5 @@
 return {
-  version = "1.10",
+  version = "1.11",
   luaversion = "5.1",
   tiledversion = "1.12.2",
   class = "",
@@ -14,7 +14,7 @@ return {
   properties = {
     ["light"] = true,
     ["name"] = "Test Map - Room 2",
-    ["name_id"] = "map_room3_name"
+    ["name_id"] = "map_room2_name"
   },
   tilesets = {
     {
@@ -248,26 +248,24 @@ return {
           properties = {
             ["map"] = "room1",
             ["marker"] = "entry1"
-            -- Wire room1's "entry1" marker to reach this room.
           }
         },
-        -- MGR-only: encounter zone (skipped with a console warning when
-        -- MagicalGlassRedux is not installed; part of the optional
-        -- light battle demo otherwise).
         {
-          id = 30,
-          name = "encounterzone",
+          id = 16,
+          name = "npc",
           type = "",
-          shape = "point",
-          x = 240,
-          y = 240,
-          width = 0,
-          height = 0,
+          shape = "rectangle",
+          x = 440,
+          y = 160,
+          width = 40,
+          height = 40,
           rotation = 0,
           opacity = 1,
           visible = true,
           properties = {
-            ["randomencounter"] = "thrash_light"
+            ["actor"] = "starwalker",
+            ["text1"] = "{world_room1_starwalker_1}",
+            ["text2"] = "{world_room1_starwalker_2}"
           }
         }
       }
