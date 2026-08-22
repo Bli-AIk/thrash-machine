@@ -4,6 +4,21 @@ function Mod:init()
     end)
     print(Game:locText("Loaded [var:name]!", {name = self.info.name}))
 
+    -- Test static bullet at each battle area's center (UI testing).
+    local TEST_BULLET_SPOTS = {
+        room1 = { 140, 820 }, -- battle area rect (40,720,200,200) center
+        room3 = { 100, 260 }, -- battle area rect (40,120,120,280) center
+    }
+    HookSystem.hook(Map, "onEnter", function(orig, self, ...)
+        local r = orig(self, ...)
+        local spot = TEST_BULLET_SPOTS[self.id]
+        if spot and not self.test_bullet_spawned then
+            self.test_bullet_spawned = true
+            Game.world:spawnBullet("test_static", spot[1], spot[2])
+        end
+        return r
+    end)
+
     if os.getenv("KRISTAL_MOD_SMOKE") == "1" then
         print("KRISTAL_MOD_SMOKE=PASS")
         love.event.quit()
