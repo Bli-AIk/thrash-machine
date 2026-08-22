@@ -107,6 +107,15 @@
             "joystick_scale": 2.5,
             "joystick_radius": 108,
             "joystick_deadzone": 0.35
+        },
+        // Optional UT content (MagicalGlassRedux + UndertaleMonstersRecreation):
+        // set "enabled": false to keep the libraries installed but cleanly
+        // disabled (no hooks/registration; Mod.libs entries remain present).
+        "magical-glass": {
+            "enabled": true
+        },
+        "undertale_monsters_recreation": {
+            "enabled": true
         }
     },
 
