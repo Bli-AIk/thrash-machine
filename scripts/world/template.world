@@ -13,6 +13,13 @@
             "width": 800,
             "x": 880,
             "y": -120
+        },
+        {
+            "fileName": "maps/room3.tmx",
+            "height": 480,
+            "width": 680,
+            "x": -760,
+            "y": 0
         }
     ],
     "onlyShowAdjacentMaps": false,

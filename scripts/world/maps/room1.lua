@@ -9,8 +9,8 @@ return {
   height = 24,
   tilewidth = 40,
   tileheight = 40,
-  nextlayerid = 6,
-  nextobjectid = 40,
+  nextlayerid = 7,
+  nextobjectid = 41,
   properties = {
     ["name"] = "Test Map - Room 1",
     ["name_id"] = "map_room1_name"
@@ -567,6 +567,36 @@ return {
             ["map"] = "room3",
             ["marker"] = "entry"
           }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 6,
+      name = "battleareas",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 40,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 40,
+          y = 720,
+          width = 200,
+          height = 200,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
         }
       }
     },

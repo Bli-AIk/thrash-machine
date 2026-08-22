@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.11" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="17" height="12" tilewidth="40" tileheight="40" infinite="0" nextlayerid="6" nextobjectid="18">
+<map version="1.11" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="17" height="12" tilewidth="40" tileheight="40" infinite="0" nextlayerid="7" nextobjectid="21">
  <editorsettings>
   <export target="room3.lua" format="lua"/>
  </editorsettings>
@@ -70,5 +70,14 @@
     <property name="text2" value="{world_room1_starwalker_2}"/>
    </properties>
   </object>
+  <object id="20" name="enemy" x="291" y="161" width="40" height="40">
+   <properties>
+    <property name="actor" value="dummy"/>
+    <property name="encounter" value="dummy"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ed333b" id="6" name="battleareas">
+  <object id="19" x="40" y="120" width="120" height="280"/>
  </objectgroup>
 </map>
