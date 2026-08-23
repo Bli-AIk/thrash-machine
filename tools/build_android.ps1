@@ -36,8 +36,28 @@ function Test-TMJava17 {
     if (-not (Test-Path -LiteralPath $JavaExecutable)) {
         return $false
     }
-    $version = ((& $JavaExecutable -version 2>&1 | Select-Object -First 1) -join '')
-    return $version -match 'version "17'
+
+    # java -version writes its version to stderr. Capture both streams outside
+    # PowerShell's native-command error handling so this remains a predicate.
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $JavaExecutable
+    $startInfo.Arguments = '-version'
+    $startInfo.UseShellExecute = $false
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.CreateNoWindow = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    try {
+        [void]$process.Start()
+        # java -version emits only a short banner, so synchronous reads cannot
+        # fill either pipe before the process exits.
+        $version = $process.StandardOutput.ReadToEnd() + $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+        return $process.ExitCode -eq 0 -and $version -match 'version "17'
+    } finally {
+        $process.Dispose()
+    }
 }
 
 function Get-TMJavaHome {
