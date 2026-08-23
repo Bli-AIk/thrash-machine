@@ -50,7 +50,7 @@ function Get-TMJavaHome {
         return [System.IO.Path]::GetFullPath($configured)
     }
 
-    $pathJava = Get-Command java.exe -CommandType Application -ErrorAction SilentlyContinue
+    $pathJava = Find-TMCommand 'java.exe'
     if ($pathJava -and (Test-TMJava17 $pathJava.Source)) {
         return Split-Path (Split-Path -Parent $pathJava.Source) -Parent
     }

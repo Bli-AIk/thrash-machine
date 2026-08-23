@@ -25,11 +25,23 @@ function Write-TMWarn {
     Write-Host "[warning] $Message" -ForegroundColor Yellow
 }
 
+function Find-TMCommand {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    # GitHub's Windows image can expose the same executable from both
+    # system and Git locations. Keep a single command object for callers.
+    $commands = @(Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue)
+    if ($commands.Count -eq 0) {
+        return $null
+    }
+    return $commands[0]
+}
+
 function Get-TMCommand {
     param([Parameter(Mandatory = $true)][string]$Name)
 
-    $command = Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue
-    if (-not $command) {
+    $command = Find-TMCommand $Name
+    if ($null -eq $command) {
         throw "Missing required command: $Name"
     }
     return $command.Source
@@ -60,7 +72,7 @@ function Invoke-TMDownload {
     New-Item -ItemType Directory -Force -Path $parent | Out-Null
     Write-TMInfo "Downloading $(Split-Path -Leaf $OutputFile)"
 
-    $curl = Get-Command curl.exe -CommandType Application -ErrorAction SilentlyContinue
+    $curl = Find-TMCommand 'curl.exe'
     if ($curl) {
         & $curl.Source --fail --location --retry 3 --output $OutputFile $Url | Out-Host
         if ($LASTEXITCODE -ne 0) {
@@ -138,7 +150,7 @@ function Get-TMLoveExecutable {
         if (Test-Path -LiteralPath $env:LOVE) {
             return [System.IO.Path]::GetFullPath($env:LOVE)
         }
-        $configuredCommand = Get-Command $env:LOVE -CommandType Application -ErrorAction SilentlyContinue
+        $configuredCommand = Find-TMCommand $env:LOVE
         if ($configuredCommand) {
             return $configuredCommand.Source
         }
@@ -146,7 +158,7 @@ function Get-TMLoveExecutable {
     }
 
     foreach ($name in @('love.exe', 'love')) {
-        $command = Get-Command $name -CommandType Application -ErrorAction SilentlyContinue
+        $command = Find-TMCommand $name
         if ($command) {
             return $command.Source
         }

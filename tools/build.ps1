@@ -461,7 +461,7 @@ function Get-TMWindowsIcon {
     if ($pngs.Count -eq 0) {
         return $null
     }
-    $magick = Get-Command magick.exe -CommandType Application -ErrorAction SilentlyContinue
+    $magick = Find-TMCommand 'magick.exe'
     if (-not $magick) {
         Write-TMWarn 'No icon.ico or ImageMagick found; leaving the default Windows executable icon.'
         return $null
@@ -480,13 +480,13 @@ function Get-TMRcedit {
     $configured = $env:THRASH_MACHINE_RCEDit
     if ($configured) {
         if (Test-Path -LiteralPath $configured) { return $configured }
-        $command = Get-Command $configured -CommandType Application -ErrorAction SilentlyContinue
+        $command = Find-TMCommand $configured
         if ($command) { return $command.Source }
         return $null
     }
     $cached = Join-Path $ToolsDir 'rcedit\rcedit-x64.exe'
     if (Test-Path -LiteralPath $cached) { return $cached }
-    $command = Get-Command rcedit.exe -CommandType Application -ErrorAction SilentlyContinue
+    $command = Find-TMCommand 'rcedit.exe'
     if ($command) { return $command.Source }
     if ($env:THRASH_MACHINE_ICON_FETCH_TOOLS -ne '1') { return $null }
     $url = Get-TMEnvOrDefault 'THRASH_MACHINE_RCEDit_URL' 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe'

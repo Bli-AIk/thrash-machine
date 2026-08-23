@@ -48,9 +48,9 @@ try {
     # When LÖVE is present, cross the real native PowerShell -> LÖVE -> Lua
     # boundary once. The plan is read-only and covers the argument-file path
     # used because LÖVE 11 does not preserve positional game arguments.
-    $love = Get-Command love.exe -CommandType Application -ErrorAction SilentlyContinue
+    $love = Find-TMCommand 'love.exe'
     if (-not $love) {
-        $love = Get-Command love -CommandType Application -ErrorAction SilentlyContinue
+        $love = Find-TMCommand 'love'
     }
     if ($love) {
         $plan = [System.IO.Path]::GetTempFileName()
