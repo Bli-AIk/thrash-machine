@@ -33,11 +33,13 @@
 | UndertaleMonstersRecreation  | **Optional** UT monsters (Froggit etc.), needs MGR       |
 | .emacs / .helix              | Project editor config (LuaLS, Kristal paths)               |
 
-## Optional UT content pack (dev only)
+## Optional UT content pack
 
 `libraries/MagicalGlassRedux` and `libraries/UndertaleMonstersRecreation` are
-**optional submodules, excluded from release packages**. To enable the light
-battle demo:
+**optional submodules; when present they ship in release packages** (they are
+real content, not dev tools). Setting their `enabled` config to `false` in
+`mod.json` disables them at runtime and strips them from packages. To enable
+the light battle demo:
 
 ```sh
 git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation

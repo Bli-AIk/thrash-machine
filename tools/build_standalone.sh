@@ -733,6 +733,15 @@ copy_mod() {
         rm -rf "$stage_mod/libraries/terminal-cli"
         rm -rf "$stage_mod/libraries/kristal-debug-tools"
     fi
+    # Optional UT content packs (MagicalGlassRedux + UndertaleMonstersRecreation)
+    # are real content: they ship when the submodules are present and enabled.
+    # When the matching mod.json config disables them they are stripped instead
+    # (UMR follows MGR: if MGR is disabled, UMR is inert too and stripped as well).
+    if grep -A2 '"magical-glass"' "$stage_mod/mod.json" 2>/dev/null | grep -qE '"enabled"[[:space:]]*:[[:space:]]*false'; then
+        rm -rf "$stage_mod/libraries/MagicalGlassRedux" "$stage_mod/libraries/UndertaleMonstersRecreation"
+    elif grep -A2 '"undertale_monsters_recreation"' "$stage_mod/mod.json" 2>/dev/null | grep -qE '"enabled"[[:space:]]*:[[:space:]]*false'; then
+        rm -rf "$stage_mod/libraries/UndertaleMonstersRecreation"
+    fi
 }
 
 prepare_stage() {

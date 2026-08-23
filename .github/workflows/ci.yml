@@ -67,8 +67,12 @@ jobs:
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-object-selector-plus/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
-          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/MagicalGlassRedux/' || true)"
-          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/UndertaleMonstersRecreation/' || true)"
+          # Optional UT content packs are real content (not dev tools): with the
+          # submodules present and enabled they must ship in every package.
+          unzip -Z1 dist/thrash-machine-mod.zip | grep -q '^libraries/MagicalGlassRedux/'
+          unzip -Z1 dist/thrash-machine-mod.zip | grep -q '^libraries/UndertaleMonstersRecreation/'
+          unzip -Z1 dist/thrash-machine-release.love | grep -q '^mods/thrash-machine/libraries/MagicalGlassRedux/'
+          unzip -Z1 dist/thrash-machine-release.love | grep -q '^mods/thrash-machine/libraries/UndertaleMonstersRecreation/'
           # Custom-icon contract: build-time icon sources never leak into packages.
           # Inside the .love the project lives under mods/<id>/, so the leaked path
           # would be mods/thrash-machine/assets/icon/ — not a root-level one.

@@ -5,9 +5,10 @@
 ### Features
 
 - Optional UT content pack: MagicalGlassRedux + UndertaleMonstersRecreation
-  submodules (dev-only, excluded from release packages), a light-world demo
-  room (`room3`) with a Froggit encounter zone, and luals shim support for
-  plain lib globals (MG_PALETTE / LIGHT_BATTLE_LAYERS etc.).
+  submodules (shipped in release packages when present and enabled; stripped
+  when disabled in mod.json — UMR follows MGR), a light-world demo room
+  (`room3`) with a Froggit encounter zone, and luals shim support for plain
+  lib globals (MG_PALETTE / LIGHT_BATTLE_LAYERS etc.).
 
 ## [0.2.0](https://github.com/Bli-AIk/thrash-machine/compare/v0.1.0...v0.2.0) (2026-08-18)
 

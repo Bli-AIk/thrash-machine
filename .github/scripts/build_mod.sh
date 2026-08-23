@@ -60,10 +60,23 @@ tar -cf - \
 rm -rf "$STAGE_DIR/libraries/kristal-object-selector-plus"
 rm -rf "$STAGE_DIR/libraries/terminal-cli"
 rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
-# Optional UT content packs (MagicalGlassRedux + UndertaleMonstersRecreation):
-# dev-only submodules, excluded from release packages (see README/THIRD_PARTY.md).
-rm -rf "$STAGE_DIR/libraries/MagicalGlassRedux"
-rm -rf "$STAGE_DIR/libraries/UndertaleMonstersRecreation"
+# Optional UT content packs (MagicalGlassRedux + UndertaleMonstersRecreation)
+# are real content: they ship when the submodules are present and enabled.
+# When the matching mod.json config disables them they are stripped instead
+# (UMR follows MGR: if MGR is disabled, UMR is inert too and stripped as well).
+MGR_DISABLED=""
+if grep -A2 '"magical-glass"' "$STAGE_DIR/mod.json" | grep -qE '"enabled"[[:space:]]*:[[:space:]]*false'; then
+    MGR_DISABLED=1
+fi
+UMR_DISABLED=""
+if grep -A2 '"undertale_monsters_recreation"' "$STAGE_DIR/mod.json" | grep -qE '"enabled"[[:space:]]*:[[:space:]]*false'; then
+    UMR_DISABLED=1
+fi
+if [ -n "$MGR_DISABLED" ]; then
+    rm -rf "$STAGE_DIR/libraries/MagicalGlassRedux" "$STAGE_DIR/libraries/UndertaleMonstersRecreation"
+elif [ -n "$UMR_DISABLED" ]; then
+    rm -rf "$STAGE_DIR/libraries/UndertaleMonstersRecreation"
+fi
 run_helper patch-mod-manifest "$STAGE_DIR/mod.json" false false
 if [ -f "$THRASH_MACHINE_WINDOW_ICON" ]; then
     cp "$THRASH_MACHINE_WINDOW_ICON" "$STAGE_DIR/window_icon.png"
