@@ -530,7 +530,12 @@ function Build-TMAndroidCompile {
     )
     Invoke-TMBuildHelper $Root $LoveExecutable @('patch-android-local-properties', (Join-Path $stage 'local.properties'), $sdk)
     $gradle = Join-Path $stage 'gradlew.bat'
-    Invoke-TMNative $gradle @('--no-daemon', 'assembleEmbedNoRecordRelease')
+    Push-Location -LiteralPath $stage
+    try {
+        Invoke-TMNative $gradle @('--no-daemon', 'assembleEmbedNoRecordRelease')
+    } finally {
+        Pop-Location
+    }
     $apk = Get-ChildItem -LiteralPath (Join-Path $stage 'app\build\outputs\apk') -Recurse -Filter '*.apk' -File |
         Where-Object { $_.FullName -match '[\\/]embedNoRecord[\\/]release[\\/]' } |
         Sort-Object LastWriteTime | Select-Object -Last 1
