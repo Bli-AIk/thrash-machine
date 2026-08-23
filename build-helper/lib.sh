@@ -164,6 +164,34 @@ run_helper() {
     return $status
 }
 
+# Ask the Lua helper which staged libraries a release excludes (development
+# tools, disabled optional libraries, and required dependents), then remove
+# only the immediate directories it named. Manifest parsing and dependency
+# handling live in one place; this shell code deliberately owns just the
+# irreversible filesystem operation.
+prune_release_optional_libraries() {
+    local stage_mod="$1" plan_file entry unsafe_entry=""
+    [ -d "$stage_mod" ] || fail "暂存项目目录不存在: $stage_mod"
+    plan_file="$(mktemp)" || fail '无法创建库裁剪计划临时文件（mktemp 失败）'
+
+    if ! run_helper plan-release-libraries "$stage_mod" "$plan_file"; then
+        rm -f "$plan_file"
+        return 1
+    fi
+
+    while IFS= read -r entry || [ -n "$entry" ]; do
+        case "$entry" in
+            ''|.|..|*/*|*\\*|*$'\r'*|*$'\n'*)
+                unsafe_entry="$entry"
+                break
+                ;;
+        esac
+        rm -rf -- "$stage_mod/libraries/$entry"
+    done < "$plan_file"
+    rm -f "$plan_file"
+    [ -z "$unsafe_entry" ] || fail "库裁剪计划包含不安全目录名: $unsafe_entry"
+}
+
 zip_dir() {
     local output="$1" source="$2" prefix="${3:-}" total _count=0
 
@@ -217,13 +245,12 @@ zip_dir() {
 # --- portable JDK (used by the Android build scripts) -------------------------
 # A pristine machine usually has no JDK. When the caller did not pin one via
 # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME and no usable `java` is on PATH,
-# ensure_java downloads a portable Temurin JDK into $THRASH_MACHINE_TOOLS_DIR/jdk<version>
+# ensure_java downloads a portable Temurin JDK 17 into $THRASH_MACHINE_TOOLS_DIR/jdk17
 # (the shared tools dir outside the mod tree) and exports JAVA_HOME/PATH. Disable
 # the download with THRASH_MACHINE_FETCH_JDK=0.
 # These functions use the warn/fail helpers defined at the top of this file, so
 # the sourcing scripts do not need to define their own before sourcing.
-THRASH_MACHINE_JDK_VERSION="${THRASH_MACHINE_JDK_VERSION:-17}"
-THRASH_MACHINE_JDK_DIR="${THRASH_MACHINE_JDK_DIR:-$THRASH_MACHINE_TOOLS_DIR/jdk$THRASH_MACHINE_JDK_VERSION}"
+THRASH_MACHINE_JDK_DIR="${THRASH_MACHINE_JDK_DIR:-$THRASH_MACHINE_TOOLS_DIR/jdk17}"
 THRASH_MACHINE_FETCH_JDK="${THRASH_MACHINE_FETCH_JDK:-1}"
 
 java_major() {
@@ -237,13 +264,13 @@ java_major() {
 
 # Resolve a JDK and export JAVA_HOME/PATH for the rest of the script.
 #   ensure_java            — use any working Java (explicit home or PATH), else
-#                            download the default version.
+#                            download JDK 17.
 #   ensure_java <major>    — additionally require that major version (an
 #                            explicit home or PATH java of a different major is
 #                            an error / triggers the download), else download.
 # Exits 1 with a clear message when nothing usable is available.
 ensure_java() {
-    local exact="${1:-}" version="${1:-$THRASH_MACHINE_JDK_VERSION}" java_home major
+    local exact="${1:-}" version="${1:-17}" java_home major
     java_home="${THRASH_MACHINE_ANDROID_JAVA_HOME:-${JAVA_HOME:-}}"
     if [ -n "$java_home" ]; then
         [ -x "$java_home/bin/java" ] || {

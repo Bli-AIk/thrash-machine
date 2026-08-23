@@ -4,11 +4,18 @@
 
 ### Features
 
-- Optional UT content pack: MagicalGlassRedux + UndertaleMonstersRecreation
-  submodules (shipped in release packages when present and enabled; stripped
-  when disabled in mod.json — UMR follows MGR), a light-world demo room
-  (`room3`) with a Froggit encounter zone, and luals shim support for plain
-  lib globals (MG_PALETTE / LIGHT_BATTLE_LAYERS etc.).
+- Optional UT content libraries: MagicalGlassRedux and
+  UndertaleMonstersRecreation, selected by their real library IDs through
+  top-level `optionalLibraries`. MGR's required dependent UMR follows MGR;
+  disabled libraries are stripped from release/project packages and gated at
+  runtime in debug packages.
+- **build:** add native Windows PowerShell entry points for desktop/mod builds
+  and the Android launcher; Linux/CI retain their POSIX shell paths.
+
+### Breaking Changes
+
+- Replace the MGR and UMR per-library `enabled` settings with top-level
+  `optionalLibraries` in `mod.json`.
 
 ## [0.2.0](https://github.com/Bli-AIk/thrash-machine/compare/v0.1.0...v0.2.0) (2026-08-18)
 

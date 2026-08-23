@@ -57,6 +57,13 @@
     // this option is explicitly set to false; else, it's done if this is set to true.
     "setWindowTitleAndIcon": null,
 
+    // Optional content is selected by actual library ID. Disabled libraries
+    // are removed before library initialization; required dependents follow.
+    "optionalLibraries": {
+        "magical-glass": true,
+        "undertale_monsters_recreation": true
+    },
+
     // Config values for the engine and any libraries you may have.
     // These config values can control chapter-specific features as well.
     "config": {
@@ -108,15 +115,7 @@
             "joystick_radius": 108,
             "joystick_deadzone": 0.35
         },
-        // Optional UT content (MagicalGlassRedux + UndertaleMonstersRecreation):
-        // set "enabled": false to keep the libraries installed but cleanly
-        // disabled (no hooks/registration; Mod.libs entries remain present).
-        "magical-glass": {
-            "enabled": true
-        },
-        "undertale_monsters_recreation": {
-            "enabled": true
-        }
+        // End of config
     },
 
     // Whether or not to enable dev mode. Dev mode enables debug keys and the console.
