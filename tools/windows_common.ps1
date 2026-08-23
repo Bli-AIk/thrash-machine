@@ -94,6 +94,22 @@ function Invoke-TMDownload {
     }
 }
 
+function Get-TMFileSha256 {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $stream = $null
+    $algorithm = $null
+    try {
+        $stream = [System.IO.File]::OpenRead($Path)
+        $algorithm = [System.Security.Cryptography.SHA256]::Create()
+        $hash = $algorithm.ComputeHash($stream)
+        return ([System.BitConverter]::ToString($hash)).Replace('-', '').ToLowerInvariant()
+    } finally {
+        if ($null -ne $algorithm) { $algorithm.Dispose() }
+        if ($null -ne $stream) { $stream.Dispose() }
+    }
+}
+
 function Expand-TMZip {
     param(
         [Parameter(Mandatory = $true)][string]$Archive,

@@ -57,6 +57,7 @@ jobs:
           for file in dist-gui/thrash-machine-release.love dist-gui/thrash-machine-debug.love; do
             test -s "$file"
             unzip -t "$file" >/dev/null
+            test -z "$(unzip -Z1 "$file" | grep -Fx 'mods/thrash-machine/gui.cmd' || true)"
           done
       - name: Build standalone packages (love + win)
         run: just build
@@ -98,6 +99,16 @@ jobs:
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/terminal-cli/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/kristal-debug-tools/' || true)"
           test -z "$(unzip -Z1 dist/thrash-machine-release.love | grep '^mods/thrash-machine/libraries/kristal-debug-tools/' || true)"
+          # gui.cmd is a local convenience wrapper, never game content. The
+          # canonical launcher remains in the debug-tools library for dev use.
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep -Fx 'gui.cmd' || true)"
+          for archive in \
+            dist/thrash-machine-release.love \
+            dist/thrash-machine-debug.love \
+            dist-love/thrash-machine-release.love \
+            dist-love/thrash-machine-debug.love; do
+            test -z "$(unzip -Z1 "$archive" | grep -Fx 'mods/thrash-machine/gui.cmd' || true)"
+          done
           # Debug is a development artifact: it retains development libraries.
           unzip -Z1 dist/thrash-machine-debug.love | grep -q '^mods/thrash-machine/libraries/kristal-debug-tools/'
           # Optional UT content packs are real content (not dev tools): with the
@@ -219,7 +230,7 @@ jobs:
       - name: Run native Windows smoke tests
         shell: pwsh
         run: pwsh -NoProfile -File tests/windows_build.ps1
-      - name: Run Windows GUI launcher headless integration
+      - name: Run Windows GUI launcher integration
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -233,17 +244,73 @@ jobs:
           try {
             $env:KRISTAL_ROOT = $engine
             $env:KRISTAL_DEBUG_TOOLS_GUI_PRINT_SELECTION = '1'
-            $output = @(& cmd.exe /d /c 'libraries\kristal-debug-tools\gui.cmd' 2>&1 | ForEach-Object { $_.ToString() })
-            if ($LASTEXITCODE -ne 0) { throw "gui.cmd selection smoke failed: $LASTEXITCODE" }
-            foreach ($expected in @(
-              'ENGINE_VERSION=0.11.0-dev',
-              'GUI_RELEASE_TAG=v0.2.0',
-              'GUI_SOURCE_REF=v0.2.0',
-              'GUI_SOURCE_KIND=tag',
-              'GUI_RELEASE_URL=https://github.com/Bli-AIk/kristal-debug-tools-gui/releases/download/v0.2.0/'
-            )) {
-              if ($output -notcontains $expected) {
-                throw "gui.cmd selection smoke is missing '$expected': $($output -join '; ')"
+            foreach ($launcher in @('libraries\kristal-debug-tools\gui.cmd', 'gui.cmd')) {
+              $output = @(& cmd.exe /d /c $launcher 2>&1 | ForEach-Object { $_.ToString() })
+              if ($LASTEXITCODE -ne 0) { throw "$launcher selection smoke failed: $LASTEXITCODE" }
+              foreach ($expected in @(
+                'ENGINE_VERSION=0.11.0-dev',
+                'GUI_RELEASE_TAG=v0.2.0',
+                'GUI_SOURCE_REF=v0.2.0',
+                'GUI_SOURCE_KIND=tag',
+                'GUI_RELEASE_URL=https://github.com/Bli-AIk/kristal-debug-tools-gui/releases/download/v0.2.0/'
+              )) {
+                if ($output -notcontains $expected) {
+                  throw "$launcher selection smoke is missing '$expected': $($output -join '; ')"
+                }
+              }
+            }
+
+            Remove-Item Env:KRISTAL_DEBUG_TOOLS_GUI_PRINT_SELECTION -ErrorAction SilentlyContinue
+            $cache = Join-Path $engine '.tools\gui'
+            New-Item -ItemType Directory -Force -Path $cache | Out-Null
+            $gui = Join-Path $cache 'kristal-debug-tools-gui-windows-x64.exe'
+            $sidecar = Join-Path $cache 'kristal-run-windows-x64.exe'
+            Copy-Item -LiteralPath $env:ComSpec -Destination $gui
+            Copy-Item -LiteralPath $env:ComSpec -Destination $sidecar
+
+            function Get-Sha256([string]$Path) {
+              $stream = $null
+              $algorithm = $null
+              try {
+                $stream = [System.IO.File]::OpenRead($Path)
+                $algorithm = [System.Security.Cryptography.SHA256]::Create()
+                return ([System.BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant()
+              } finally {
+                if ($null -ne $algorithm) { $algorithm.Dispose() }
+                if ($null -ne $stream) { $stream.Dispose() }
+              }
+            }
+            @(
+              "$(Get-Sha256 $gui)  $(Split-Path -Leaf $gui)",
+              "$(Get-Sha256 $sidecar)  $(Split-Path -Leaf $sidecar)"
+            ) | Set-Content -LiteralPath (Join-Path $cache 'checksums-windows-x64.txt')
+            Set-Content -LiteralPath (Join-Path $cache 'version.txt') -Value 'v0.2.0' -NoNewline
+
+            # cmd.exe is a harmless stand-in that exits immediately. Both launchers
+            # must verify the existing cache without taking the network path.
+            foreach ($launcher in @('libraries\kristal-debug-tools\gui.cmd', 'gui.cmd')) {
+              $stdout = Join-Path $env:RUNNER_TEMP ("gui-cache-" + [guid]::NewGuid().ToString('N') + '.stdout')
+              $stderr = Join-Path $env:RUNNER_TEMP ("gui-cache-" + [guid]::NewGuid().ToString('N') + '.stderr')
+              try {
+                $process = Start-Process -FilePath $env:ComSpec -ArgumentList @('/d', '/c', "$launcher /d /c exit 0") `
+                  -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+                if (-not $process.WaitForExit(30000)) {
+                  $process.Kill()
+                  $process.WaitForExit()
+                  throw "$launcher did not finish its cached launch within 30 seconds."
+                }
+                $output = @()
+                if (Test-Path -LiteralPath $stdout) { $output += Get-Content -LiteralPath $stdout }
+                if (Test-Path -LiteralPath $stderr) { $output += Get-Content -LiteralPath $stderr }
+                if ($process.ExitCode -ne 0) { throw "$launcher cached launch failed: $($process.ExitCode) ($($output -join '; '))" }
+                if ($output -notcontains '[kristal-debug-tools] Using verified GUI release v0.2.0 for Kristal 0.11.0-dev.') {
+                  throw "$launcher did not use the verified cache: $($output -join '; ')"
+                }
+                if ($output | Where-Object { $_ -like '*Downloading GUI release*' }) {
+                  throw "$launcher unexpectedly entered the download path: $($output -join '; ')"
+                }
+              } finally {
+                Remove-Item -LiteralPath $stdout, $stderr -Force -ErrorAction SilentlyContinue
               }
             }
           } finally {
@@ -392,6 +459,10 @@ jobs:
             'libraries/kristal-debug-tools/'
           )) {
             Assert-ArchiveOmits $mod $prefix
+          }
+          Assert-ArchiveOmits $mod 'gui.cmd'
+          foreach ($entries in @($release, $debug, $loveOnlyRelease, $loveOnlyDebug)) {
+            Assert-ArchiveOmits $entries 'mods/thrash-machine/gui.cmd'
           }
           Assert-ArchiveOmits $release 'mods/thrash-machine/libraries/kristal-debug-tools/'
       - name: Smoke test native task dispatcher cleanup

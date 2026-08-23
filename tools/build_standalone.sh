@@ -712,6 +712,7 @@ copy_mod() {
         --exclude='./docs' \
         --exclude='./Makefile' \
         --exclude='./justfile' \
+        --exclude='./gui.cmd' \
         --exclude='./tools' \
         --exclude='./build-helper' \
         --exclude='__pycache__' \

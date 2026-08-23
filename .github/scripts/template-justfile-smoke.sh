@@ -113,7 +113,7 @@ run_fixed_gui_release_case() {
     grep -Fqx "just-task $root/justfile build" "$side_log"
     grep -Fqx "$tag" "$engine_dir/.tools/gui/version.txt"
 
-    # gui.cmd writes version.txt with CRLF. Git Bash must still recognize the
+    # The GUI launcher writes version.txt with CRLF. Git Bash must still recognize the
     # matching cached tag rather than downloading it again.
     printf '%s\r\n' "$tag" > "$engine_dir/.tools/gui/version.txt"
     : > "$curl_log"
@@ -159,10 +159,17 @@ CURL_LOG="$unknown_log" SIDE_LOG="$explicit_log" KRISTAL_ROOT= THRASH_MACHINE_KR
 grep -Fqx "just-task $root/justfile build" "$explicit_log"
 test ! -s "$unknown_log"
 
-grep -F 'set "GUI_TAG=v0.1.5"' "$root/gui.cmd" >/dev/null
-grep -F 'set "GUI_TAG=v0.2.0"' "$root/gui.cmd" >/dev/null
-if grep -F '/releases/latest/' "$root/gui.cmd" >/dev/null; then
-    printf '%s\n' 'gui.cmd must not download the latest release' >&2
+grep -F 'set "GUI_LAUNCHER=%~dp0libraries\kristal-debug-tools\gui.cmd"' "$root/gui.cmd" >/dev/null
+grep -F 'call "%GUI_LAUNCHER%" %*' "$root/gui.cmd" >/dev/null
+gui_launcher="$root/libraries/kristal-debug-tools/gui.cmd"
+grep -F 'set "GUI_RELEASE_TAG=v0.1.5"' "$gui_launcher" >/dev/null
+grep -F 'set "GUI_RELEASE_TAG=v0.2.0"' "$gui_launcher" >/dev/null
+if grep -F '/releases/latest/' "$gui_launcher" >/dev/null; then
+    printf '%s\n' 'GUI launcher must not download the latest release' >&2
+    exit 1
+fi
+if grep -F 'Get-FileHash' "$gui_launcher" >/dev/null; then
+    printf '%s\n' 'GUI launcher must not require Get-FileHash' >&2
     exit 1
 fi
 

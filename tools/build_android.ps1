@@ -272,7 +272,7 @@ function Get-TMEmbedApk {
     }
     $expected = Get-TMEnvOrDefault 'THRASH_MACHINE_ANDROID_EMBED_APK_SHA256' 'dcf71c1b54c5b5a09598ef1e6cf4852ced5e5e612de3d0f30cfdd39b5014e889'
     if ($expected) {
-        $actual = (Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash.ToLowerInvariant()
+        $actual = Get-TMFileSha256 $apk
         if ($actual -ne $expected.ToLowerInvariant()) {
             throw "Embed APK checksum mismatch: expected $expected, got $actual"
         }

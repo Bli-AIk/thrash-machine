@@ -20,9 +20,28 @@ foreach ($script in $scripts) {
     if ($shellCalls) {
         throw "$script invokes a POSIX shell: $($shellCalls -join ', ')"
     }
+    $legacyHashCalls = $ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.CommandAst] -and
+            $node.GetCommandName() -eq 'Get-FileHash'
+    }, $true)
+    if ($legacyHashCalls) {
+        throw "$script depends on Get-FileHash; use Get-TMFileSha256 instead."
+    }
 }
 
 . (Join-Path $Root 'tools/windows_common.ps1')
+$hashFixture = [System.IO.Path]::GetTempFileName()
+try {
+    [System.IO.File]::WriteAllText($hashFixture, 'abc', [System.Text.Encoding]::ASCII)
+    $hash = Get-TMFileSha256 $hashFixture
+    if ($hash -ne 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad') {
+        throw "SHA-256 helper returned an unexpected digest: $hash"
+    }
+} finally {
+    Remove-Item -LiteralPath $hashFixture -Force -ErrorAction SilentlyContinue
+}
+
 $environmentNames = @('THRASH_MACHINE_TOOLS_DIR', 'THRASH_MACHINE_KRISTAL_DIR', 'KRISTAL_ROOT')
 $previous = @{}
 foreach ($name in $environmentNames) {

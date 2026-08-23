@@ -335,6 +335,7 @@ function Copy-TMModTree {
         '.release-please-manifest.json', '.gitmodules', '.gitignore',
         '*.pyc', '*.pyo', '*.tiled-project', '*.tiled-session'
     )
+    Remove-Item -LiteralPath (Join-Path $Destination 'gui.cmd') -Force -ErrorAction SilentlyContinue
     Remove-TMPathIfPresent (Join-Path $Destination 'libraries\kristal-debug-tools\gui')
     Remove-TMPathIfPresent (Join-Path $Destination 'libraries\kristal-debug-tools-gui')
     Remove-TMPathIfPresent (Join-Path $Destination 'libraries\kristal-debug-tools\dist')
@@ -509,13 +510,13 @@ function Select-TMExecutableWithIcon {
     New-Item -ItemType Directory -Force -Path $WorkDirectory | Out-Null
     $candidate = Join-Path $WorkDirectory 'love-icon.exe'
     Copy-Item -LiteralPath $LoveExecutable -Destination $candidate -Force
-    $before = (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash
+    $before = Get-TMFileSha256 $candidate
     try {
         & $rcedit $candidate --set-icon $Icon | Out-Host
         if ($LASTEXITCODE -ne 0) {
             throw "rcedit exited with $LASTEXITCODE"
         }
-        $after = (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash
+        $after = Get-TMFileSha256 $candidate
         if ($before -eq $after) {
             throw 'rcedit did not modify the executable'
         }
