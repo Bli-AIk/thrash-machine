@@ -10,7 +10,7 @@ return {
   tilewidth = 40,
   tileheight = 40,
   nextlayerid = 7,
-  nextobjectid = 41,
+  nextobjectid = 46,
   properties = {
     ["name"] = "Test Map - Room 1",
     ["name_id"] = "map_room1_name"
@@ -42,10 +42,10 @@ return {
       properties = {},
       encoding = "lua",
       data = {
-        0, 22, 13, 23, 23, 13, 23, 23, 23, 13, 23, 23, 13, 24, 0, 0, 0, 0, 0, 0,
-        0, 22, 23, 23, 23, 23, 23, 21, 23, 23, 23, 23, 23, 24, 0, 0, 0, 0, 0, 0,
-        0, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 0, 0, 0, 0, 0, 0,
-        0, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 0, 0, 0, 0, 0, 0,
+        0, 22, 13, 23, 23, 13, 23, 23, 23, 13, 10, 12, 13, 24, 0, 0, 0, 0, 0, 0,
+        0, 22, 23, 23, 23, 23, 23, 21, 23, 23, 10, 12, 23, 24, 0, 0, 0, 0, 0, 0,
+        0, 26, 27, 27, 27, 27, 27, 27, 27, 27, 10, 12, 27, 28, 0, 0, 0, 0, 0, 0,
+        0, 6, 7, 7, 7, 7, 7, 7, 7, 7, 11, 11, 7, 8, 0, 0, 0, 0, 0, 0,
         0, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 0, 0, 0, 0, 0, 0,
         7, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 7, 7, 7, 7, 7, 7,
         15, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 15, 15, 15, 15, 15, 15,
@@ -133,7 +133,7 @@ return {
           shape = "rectangle",
           x = 40,
           y = 80,
-          width = 520,
+          width = 360,
           height = 40,
           rotation = 0,
           opacity = 1,
@@ -433,6 +433,48 @@ return {
           opacity = 1,
           visible = true,
           properties = {}
+        },
+        {
+          id = 42,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 480,
+          y = 80,
+          width = 80,
+          height = 40,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 43,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 360,
+          y = 0,
+          width = 40,
+          height = 80,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 44,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 480,
+          y = 0,
+          width = 40,
+          height = 80,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
         }
       }
     },
@@ -567,6 +609,26 @@ return {
             ["map"] = "room3",
             ["marker"] = "entry"
           }
+        },
+        {
+          id = 41,
+          name = "transition",
+          type = "",
+          shape = "rectangle",
+          x = 400,
+          y = -40,
+          width = 80,
+          height = 40,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["exit_delay"] = 0.3,
+            ["exit_sound"] = "doorclose",
+            ["marker"] = "entry_shop",
+            ["shop"] = "seamshop",
+            ["sound"] = "dooropen"
+          }
         }
       }
     },
@@ -649,6 +711,20 @@ return {
           shape = "point",
           x = 40,
           y = 240,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 45,
+          name = "entry_shop",
+          type = "",
+          shape = "point",
+          x = 440,
+          y = 100,
           width = 0,
           height = 0,
           rotation = 0,
