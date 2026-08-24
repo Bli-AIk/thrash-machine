@@ -111,12 +111,15 @@ jobs:
           done
           # Debug is a development artifact: it retains development libraries.
           unzip -Z1 dist/thrash-machine-debug.love | grep -q '^mods/thrash-machine/libraries/kristal-debug-tools/'
-          # Optional UT content packs are real content (not dev tools): with the
-          # submodules present and enabled they must ship in every package.
-          unzip -Z1 dist/thrash-machine-mod.zip | grep -q '^libraries/MagicalGlassRedux/'
-          unzip -Z1 dist/thrash-machine-mod.zip | grep -q '^libraries/UndertaleMonstersRecreation/'
-          unzip -Z1 dist/thrash-machine-release.love | grep -q '^mods/thrash-machine/libraries/MagicalGlassRedux/'
-          unzip -Z1 dist/thrash-machine-release.love | grep -q '^mods/thrash-machine/libraries/UndertaleMonstersRecreation/'
+          # Optional UT content packs follow the optionalLibraries selection in
+          # mod.json: the template default keeps MGR disabled and UMR follows it
+          # as a required dependent, so release and project packages are pruned
+          # of them (see README "可选 UT 内容库"). Forks that re-enable the
+          # packs must flip these asserts back to 'grep -q'.
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/MagicalGlassRedux/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-mod.zip | grep '^libraries/UndertaleMonstersRecreation/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-release.love | grep '^mods/thrash-machine/libraries/MagicalGlassRedux/' || true)"
+          test -z "$(unzip -Z1 dist/thrash-machine-release.love | grep '^mods/thrash-machine/libraries/UndertaleMonstersRecreation/' || true)"
           # Local/editor metadata must never ship, including from nested libraries.
           for archive in \
             dist/thrash-machine-release.love \
@@ -431,8 +434,13 @@ jobs:
           $apk = Get-ZipEntries 'dist-android-win/thrash-machine-android-wrap.apk'
 
           Assert-ArchiveContains $mod 'mod.json'
-          Assert-ArchiveContains $release 'mods/thrash-machine/libraries/MagicalGlassRedux/'
-          Assert-ArchiveContains $release 'mods/thrash-machine/libraries/UndertaleMonstersRecreation/'
+          # Optional UT content packs follow the optionalLibraries selection in
+          # mod.json: the template default keeps MGR disabled (UMR follows it),
+          # so the release .love must not contain them; the debug .love retains
+          # them. Forks that re-enable the packs must flip these back to
+          # Assert-ArchiveContains.
+          Assert-ArchiveOmits $release 'mods/thrash-machine/libraries/MagicalGlassRedux/'
+          Assert-ArchiveOmits $release 'mods/thrash-machine/libraries/UndertaleMonstersRecreation/'
           Assert-ArchiveContains $debug 'mods/thrash-machine/libraries/kristal-debug-tools/'
           Assert-ArchiveContains $winRelease 'thrash-machine-release-win64/THRASH-MACHINE-release.exe'
           Assert-ArchiveContains $winDebug 'thrash-machine-debug-win64/THRASH-MACHINE-debug.exe'

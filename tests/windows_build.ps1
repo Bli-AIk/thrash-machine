@@ -81,9 +81,15 @@ try {
                     throw "release library plan is missing development library: $expected"
                 }
             }
-            foreach ($retained in @('MagicalGlassRedux', 'UndertaleMonstersRecreation')) {
-                if ($retained -in $entries) {
-                    throw "release library plan unexpectedly removes enabled content library: $retained"
+            # Optional UT content packs follow the optionalLibraries selection:
+            # the current mod.json default keeps MGR disabled and UMR follows it
+            # as a required dependent, so the release plan must remove both
+            # (README: release artifacts physically remove disabled libraries).
+            # Selection semantics are covered data-driven in
+            # tests/build_helper_manifest.sh; this pins the tree's defaults.
+            foreach ($excluded in @('MagicalGlassRedux', 'UndertaleMonstersRecreation')) {
+                if ($excluded -notin $entries) {
+                    throw "release library plan does not remove disabled content library: $excluded"
                 }
             }
         } finally {
