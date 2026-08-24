@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/Bli-AIk/thrash-machine/compare/v0.2.0...v0.3.0) (2026-08-24)
+
+
+### Features
+
+* **luals:** generate library globals shim from libraries/ ([bae389f](https://github.com/Bli-AIk/thrash-machine/commit/bae389f1e12ceb237d66a865257f21daa9b8fd33))
+* **luals:** teach library globals from mod libraries ([e97fe98](https://github.com/Bli-AIk/thrash-machine/commit/e97fe9851a327b14ed527aa0317009906931e1b8))
+* optional MagicalGlassRedux pack + light world demo ([#11](https://github.com/Bli-AIk/thrash-machine/issues/11)) ([940512e](https://github.com/Bli-AIk/thrash-machine/commit/940512eb6d155abda5eb34418325619ee442b5e1))
+
+
+### Bug Fixes
+
+* **luals:** resolve library global types from submodule libraries ([230c15c](https://github.com/Bli-AIk/thrash-machine/commit/230c15cfd4d16e2396e376b0cb8d93acf08668a8))
+
 ## [Unreleased]
 
 ### Features
