@@ -1,9 +1,9 @@
 # Thrash Machine
 
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE-APACHE) <img src="https://img.shields.io/github/repo-size/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/last-commit/Bli-AIk/thrash-machine.svg"/> <img src="https://img.shields.io/github/v/release/Bli-AIk/thrash-machine.svg"/> <br>
-<img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge"/> <img src="https://img.shields.io/badge/Kristal-3B3B3B?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Deltarune-001225?style=for-the-badge&labelColor=001225&logo=undertale&logoColor=ff0000" /> <img src="https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge&logo=lua&logoColor=white" /> <img src="https://img.shields.io/badge/Kristal-FF6B35?style=for-the-badge&logo=love2d&logoColor=white" />
 
-**Thrash Machine** 是一个开箱即用的 Kristal 模板：自带能跑的 starter 地图、Dummy 战斗和对象事件，中文本地化和开发期工具按子模块组织好。
+**Thrash Machine** — 一个便于开发的 Kristal 模板：把我维护的本地化、对象编辑器、调试工具等实用包都整合成了子模块，拿来就能开工。
 
 | 简体中文 | English                 |
 | -------- | ----------------------- |
@@ -11,33 +11,33 @@
 
 ## Kristal 版本支持
 
-| `kristal`                                                                                                                    | `thrash-machine` |
-| -------------------------------------------------------------------------------------------------------------------------------| ------ |
-| [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | v0.2.0 - v0.3.0 |
-| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23)    | v0.0.0 – v0.1.0 |
+| `kristal`                                                                                                                     | `thrash-machine` |
+| ----------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | v0.2.0 - v0.3.0  |
+| [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23)    | v0.0.0 – v0.1.0  |
 
-## 有什么
+## 里面有什么
 
-- 直接可玩：starter 地图 + Dummy 战斗 + 对象事件
-- 图形化启动器（GUI）：Windows 双击 `gui.cmd` 打开（GUI 自动下载到 Kristal 引擎旁的共享 `.tools\gui\`，无需手动安装）；按引擎 `VERSION` 固定选择 `0.10.0 -> v0.1.5`、`0.11.0-dev -> v0.2.0`，其他版本会明确报错
-- 中英双语（kristal-i18n），游戏内可切换
-- 开发期工具按子模块组织，生产包自动剔除
+- **实用库**：本地化、对象编辑器、战斗调试启动器、终端控制台——按子模块整合，打包按配置取舍（见下方库列表）
+- **构建脚本**：Linux 的 .love、Windows 可执行程序、Android APK 三种打包，自动进行图标处理
+- **GUI 启动器**：`gui.cmd` 打开图形化启动器，自动按引擎版本下载对应 release（SHA256 校验），点选构建任务就能跑
+- **自动化发版**：通过 [release-please](https://github.com/googleapis/release-please) 合并发版 PR，自动打包并上传 Release
 
-| 子模块                       | 用途                                                 |
-| ---------------------------- | ---------------------------------------------------- |
-| kristal-i18n                 | 本地化，内置英文/简体中文                            |
-| kristal-object-selector-plus | 场景对象编辑器（Blender 风格 G/R/S）                 |
-| terminal-cli                 | 终端调试控制台（Linux/POSIX）                        |
-| kristal-debug-tools          | 战斗调试启动器（`--encounter` / `--wave` / `--tp`…） |
-| MagicalGlassRedux            | **可选** UT 明界战斗内容库（fork，Kristal 0.11-dev） |
-| UndertaleMonstersRecreation  | **可选** UT 怪物内容库；依赖 MagicalGlassRedux      |
-| .emacs / .helix              | 项目级编辑器配置（LuaLS、Kristal 路径）              |
+### 库列表
 
-## 可选 UT 内容库
+| 库                           | 作用                                                           | 备注     |
+| ---------------------------- | -------------------------------------------------------------- | -------- |
+| kristal-i18n                 | 本地化，内置英文/简体中文，游戏内可切换                        |          |
+| kristal-object-selector-plus | 场景对象编辑器，Blender 风格 G/R/S 变换                        |          |
+| terminal-cli                 | 终端调试控制台（Linux/POSIX）                                  |          |
+| kristal-debug-tools          | 战斗调试启动器：直接指定遭遇、波次、TP、仁慈值                 |          |
+| MagicalGlassRedux            | UT 风格光世界战斗内容库（fork）                                | （可选） |
+| UndertaleMonstersRecreation  | 蛙吉特、小模怪、商店等 UT 怪物内容示例，依赖 MagicalGlassRedux | （可选） |
+| .emacs / .helix              | 项目级编辑器配置（LuaLS、Kristal 路径）                        |          |
 
-`libraries/MagicalGlassRedux` 和 `libraries/UndertaleMonstersRecreation`
-是可选内容子模块，不属于开发期工具。它们由 `mod.json` 顶层的
-`optionalLibraries` 选择，键使用各自 `lib.json` 的实际库 ID，而不是子模块目录名：
+## 可选拓展
+
+想写 UT 风格的光世界战斗和怪物内容吗？MagicalGlassRedux（光世界战斗）和 UndertaleMonstersRecreation（蛙吉特、小模怪、商店等怪物内容示例，依赖前者）就是为此准备的可选拓展，在 `mod.json` 顶层的 `optionalLibraries` 里开关（ID 取自各自 `lib.json`）：
 
 ```jsonc
 "optionalLibraries": {
@@ -46,177 +46,142 @@
 }
 ```
 
-`undertale_monsters_recreation` 依赖 `magical-glass`：关闭 MGR 会连带关闭
-UMR，即使 UMR 的值仍为 `true`；单独关闭 UMR 不会关闭 MGR。需要该内容时可初始化
-子模块：
+`undertale_monsters_recreation` 依赖 `magical-glass`：关掉 MGR 会连带关掉 UMR（哪怕 UMR 还是 `true`）；单独关 UMR 则不影响 MGR。用之前先初始化子模块：
 
 ```sh
 git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
 ```
 
-release 产物和 `build-mod` 项目包会物理移除已关闭的库。debug 产物会保留这些文件，
-但运行时不会初始化或注册已关闭的库，也不会将其暴露在 `Mod.libs` 中；这不表示
-Kristal 在启动前从未编译过这些 Lua 源文件。
+## 快速开始
 
-两个库都是本项目维护的 fork（上游为 FireRainV/Noelle-Libraries-Pack）。详见各自的
-`LICENSE-UPSTREAM.md`：上游代码保留所有权利，fork 新增部分为 MIT 或 Apache-2.0。
+**1. 获取模板**
 
-这是**模板仓库**：建议先点仓库主页的 **Use this template** 按钮创建你自己的仓库（子模块引用会一并带上），再克隆你自己的仓库开始开发——这样版本历史和 Release 各自独立。
+**方式一：直接下载（快捷）**
 
-## 开始
+去 [Releases](https://github.com/Bli-AIk/thrash-machine/releases) 页下载 `thrash-machine-<版本>-full-source.zip`（或 `.tar.gz`）——已经拉好全部子模块的完整源码，解压即用。
+
+**方式二：版本管理**
+
+这是**模板仓库**：建议先点仓库主页的 **Use this template** 创建你自己的仓库（子模块引用会一并带上），再克隆你的仓库开始开发——版本历史和 Release 都归你自己。直接克隆也可以：
 
 ```sh
 git clone --recurse-submodules https://github.com/Bli-AIk/thrash-machine.git
 cd thrash-machine
-./tools/start.sh       # 把模板改成你的项目（--name "My Project"；--yes 免交互）
-make test             # 静态断言 + 语法检查
-KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal 路径）
 ```
 
-运行调试参数直接透传给 kristal-debug-tools：`just run --encounter`、`just run --wave 2 --tp 50`、`just run --lang zh-hans`。
+**2. 改成你的项目**
 
-打包所需软件按系统区分：
+把克隆下来的文件夹改成你的项目名，然后直接跑（不传 `--name` 时自动用文件夹名）：
 
-| 系统        | 必需                                                             | 说明                                                                                  |
-| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| **Windows** | Git、PowerShell、LÖVE 11.5                                      | 用原生 PowerShell 构建入口；不要求 Git Bash。Git 用于克隆或需要取源码的目标。          |
-| **Linux**   | git、tar、unzip、curl、love（如 Arch：`sudo pacman -S love`）    | `zip` 可选：有则用系统 zip，无则 Lua 助手                                             |
+```sh
+# Linux / Git Bash
+./tools/start.sh --yes
+./tools/start.sh --name "My Project" --yes
+```
 
-Linux/CI 的命令行打包使用 `just`。Windows 可直接使用下面的 PowerShell 入口，无需安装
-`just`。**LÖVE 需在 PATH 中**（或装在默认位置——脚本会自动检查 Windows 的
-`Program Files\LOVE` 与 `%LOCALAPPDATA%\Programs\LOVE`）。
+```powershell
+# Windows（PowerShell，不需要 Git Bash）
+.\tools\start.ps1 --yes
+.\tools\start.ps1 --name "My Project" --yes
+```
 
-Android 打包有**两种模式**：
+脚本会一并改掉项目 ID、名字，并拉齐全部子模块（`--yes` 免交互；详细选项见 `./tools/start.sh --help`）。
 
-- **套包构建（推荐给普通用户）**：`just build-android-wrap`，不需要 Android SDK/NDK；脚本会自动下载 JDK 17、官方 LÖVE 壳 APK 与 Android build-tools。它仍需使用本地 Kristal，或由 Git 取得固定引擎版本；不能自定义包名/图标/名称，也不能上架 Google Play。
-- **编译构建**：`just build-android`，从源码编译原生 APK。脚本会自动准备 JDK 17、Android SDK API 34、NDK 25.2.9519653 和 Gradle wrapper；首次需要联网下载，取得 Kristal 和 love-android 源码时仍需要 Git。
+**3. 跑起来**
 
-## 构建
+```sh
+make test                                  # 静态断言 + 语法检查
+just run                                   # 启动（自动查找 Kristal 引擎）
+```
 
-### 构建所需工具
+启动器从项目目录逐级向上找引擎（含 `main.lua` 和 `src/kristal.lua` 的目录）——把项目放进引擎的 `mods/` 下（`<Kristal>/mods/<你的项目>`）就完全不用配。项目不在引擎目录里时，运行时报错并告诉你怎么做：`Kristal engine not found. Set KRISTAL_ROOT=/path/to/Kristal.`，照做即可：
 
-**Windows 用户**：安装开发用的桌面版 **LÖVE**（加进 PATH 或放默认位置，脚本会自动找到），然后使用原生 PowerShell 入口。Git Bash 不是构建前提；需要 Git 的取源码目标仍会明确检查 Git。安卓打包使用的 LÖVE 是**移动端 LÖVE**（官方壳 APK），与开发用的桌面 LÖVE 不同。
+```sh
+# Linux：只对当前命令生效
+KRISTAL_ROOT=/path/to/Kristal just run
+```
 
-**Linux 用户**：自己装 git、love、just（缺了脚本会给出安装命令提示）；JDK 17、Android 打包工具、官方壳 APK、Kristal 引擎由脚本自动下载。
+```powershell
+# Windows：当前会话生效
+$env:KRISTAL_ROOT = "C:\path\to\Kristal"; just run
+```
 
-（可选）给 Windows exe 换图标还要 `rcedit`：Windows 上直接运行，Linux 上需要 `wine`；没有就跳过，不影响打包。
+想一劳永逸，就把 `KRISTAL_ROOT` 配进环境变量（Windows 系统设置、Linux shell 配置）。
+
+调试参数直接透传给 kristal-debug-tools：`just run --encounter`（直接进遭遇）、`just run --wave 2 --tp 50`（指定波次和初始 TP）、`just run --lang zh-hans`（选本次启动语言）。
+
+不想敲命令？GUI 也能用——Windows 双击 `gui.cmd`（其他平台 `just gui`）打开图形化启动器：运行项、调试参数、章节配置都是可视化点选，也能跑构建任务（见下文「打包 → GUI 打包」）。
+
+## 打包
 
 ### 命令行打包
 
-Windows 直接运行原生入口：
+Windows 和 Linux/CI 各走各的入口，产物一样：
 
 ```powershell
-tools\build.cmd all
-tools\build.cmd love
-tools\build.cmd win
-tools\build.cmd mod
-
-# 或直接调用 PowerShell 脚本
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build.ps1 all
+# Windows：原生 PowerShell 入口，不需要 Git Bash
+tools\build.cmd all      # 全部（love + win + mod）
+tools\build.cmd love     # .love 包
+tools\build.cmd win      # Windows x64 包
+tools\build.cmd mod      # 可直接放进 mods/ 的项目 ZIP
 ```
 
-`tools\build.cmd` 与 `tools\build.ps1` 的目标分别为 `all`、`love`、`win`、`mod`，
-不调用 Git Bash。Linux/CI 继续使用 POSIX shell 和下列 `just` 命令：
+```sh
+# Linux / CI
+just build                # release/debug .love + Windows x64（产出在 dist/）
+just build-win            # 只要 Windows x64
+just build-love           # 只要 .love
+just build-mod            # 项目 ZIP（自动剔除开发期工具）
+```
 
-- `just build` —— 同时生成 release/debug `.love` 与 Windows x64 包（老用法，默认固定 Kristal 0.11.0-dev，产出在 `dist/`）
-- `just build-win` —— 只生成 Windows x64 包
-- `just build-love` —— 只生成 release/debug `.love`，不生成 Windows exe、也不下载 LÖVE
-- `just build-mod` —— 可直接放进 `mods/` 的项目 ZIP（自动剔除开发期工具；recipe 和文件名保留 Kristal 兼容后缀）
-- `just build-android` —— **编译构建** Android APK（自动准备 JDK 17、Android SDK API 34、NDK 25.2.9519653 和 Gradle wrapper；包名/签名通过环境变量覆盖，详见脚本）
-- `just build-android-wrap` —— **套包构建** Android APK（官方 LÖVE 壳 + 游戏 `.love`，自动下载工具并重签名；不需要 Android SDK/NDK，**但是**不能自定义包名/图标/名称，也不能上架 Google Play）
+Linux 需要 git、tar、unzip、curl、love（Arch：`sudo pacman -S love`）；Windows 需要 Git、PowerShell、LÖVE 11.5。
 
-构建默认固定 Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`（`0.11.0-dev`），远程下载使用浅克隆（`--depth 1`），默认克隆到 `.build/Kristal`。若需改用其他来源，在交互式终端设置 `THRASH_MACHINE_KRISTAL_SOURCE=ask` 后运行 `just build`、`just build-win` 或 `just build-love`：
+### Android：两种模式
 
-1. 使用本地 Kristal（自动检测 `.build/Kristal`、`KRISTAL_ROOT` 和常见路径）
-2. 自己输入本地路径（Git 检出或普通目录均可）
-3. 从 Git 远程选择 tag（自动列出远程 tag 列表）
-4. 从 Git 远程输入完整 commit hash（40 位十六进制）
+- **套包构建**：`just build-android-wrap`，不需要 Android SDK/NDK——JDK 17、官方 LÖVE 壳和 build-tools 都自动准备；适合快速自用；代价是包名/图标/名称不能自定义，也上不了 Google Play。
+- **编译构建**：`just build-android`，从源码编译 APK，包名/图标可自定义，正式分发用它。
 
-CI 与非交互环境同样使用该固定 commit。也可用环境变量指定其他来源：
-
-- `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` 指定来源
-- `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` 指定本地路径
-- `THRASH_MACHINE_KRISTAL_REF` 指定 tag 或 commit hash
-- `THRASH_MACHINE_KRISTAL_REPO` 覆盖远程仓库
+Windows 上双击 `tools\build_android.cmd` 按提示选择即可（也支持参数：`build_android.cmd wrap` / `build_android.cmd compile`），两条路径都不用 Git Bash。JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` 显式指定 → PATH 里版本匹配的 `java` → 自动下载便携 Temurin 17（`THRASH_MACHINE_FETCH_JDK=0` 可关闭）。
 
 ### GUI 打包
 
-用 kristal-debug-tools GUI 也可以打包（Windows 下 `gui.cmd`，或任意平台 `just gui`）：
+Windows 双击仓库根目录的 `gui.cmd`（其他平台 `just gui`）打开 kristal-debug-tools 的图形化启动器：
 
-1. 展开"运行项列表（高级）"→ **项目构建** 组
-2. 点 `build` / `build-mod` / `build-android` —— 任务在独立终端窗口运行，输出实时可见
+1. 展开「运行项列表（高级）」 → **项目构建** 组
+2. 点 `build` / `build-mod` / `build-android`，任务在独立终端窗口运行，输出实时可见
 
-GUI 只是启动本项目的构建任务，打包规则仍在本仓库中。Windows 任务走原生 PowerShell，
-不需要 Git Bash；LÖVE 与所选目标的其他依赖仍需满足。启动器只下载当前引擎版本对应的
-固定 GUI release，不会请求 `latest`，也不会回退到另一个 release；目标 release 尚未上传时请稍后重试。
+启动器只下载与当前引擎版本匹配的固定 release（SHA256 校验），不会请求 `latest`；目标 release 还没传上去时稍后重试。启动器自身也不需要装 just / Rust / Node。
 
-GitHub 的自动构建会在每次推送和合并时自动检查项目能否正常打包；发布新版本时，打包好的文件（包括 Windows x64 包、.love 包、编译版 APK）会自动上传到 GitHub 的 Release 页面。**套包版默认不会自动构建**，需要时可在 GitHub 上手动触发构建并勾选 `build_android_wrap`。不想在自己电脑上安装 JDK、Android SDK 这些环境？直接合并 GitHub 上的版本发布 PR 就行，打包和上传全自动完成。
+### 引擎来源
 
-## Android 打包
+构建默认固定 Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`（`0.11.0-dev`，远程浅克隆到 `.build/Kristal`）。想换来源：交互终端里 `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` 按提示选（本地路径 / 远程 tag / 完整 commit），或用环境变量直接指定：
 
-### 分发产物对比
+- `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` —— 来源类型
+- `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` —— 本地路径
+- `THRASH_MACHINE_KRISTAL_REF` —— tag 或 commit hash
+- `THRASH_MACHINE_KRISTAL_REPO` —— 覆盖远程仓库
 
-|                         | Windows 版         | `.love` 版           | Project 版                  | Android 编译版       | Android 套包版            |
-| ----------------------- | ------------------ | -------------------- | --------------------------- | -------------------- | ------------------------- |
-| 命令                    | `just build-win`   | `just build-love`    | `just build-mod`            | `just build-android` | `just build-android-wrap` |
-| 产物                    | `dist/*-win64.zip` | `dist/*.love`        | `dist/*-mod.zip`            | `dist/*-android.apk` | `dist/*-android-wrap.apk` |
-| 运行平台                | Windows            | 装有 LÖVE 的任意平台 | Kristal `mods/`（任意平台） | Android              | Android                   |
-| 构建依赖                | git、LÖVE、curl    | LÖVE                 | git、LÖVE                   | Git、JDK 17（SDK/NDK 自动准备） | Git、JDK 17（无 SDK/NDK） |
-| 自定义包名/图标/名称    | —                  | —                    | —                           | ✅ 环境变量可覆盖    | ❌ 沿用官方壳             |
-| 修改 LÖVE 引擎/原生代码 | —                  | —                    | —                           | ✅ 可改              | ❌ 不能                   |
-| 适合                    | 桌面玩家           | Unix 系用户/开发者   | 玩家安装项目                | 正式分发、深度定制   | 普通玩家快速自用          |
+### 自动发版
 
-### Windows 一键打包
-
-双击项目根目录的 **`tools\build_android.cmd`**，或直接运行
-`powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build_android.ps1`，按提示选择：
-
-1. **快速套包构建** —— 原生 PowerShell 流程；不需要 Android SDK/NDK，自动准备 JDK 17、官方 LÖVE 壳和 build-tools；没有本地 Kristal 时需要 Git 取得固定引擎；
-2. **完整编译构建** —— 原生 PowerShell 流程；自动准备 JDK 17、Android SDK、NDK 和 Gradle wrapper；需要 Git 取得 Kristal 与 love-android 源码。
-
-也支持带参数运行：`tools\build_android.cmd wrap` 或 `tools\build_android.cmd compile`。两种路径都不调用 Git Bash。构建完成后会自动打开 `dist\` 目录。
-
-命令行（任意平台）等价用法：
-
-```sh
-just build-android-wrap   # 套包构建（无 Android SDK/NDK；缺 JDK 时自动下载 Temurin 17 到共享 .tools/jdk17）
-just build-android        # 编译构建（JDK、Android SDK/NDK 自动补齐）
-```
-
-JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到共享 `.tools/jdk17/`（位于 Kristal 引擎旁，多项目共享；无引擎时回退项目根 `.tools`）。`THRASH_MACHINE_FETCH_JDK=0` 可禁用自动下载。
+每次推送和合并，GitHub 都会自动检查项目能否正常打包；合并发版 PR 之后，Windows x64、.love、编译版 APK 会自动上传到 GitHub Release 页面。**套包版默认不自动构建**，需要时在 GitHub 上手动触发构建并勾选 `build_android_wrap`。
 
 ## 自定义图标（可选）
 
-构建脚本按**目录约定**读取 `assets/icon/`，无需配置。图标文件或工具缺失时该步骤自动跳过并警告，默认构建不受影响。
+构建脚本按目录约定读 `assets/icon/`，无需配置：
 
-```
-assets/icon/
-├── window_icon.png      # 游戏窗口图标 → 构建时复制到项目根目录并置 setWindowTitleAndIcon=true
-├── win/                 # Windows exe 图标
-│   ├── icon.ico         #   现成 .ico（可选捷径）
-│   └── 16x16.png 32x32.png 48x48.png 64x64.png 128x128.png 256x256.png
-└── android/             # Android 启动图标（缺失 density 自动就近回退）
-    └── ldpi.png mdpi.png hdpi.png xhdpi.png xxhdpi.png xxxhdpi.png
-```
+- `window_icon.png` —— 游戏窗口图标
+- `win/` —— Windows exe 图标（一组尺寸 PNG，或现成 `icon.ico`）
+- `android/` —— 各 density 的启动图标，缺失会自动用最近的补位
 
-| 目标        | 所需工具                                                          | 说明                                                        |
-| ----------- | ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| 游戏窗口    | 无                                                                | 自动复制到项目根目录（引擎只认根目录的 `window_icon.png`） |
-| Windows exe | `rcedit`（Linux 需 `wine`）+ `icotool`/ImageMagick 合成 PNG | 工具缺失时跳过并警告，不影响构建                            |
-| Android APK | 无                                                                | 各 density 独立成图，缺失的自动用最近的补位                 |
-
-- `win/` 下放一组尺寸 PNG（至少 32 + 256 效果最佳）或直接放 `icon.ico`；脚本优先用现成 `.ico`。
-- `THRASH_MACHINE_ICON_FETCH_TOOLS=1` 时脚本自动下载 rcedit 到共享 `.tools/rcedit/`（Kristal 引擎旁，无引擎时回退项目根）。
-- 完整 `assets/icon/` 目录会被排除出 `.love` / 项目包；`window_icon.png` 会在构建时复制到项目根目录后进包。
-- 可用环境变量覆盖路径：`THRASH_MACHINE_ICON_DIR`、`THRASH_MACHINE_WINDOW_ICON`、`THRASH_MACHINE_WIN_ICON_DIR`、`THRASH_MACHINE_RCEDit`、`THRASH_MACHINE_ANDROID_ICON_DIR`、`THRASH_MACHINE_ANDROID_ICON`。
+缺工具（如 `rcedit`）时自动跳过并警告，不影响默认构建。
 
 ## 提交规范
 
-用 Conventional Commits（feat/fix 驱动 release-please 的版本与变更日志）：
+用 Conventional Commits 写提交信息（feat/fix 会驱动 release-please 的版本号与变更日志）：
 
     feat: 添加新的 Lua 战斗波次
     fix: 修复地图切换后的对象事件
 
 ## 许可证
 
-自研 Lua 源码与文档为 MIT / Apache-2.0 双许可（LICENSE-MIT / LICENSE-APACHE）。Kristal 与子模块的许可边界见 THIRD_PARTY.md。
+自研 Lua 源码与文档为 MIT / Apache-2.0 双许可（[LICENSE-MIT](LICENSE-MIT) / [LICENSE-APACHE](LICENSE-APACHE)）。Kristal 与各子模块的许可边界见 [THIRD_PARTY.md](THIRD_PARTY.md)。
