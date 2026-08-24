@@ -29,7 +29,37 @@
 | kristal-object-selector-plus | 场景对象编辑器（Blender 风格 G/R/S）                 |
 | terminal-cli                 | 终端调试控制台（Linux/POSIX）                        |
 | kristal-debug-tools          | 战斗调试启动器（`--encounter` / `--wave` / `--tp`…） |
+| MagicalGlassRedux            | **可选** UT 明界战斗内容库（fork，Kristal 0.11-dev） |
+| UndertaleMonstersRecreation  | **可选** UT 怪物内容库；依赖 MagicalGlassRedux      |
 | .emacs / .helix              | 项目级编辑器配置（LuaLS、Kristal 路径）              |
+
+## 可选 UT 内容库
+
+`libraries/MagicalGlassRedux` 和 `libraries/UndertaleMonstersRecreation`
+是可选内容子模块，不属于开发期工具。它们由 `mod.json` 顶层的
+`optionalLibraries` 选择，键使用各自 `lib.json` 的实际库 ID，而不是子模块目录名：
+
+```jsonc
+"optionalLibraries": {
+    "magical-glass": true,
+    "undertale_monsters_recreation": true
+}
+```
+
+`undertale_monsters_recreation` 依赖 `magical-glass`：关闭 MGR 会连带关闭
+UMR，即使 UMR 的值仍为 `true`；单独关闭 UMR 不会关闭 MGR。需要该内容时可初始化
+子模块：
+
+```sh
+git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
+```
+
+release 产物和 `build-mod` 项目包会物理移除已关闭的库。debug 产物会保留这些文件，
+但运行时不会初始化或注册已关闭的库，也不会将其暴露在 `Mod.libs` 中；这不表示
+Kristal 在启动前从未编译过这些 Lua 源文件。
+
+两个库都是本项目维护的 fork（上游为 FireRainV/Noelle-Libraries-Pack）。详见各自的
+`LICENSE-UPSTREAM.md`：上游代码保留所有权利，fork 新增部分为 MIT 或 Apache-2.0。
 
 这是**模板仓库**：建议先点仓库主页的 **Use this template** 按钮创建你自己的仓库（子模块引用会一并带上），再克隆你自己的仓库开始开发——这样版本历史和 Release 各自独立。
 
@@ -49,34 +79,51 @@ KRISTAL_ROOT=/path/to/Kristal just run   # 运行（自动查找常见 Kristal �
 
 | 系统        | 必需                                                             | 说明                                                                                  |
 | ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| **Windows** | Git for Windows（安装时选默认 PATH 选项）、LÖVE 11.5             | Git Bash 自带 bash/tar/curl/unzip/sed；Git Bash 不含 `zip`，缺省时由 Lua 助手写入 zip |
+| **Windows** | Git、PowerShell、LÖVE 11.5                                      | 用原生 PowerShell 构建入口；不要求 Git Bash。Git 用于克隆或需要取源码的目标。          |
 | **Linux**   | git、tar、unzip、curl、love（如 Arch：`sudo pacman -S love`）    | `zip` 可选：有则用系统 zip，无则 Lua 助手                                             |
 
-`just` 仅在命令行打包时需要（GUI 自带内嵌 just）。**LÖVE 需在 PATH 中**（或装在默认位置——脚本会自动检查 Windows 的 `Program Files\LOVE` 与 `%LOCALAPPDATA%\Programs\LOVE`）。
+Linux/CI 的命令行打包使用 `just`。Windows 可直接使用下面的 PowerShell 入口，无需安装
+`just`。**LÖVE 需在 PATH 中**（或装在默认位置——脚本会自动检查 Windows 的
+`Program Files\LOVE` 与 `%LOCALAPPDATA%\Programs\LOVE`）。
 
 Android 打包有**两种模式**：
 
-- **套包构建（推荐给普通用户）**：`just build-android-wrap`，只需一个 JDK（脚本自动下载官方 LÖVE 壳 APK 与 Android build-tools），几分钟出包，**但是**不能自定义包名/图标/名称，也不能上架 Google Play。
-- **编译构建**：`just build-android`，从源码编译原生 APK，需要 JDK 17 + Android SDK API 34 + NDK 25.2.9519653（配置较麻烦，且需联网获取 JDK/SDK/NDK）。
+- **套包构建（推荐给普通用户）**：`just build-android-wrap`，不需要 Android SDK/NDK；脚本会自动下载 JDK 17、官方 LÖVE 壳 APK 与 Android build-tools。它仍需使用本地 Kristal，或由 Git 取得固定引擎版本；不能自定义包名/图标/名称，也不能上架 Google Play。
+- **编译构建**：`just build-android`，从源码编译原生 APK。脚本会自动准备 JDK 17、Android SDK API 34、NDK 25.2.9519653 和 Gradle wrapper；首次需要联网下载，取得 Kristal 和 love-android 源码时仍需要 Git。
 
 ## 构建
 
 ### 构建所需工具
 
-**Windows 用户**：只需手动装 **LÖVE**（开发用的桌面版，加进 PATH 或放默认位置即可，脚本会自动找到）；其他工具（Git 含 bash、just、JDK 17、Android 打包工具、Kristal 引擎）全部由脚本自动下载。安卓打包也会自动下载 LÖVE，但那是**移动端 LÖVE**（官方壳 APK），是打进安卓包用的，不是开发用的桌面 LÖVE。
+**Windows 用户**：安装开发用的桌面版 **LÖVE**（加进 PATH 或放默认位置，脚本会自动找到），然后使用原生 PowerShell 入口。Git Bash 不是构建前提；需要 Git 的取源码目标仍会明确检查 Git。安卓打包使用的 LÖVE 是**移动端 LÖVE**（官方壳 APK），与开发用的桌面 LÖVE 不同。
 
-**Linux 用户**：自己装 git、love、just（缺了脚本会给出安装命令提示）；JDK 17、Android 打包工具、官方壳 APK、Kristal 引擎由脚本自动下载。编译版 APK 还需自己装 Android SDK/NDK。
+**Linux 用户**：自己装 git、love、just（缺了脚本会给出安装命令提示）；JDK 17、Android 打包工具、官方壳 APK、Kristal 引擎由脚本自动下载。
 
 （可选）给 Windows exe 换图标还要 `rcedit`：Windows 上直接运行，Linux 上需要 `wine`；没有就跳过，不影响打包。
 
-### 手动打包
+### 命令行打包
+
+Windows 直接运行原生入口：
+
+```powershell
+tools\build.cmd all
+tools\build.cmd love
+tools\build.cmd win
+tools\build.cmd mod
+
+# 或直接调用 PowerShell 脚本
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build.ps1 all
+```
+
+`tools\build.cmd` 与 `tools\build.ps1` 的目标分别为 `all`、`love`、`win`、`mod`，
+不调用 Git Bash。Linux/CI 继续使用 POSIX shell 和下列 `just` 命令：
 
 - `just build` —— 同时生成 release/debug `.love` 与 Windows x64 包（老用法，默认固定 Kristal 0.11.0-dev，产出在 `dist/`）
 - `just build-win` —— 只生成 Windows x64 包
 - `just build-love` —— 只生成 release/debug `.love`，不生成 Windows exe、也不下载 LÖVE
 - `just build-mod` —— 可直接放进 `mods/` 的项目 ZIP（自动剔除开发期工具；recipe 和文件名保留 Kristal 兼容后缀）
-- `just build-android` —— **编译构建** Android APK（需 JDK 17 + Android SDK API 34 + NDK 25.2.9519653；包名/签名通过环境变量覆盖，详见脚本）
-- `just build-android-wrap` —— **套包构建** Android APK（官方 LÖVE 壳 + 游戏 .love，自动下载工具并重签名；只需 JDK、速度更快，**但是**不能自定义包名/图标/名称，也不能上架 Google Play）
+- `just build-android` —— **编译构建** Android APK（自动准备 JDK 17、Android SDK API 34、NDK 25.2.9519653 和 Gradle wrapper；包名/签名通过环境变量覆盖，详见脚本）
+- `just build-android-wrap` —— **套包构建** Android APK（官方 LÖVE 壳 + 游戏 `.love`，自动下载工具并重签名；不需要 Android SDK/NDK，**但是**不能自定义包名/图标/名称，也不能上架 Google Play）
 
 构建默认固定 Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`（`0.11.0-dev`），远程下载使用浅克隆（`--depth 1`），默认克隆到 `.build/Kristal`。若需改用其他来源，在交互式终端设置 `THRASH_MACHINE_KRISTAL_SOURCE=ask` 后运行 `just build`、`just build-win` 或 `just build-love`：
 
@@ -92,20 +139,6 @@ CI 与非交互环境同样使用该固定 commit。也可用环境变量指定�
 - `THRASH_MACHINE_KRISTAL_REF` 指定 tag 或 commit hash
 - `THRASH_MACHINE_KRISTAL_REPO` 覆盖远程仓库
 
-### 没有安装 just？用 `tools/just`（Windows 免装，走 GUI 内嵌版）
-
-构建脚本通过 `just` 调用，但 Windows 上**不需要单独安装 just**：仓库里的 `tools/just`（Git Bash）或 `tools/just.cmd`（cmd / PowerShell）会自动使用 kristal-debug-tools GUI 内嵌的 just——`kristal-run` sidecar 的 `just-task` 模式，just 1.58.0 编译在内部。sidecar 缺失时按 `gui.cmd` 相同的固定版本映射和 URL/SHA256 方案下载到共享 `.tools/gui/`（Kristal 引擎旁）：`0.10.0 -> v0.1.5`，`0.11.0-dev -> v0.2.0`；其他引擎版本会停止并说明原因。
-
-```sh
-tools/just build-love     # Git Bash
-tools\just.cmd build      # cmd / PowerShell
-```
-
-- 解析顺序：`$JUST`（显式指定）→ Windows 上 GUI sidecar（`kristal-run just-task <justfile> <task>`）→ PATH 里的 `just`。
-- Linux 没有 sidecar，`tools/just` 要求 PATH 里有 `just`（`scoop install just` 或官方安装包）。
-- 想手动指定 sidecar：`KRISTAL_RUN=/path/to/kristal-run.exe tools/just build`。
-- 产物与直接 `just build` 完全一致（wrapper 先 `cd` 到项目根目录，recipe 行为不变）。
-
 ### GUI 打包
 
 用 kristal-debug-tools GUI 也可以打包（Windows 下 `gui.cmd`，或任意平台 `just gui`）：
@@ -113,7 +146,9 @@ tools\just.cmd build      # cmd / PowerShell
 1. 展开"运行项列表（高级）"→ **项目构建** 组
 2. 点 `build` / `build-mod` / `build-android` —— 任务在独立终端窗口运行，输出实时可见
 
-要求与手动打包相同：Windows 需 Git Bash 在 PATH、LÖVE 已安装；`just` 无需安装（GUI 自带）。启动器只下载当前引擎版本对应的固定 GUI release，不会请求 `latest`，也不会回退到另一个 release；目标 release 尚未上传时请稍后重试。
+GUI 只是启动本项目的构建任务，打包规则仍在本仓库中。Windows 任务走原生 PowerShell，
+不需要 Git Bash；LÖVE 与所选目标的其他依赖仍需满足。启动器只下载当前引擎版本对应的
+固定 GUI release，不会请求 `latest`，也不会回退到另一个 release；目标 release 尚未上传时请稍后重试。
 
 GitHub 的自动构建会在每次推送和合并时自动检查项目能否正常打包；发布新版本时，打包好的文件（包括 Windows x64 包、.love 包、编译版 APK）会自动上传到 GitHub 的 Release 页面。**套包版默认不会自动构建**，需要时可在 GitHub 上手动触发构建并勾选 `build_android_wrap`。不想在自己电脑上安装 JDK、Android SDK 这些环境？直接合并 GitHub 上的版本发布 PR 就行，打包和上传全自动完成。
 
@@ -126,28 +161,29 @@ GitHub 的自动构建会在每次推送和合并时自动检查项目能否正�
 | 命令                    | `just build-win`   | `just build-love`    | `just build-mod`            | `just build-android` | `just build-android-wrap` |
 | 产物                    | `dist/*-win64.zip` | `dist/*.love`        | `dist/*-mod.zip`            | `dist/*-android.apk` | `dist/*-android-wrap.apk` |
 | 运行平台                | Windows            | 装有 LÖVE 的任意平台 | Kristal `mods/`（任意平台） | Android              | Android                   |
-| 构建依赖                | git、LÖVE、curl    | LÖVE                 | git、LÖVE                   | JDK 17 + SDK/NDK     | 只需 JDK                  |
+| 构建依赖                | git、LÖVE、curl    | LÖVE                 | git、LÖVE                   | Git、JDK 17（SDK/NDK 自动准备） | Git、JDK 17（无 SDK/NDK） |
 | 自定义包名/图标/名称    | —                  | —                    | —                           | ✅ 环境变量可覆盖    | ❌ 沿用官方壳             |
 | 修改 LÖVE 引擎/原生代码 | —                  | —                    | —                           | ✅ 可改              | ❌ 不能                   |
 | 适合                    | 桌面玩家           | Unix 系用户/开发者   | 玩家安装项目                | 正式分发、深度定制   | 普通玩家快速自用          |
 
 ### Windows 一键打包
 
-双击项目根目录的 **`tools\build_android.cmd`**，按提示选择：
+双击项目根目录的 **`tools\build_android.cmd`**，或直接运行
+`powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build_android.ps1`，按提示选择：
 
-1. **快速套包构建** —— 自动下载/安装缺失的 Git Bash（PortableGit）、JDK 17、LÖVE 到 Kristal 引擎旁的共享 `.tools\`（无引擎时回退项目根），然后直接出包；
-2. **完整编译构建** —— 额外自动下载 Android cmdline-tools/SDK/NDK（首次约 1.5 GB）。
+1. **快速套包构建** —— 原生 PowerShell 流程；不需要 Android SDK/NDK，自动准备 JDK 17、官方 LÖVE 壳和 build-tools；没有本地 Kristal 时需要 Git 取得固定引擎；
+2. **完整编译构建** —— 原生 PowerShell 流程；自动准备 JDK 17、Android SDK、NDK 和 Gradle wrapper；需要 Git 取得 Kristal 与 love-android 源码。
 
-也支持带参数运行：`tools\build_android.cmd wrap` 或 `tools\build_android.cmd compile`。构建完成后会自动打开 `dist\` 目录。
+也支持带参数运行：`tools\build_android.cmd wrap` 或 `tools\build_android.cmd compile`。两种路径都不调用 Git Bash。构建完成后会自动打开 `dist\` 目录。
 
 命令行（任意平台）等价用法：
 
 ```sh
-just build-android-wrap   # 套包构建（只需 JDK，缺 JDK 时自动下载 Temurin 17 到共享 .tools/jdk17）
-just build-android        # 编译构建（需完整 Android SDK/NDK；JDK 同样自动补齐）
+just build-android-wrap   # 套包构建（无 Android SDK/NDK；缺 JDK 时自动下载 Temurin 17 到共享 .tools/jdk17）
+just build-android        # 编译构建（JDK、Android SDK/NDK 自动补齐）
 ```
 
-JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到共享 `.tools/jdk17/`（位于 Kristal 引擎旁，多项目共享；无引擎时回退项目根 `.tools`。`THRASH_MACHINE_FETCH_JDK=0` 禁用自动下载；`THRASH_MACHINE_JDK_VERSION` 改版本号）。
+JDK 解析顺序：`THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME`（显式指定，版本不符会直接报错）→ PATH 里版本匹配的 `java` → 自动下载便携 Temurin JDK 17 到共享 `.tools/jdk17/`（位于 Kristal 引擎旁，多项目共享；无引擎时回退项目根 `.tools`）。`THRASH_MACHINE_FETCH_JDK=0` 可禁用自动下载。
 
 ## 自定义图标（可选）
 

@@ -6,10 +6,17 @@ test: test-static test-debug-tools
 
 test-static:
 	sh .github/scripts/static-smoke.sh
+	luajit tests/optional_libraries.lua
+	luajit tests/i18n_item_key_api.lua
+	sh tests/build_helper_manifest.sh
+	sh tests/refactor_boundaries.sh
+	if command -v pwsh >/dev/null 2>&1; then pwsh -NoProfile -File tests/windows_build.ps1; else printf '%s\n' 'pwsh unavailable: skipping Windows build smoke'; fi
 	find . -path ./.git -prune -o -path ./.emacs -prune -o -path ./.helix -prune -o \
 		-path ./libraries -prune -o -path ./.build -prune -o -path ./dist -prune -o \
 		-path ./.worktrees -prune -o -type f -name '*.lua' -print0 | \
-		xargs -0 -I{} luajit -b {} /dev/null
+		xargs -0 -I{} luajit -b -l {} >/dev/null
+	find libraries/kristal-i18n libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation \
+		-type f -name '*.lua' -print0 | xargs -0 -I{} luajit -b -l {} >/dev/null
 
 test-debug-tools:
 	sh .github/scripts/template-justfile-smoke.sh

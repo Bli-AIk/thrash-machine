@@ -698,6 +698,9 @@ copy_mod() {
     tar -cf - \
         --exclude='*.git' \
         --exclude='./.github' \
+        --exclude='./libraries/*/.github' \
+        --exclude='./.claude' \
+        --exclude='./libraries/*/.claude' \
         --exclude='./.build' \
         --exclude='./dist*' \
         --exclude='./.tools' \
@@ -709,6 +712,7 @@ copy_mod() {
         --exclude='./docs' \
         --exclude='./Makefile' \
         --exclude='./justfile' \
+        --exclude='./gui.cmd' \
         --exclude='./tools' \
         --exclude='./build-helper' \
         --exclude='__pycache__' \
@@ -729,9 +733,9 @@ copy_mod() {
         -C "$THRASH_MACHINE_MOD_DIR" . | tar -xf - -C "$stage_mod"
 
     if [ "$variant" = "release" ]; then
-        rm -rf "$stage_mod/libraries/kristal-object-selector-plus"
-        rm -rf "$stage_mod/libraries/terminal-cli"
-        rm -rf "$stage_mod/libraries/kristal-debug-tools"
+        # The helper owns release stripping by library ID. Debug packages
+        # intentionally retain every optional and development library directory.
+        prune_release_optional_libraries "$stage_mod"
     fi
 }
 

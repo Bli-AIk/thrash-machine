@@ -29,7 +29,41 @@
 | kristal-object-selector-plus | Scene object editor (Blender-style G/R/S)                  |
 | terminal-cli                 | Terminal debug console (Linux/POSIX)                       |
 | kristal-debug-tools          | Battle debug launcher (`--encounter` / `--wave` / `--tp`…) |
+| MagicalGlassRedux            | **Optional** UT light battle pack (fork, Kristal 0.11-dev) |
+| UndertaleMonstersRecreation  | **Optional** UT monster content; requires MGR             |
 | .emacs / .helix              | Project editor config (LuaLS, Kristal paths)               |
+
+## Optional UT content pack
+
+`libraries/MagicalGlassRedux` and `libraries/UndertaleMonstersRecreation` are
+optional content submodules, not development tools. Select them through the
+top-level `optionalLibraries` object in `mod.json`; its keys are the real
+library IDs from `lib.json`, not submodule directory names:
+
+```jsonc
+"optionalLibraries": {
+    "magical-glass": true,
+    "undertale_monsters_recreation": true
+}
+```
+
+`undertale_monsters_recreation` requires `magical-glass`. Disabling MGR also
+disables UMR even when UMR remains `true`; disabling UMR alone leaves MGR
+enabled. Initialize the submodules when you want the optional content:
+
+```sh
+git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
+```
+
+Release artifacts and `build-mod` project packages physically remove disabled
+libraries. Debug artifacts retain their files, but disabled libraries are not
+initialized, registered, or exposed through `Mod.libs` at runtime. That runtime
+boundary does not promise that Kristal never compiles their Lua source before
+startup.
+
+Both libraries are forks maintained by this project (upstream:
+FireRainV/Noelle-Libraries-Pack). See their `LICENSE-UPSTREAM.md` files:
+upstream code retains all rights; fork additions are MIT or Apache-2.0.
 
 This is a **template repository**: click **Use this template** on the repo page to create your own copy (the submodule references come along), then clone your own repo before you start — your version history and releases stay independent.
 
@@ -49,34 +83,53 @@ Software requirements by OS:
 
 | OS          | Required                                                               | Notes                                                                                                             |
 | ----------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Windows** | Git for Windows (default PATH option at install), LÖVE 11.5            | Git Bash provides bash/tar/curl/unzip/sed; Git Bash has no `zip`, so the Lua helper writes zips when it's missing |
+| **Windows** | Git, PowerShell, LÖVE 11.5                                             | Use the native PowerShell build entry point; Git Bash is not required. Git is used for cloning or targets that fetch source. |
 | **Linux**   | git, tar, unzip, curl, love (e.g. Arch: `sudo pacman -S love`)         | `zip` optional: system zip when present, Lua helper otherwise                                                     |
 
-`just` is only needed for command-line packaging (the GUI embeds its own). **LÖVE must be on PATH** (or installed in the default locations — the scripts check Windows' `Program Files\LOVE` and `%LOCALAPPDATA%\Programs\LOVE` automatically).
+Linux/CI command-line packaging uses `just`. Windows can use the native entry
+point below without installing `just`. **LÖVE must be on PATH** (or installed
+in the default locations — the scripts check Windows' `Program Files\LOVE` and
+`%LOCALAPPDATA%\Programs\LOVE` automatically).
 
 Android packaging has **two modes**:
 
-- **Wrap build (recommended for casual users)**: `just build-android-wrap` — only needs a JDK (the official LÖVE shell APK and Android build-tools are downloaded automatically); an APK is ready in minutes, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play.
-- **Compile build**: `just build-android` — compiles a native APK from source and needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653 (more setup involved, and the JDK/SDK/NDK must be fetched over the network).
+- **Wrap build (recommended for casual users)**: `just build-android-wrap` — no Android SDK/NDK is needed; the script downloads JDK 17, the official LÖVE shell APK, and Android build-tools. It still uses a local Kristal checkout or Git to obtain the pinned engine. The package id/icon/name cannot be customized and it cannot be published on Google Play.
+- **Compile build**: `just build-android` — compiles a native APK from source. The script provisions JDK 17, Android SDK API 34, NDK 25.2.9519653, and the Gradle wrapper; the first run downloads them, while obtaining Kristal and love-android source still needs Git.
 
 ## Builds
 
 ### Build tools
 
-**Windows**: install **LÖVE** yourself (the desktop build you develop with — add it to PATH or use a default install location; the scripts find it automatically). Everything else — Git (with bash), `just`, JDK 17, Android packaging tools, the Kristal engine — is downloaded automatically by the build scripts. The Android build also downloads LÖVE, but that is the **mobile LÖVE** (the official shell APK) that goes inside the APK — not the desktop LÖVE you develop with.
+**Windows**: install the desktop **LÖVE** you develop with (add it to PATH or use a default install location; the scripts find it automatically), then use the native PowerShell entry point. Git Bash is not a build prerequisite; targets that need Git to fetch source check it explicitly. The LÖVE used for Android packaging is the **mobile LÖVE** official shell APK, not the desktop LÖVE used for development.
 
-**Linux**: install git, love and `just` yourself (the scripts print the install commands if something is missing). JDK 17, Android packaging tools, the official shell APK and the Kristal engine are downloaded automatically by the build scripts. The compile-build APK additionally needs the Android SDK/NDK installed by hand.
+**Linux**: install git, love and `just` yourself (the scripts print the install commands if something is missing). JDK 17, Android packaging tools, the official shell APK and the Kristal engine are downloaded automatically by the build scripts.
 
 (Optional) Customizing the Windows exe icon uses `rcedit`: runs directly on Windows, needs `wine` on Linux; without it the icon is skipped and the build is unaffected.
 
-### Manual packaging
+### Command-line packaging
+
+On Windows, run the native entry point directly:
+
+```powershell
+tools\build.cmd all
+tools\build.cmd love
+tools\build.cmd win
+tools\build.cmd mod
+
+# Or call PowerShell directly.
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build.ps1 all
+```
+
+`tools\build.cmd` and `tools\build.ps1` accept `all`, `love`, `win`, and
+`mod`; they do not invoke Git Bash. Linux/CI continue to use POSIX shell and
+the following `just` commands:
 
 - `just build` — release/debug `.love` plus Windows x64 packages (original behavior; Kristal 0.11.0-dev by default, output in `dist/`)
 - `just build-win` — Windows x64 package only
 - `just build-love` — release/debug `.love` only, without Windows executables or a LÖVE download
 - `just build-mod` — a project ZIP for `mods/` (dev tools stripped; the recipe and filename keep Kristal's compatibility suffix)
-- `just build-android` — **compile-build** Android APK (needs JDK 17 + Android SDK API 34 + NDK 25.2.9519653; package/signing overrides via env vars, see scripts)
-- `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; only a JDK is required and it is faster, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
+- `just build-android` — **compile-build** Android APK (automatically provisions JDK 17, Android SDK API 34, NDK 25.2.9519653, and the Gradle wrapper; package/signing overrides via env vars, see scripts)
+- `just build-android-wrap` — **wrap-build** Android APK (official LÖVE shell + game.love; tools auto-downloaded and re-signed; no Android SDK/NDK is needed, **but** the package id/icon/name cannot be customized and it cannot be published on Google Play)
 
 Builds pin Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81` (`0.11.0-dev`), shallow-clone remote sources (`--depth 1`), and use `.build/Kristal` by default. To choose another source interactively, run `just build`, `just build-win`, or `just build-love` with `THRASH_MACHINE_KRISTAL_SOURCE=ask`:
 
@@ -92,20 +145,6 @@ CI and non-interactive environments use the same pinned commit. To select anothe
 - `THRASH_MACHINE_KRISTAL_REF` for a tag or commit hash
 - `THRASH_MACHINE_KRISTAL_REPO` to override the remote repository
 
-### No standalone `just`? Use `tools/just` (Windows: zero-install, GUI-embedded)
-
-The build scripts are driven by `just`, but on Windows **no separate just install is needed**: `tools/just` (Git Bash) or `tools/just.cmd` (cmd/PowerShell) automatically uses the just embedded in the kristal-debug-tools GUI — the `kristal-run` sidecar's `just-task` mode (just 1.58.0 compiled in). When the sidecar is missing it is downloaded on demand into the shared `.tools/gui/` next to the Kristal engine with the same fixed release mapping and URL/SHA256 scheme as `gui.cmd`: `0.10.0 -> v0.1.5`, `0.11.0-dev -> v0.2.0`; other engine versions stop with a clear error.
-
-```sh
-tools/just build-love     # Git Bash
-tools\just.cmd build      # cmd / PowerShell
-```
-
-- Resolution order: `$JUST` (explicit) → GUI sidecar on Windows (`kristal-run just-task <justfile> <task>`) → `just` on PATH.
-- Linux has no sidecar, so `tools/just` requires `just` on PATH (`scoop install just` or the official installer).
-- To point at a specific sidecar: `KRISTAL_RUN=/path/to/kristal-run.exe tools/just build`.
-- Output is identical to running `just build` directly (the wrapper cd's to the project root first, so recipes behave the same).
-
 ### Packaging from the GUI
 
 The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just gui` anywhere):
@@ -113,7 +152,12 @@ The kristal-debug-tools GUI can package too (run `gui.cmd` on Windows, or `just 
 1. Expand the "RUN LIST (ADVANCED)" panel → **PROJECT BUILDS** group
 2. Click `build` / `build-mod` / `build-android` — the task runs in a separate terminal window with live output
 
-Same requirements as manual packaging: Git Bash on PATH on Windows and LÖVE installed; `just` itself is not needed (the GUI embeds it). The launcher downloads only the fixed GUI release for the current engine version: it never requests `latest` or falls back to a different release. Retry later when the selected release has not uploaded its assets yet.
+The GUI only launches this project's build tasks; packaging rules remain in this
+repository. Windows tasks use native PowerShell and do not require Git Bash;
+LÖVE and the selected target's other dependencies still apply. The launcher
+downloads only the fixed GUI release for the current engine version: it never
+requests `latest` or falls back to a different release. Retry later when the
+selected release has not uploaded its assets yet.
 
 GitHub's automated builds check that the project packages correctly on every push and merge; when a new version is released, the packaged files (including the Windows x64 package, the .love package, and the **compiled APK**) are uploaded to the GitHub Release page automatically. The **wrap APK is not built automatically by default** — enable it by checking `build_android_wrap` when triggering a build manually on GitHub. Don't want to install JDK or Android SDK on your own machine? Just merge the version-release PR on GitHub — packaging and uploading are fully automatic.
 
@@ -126,28 +170,29 @@ GitHub's automated builds check that the project packages correctly on every pus
 | Recipe                               | `just build-win`   | `just build-love`      | `just build-mod`               | `just build-android`                      | `just build-android-wrap`           |
 | Output                               | `dist/*-win64.zip` | `dist/*.love`          | `dist/*-mod.zip`               | `dist/*-android.apk`                      | `dist/*-android-wrap.apk`           |
 | Runs on                              | Windows            | Any platform with LÖVE | Kristal `mods/` (any platform) | Android                                   | Android                             |
-| Build deps                           | git, LÖVE, curl    | LÖVE                   | git, LÖVE                      | JDK 17 + SDK/NDK                          | A JDK only                          |
+| Build deps                           | git, LÖVE, curl    | LÖVE                   | git, LÖVE                      | Git, JDK 17 (SDK/NDK auto-provisioned)    | Git, JDK 17 (no SDK/NDK)            |
 | Custom package id / icon / name      | —                  | —                      | —                              | ✅ env overrides                          | ❌ official shell                   |
 | Modify the LÖVE engine / native code | —                  | —                      | —                              | ✅                                        | ❌                                  |
 | Best for                             | Desktop players    | Unix users/developers  | Players installing projects    | Official distribution, deep customization | Casual users, quick personal builds |
 
 ### One-click packaging on Windows
 
-Double-click **`tools\build_android.cmd`** in the project root and pick:
+Double-click **`tools\build_android.cmd`** in the project root, or run
+`powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\build_android.ps1`, and pick:
 
-1. **Quick wrap build** — automatically installs whatever is missing into the shared `.tools\` next to the Kristal engine (PortableGit Git Bash, JDK 17, LÖVE 11.5; the project root is the fallback) and produces the APK;
-2. **Full compile build** — additionally downloads the Android cmdline-tools/SDK/NDK (first run ~1.5 GB).
+1. **Quick wrap build** — a native PowerShell flow with no Android SDK/NDK; it provisions JDK 17, the official LÖVE shell, and build-tools, while a missing local Kristal checkout still requires Git to obtain the pinned engine;
+2. **Full compile build** — a native PowerShell flow that provisions JDK 17, the Android SDK, NDK, and Gradle wrapper; Git obtains Kristal and love-android source.
 
-It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_android.cmd compile`. When the build finishes it opens the `dist\` folder.
+It also accepts arguments: `tools\build_android.cmd wrap` or `tools\build_android.cmd compile`. Neither path invokes Git Bash. When the build finishes it opens the `dist\` folder.
 
 Equivalent commands on any platform:
 
 ```sh
-just build-android-wrap   # wrap build (only a JDK is needed; a missing JDK auto-downloads Temurin 17 into the shared .tools/jdk17)
-just build-android        # compile build (needs the full Android SDK/NDK; the JDK is auto-supplemented too)
+just build-android-wrap   # wrap build (no Android SDK/NDK; a missing JDK auto-downloads Temurin 17 into the shared .tools/jdk17)
+just build-android        # compile build (JDK and Android SDK/NDK are auto-provisioned)
 ```
 
-JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across projects; the project root `.tools` is the fallback when no engine is found. `THRASH_MACHINE_FETCH_JDK=0` disables the download; `THRASH_MACHINE_JDK_VERSION` changes the version).
+JDK resolution order: `THRASH_MACHINE_ANDROID_JAVA_HOME` / `JAVA_HOME` (explicit; a version mismatch fails fast) → a version-matching `java` on PATH → an auto-downloaded portable Temurin JDK 17 in the shared `.tools/jdk17/` (next to the Kristal engine, shared across projects; the project root `.tools` is the fallback when no engine is found). `THRASH_MACHINE_FETCH_JDK=0` disables the download.
 
 ## Custom Icons (Optional)
 

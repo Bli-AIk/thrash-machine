@@ -3,6 +3,7 @@ dist/
 dist-*/
 .worktrees/
 .vscode/
+.claude/
 *.luac
 *.log
 *.tiled-session

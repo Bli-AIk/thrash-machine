@@ -6,7 +6,7 @@ set -euo pipefail
 # Instead of compiling the LÖVE Android app from source (see build_android.sh),
 # this script starts from the official LÖVE 11.5a "embed" APK from love2d.org,
 # swaps in our release .love as assets/game.love, re-aligns and re-signs it.
-# It only needs bash, curl, unzip, git, tar and a JDK (8+; 17 recommended) —
+# It only needs bash, curl, unzip, git, tar and JDK 17 —
 # the Android build-tools (zipalign + apksigner) are downloaded automatically.
 #
 # Known limitations (by design):
@@ -62,11 +62,10 @@ source "$THRASH_MACHINE_MOD_DIR/build-helper/lib.sh"
 
 # --- Java -------------------------------------------------------------------
 resolve_java() {
-    # The wrapper accepts any JDK (8+): an explicit
-    # THRASH_MACHINE_ANDROID_JAVA_HOME/JAVA_HOME or PATH java is used as-is,
-    # and a portable JDK 17 is downloaded into $THRASH_MACHINE_TOOLS_DIR/jdk17
-    # (the shared tools dir outside the mod tree) only when the box has none.
-    ensure_java
+    # Keep this aligned with the source build and the native Windows path.
+    # A portable JDK 17 is downloaded into $THRASH_MACHINE_TOOLS_DIR/jdk17
+    # (the shared tools dir outside the mod tree) when none is configured.
+    ensure_java 17
     need_cmd keytool
     log "使用 Java: $(command -v java)"
 }

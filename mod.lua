@@ -1,8 +1,79 @@
+local function applyOptionalLibrarySelection(info)
+    local selection = info.optionalLibraries
+    if selection == nil then
+        return
+    end
+    if type(selection) ~= "table" then
+        error("mod.json optionalLibraries must be an object")
+    end
+
+    local disabled = {}
+    for id, enabled in pairs(selection) do
+        if type(id) ~= "string" or id == "" or type(enabled) ~= "boolean" then
+            error("mod.json optionalLibraries must map library IDs to booleans")
+        end
+        if enabled then
+            if not info.libs[id] then
+                error("enabled optional library is missing: " .. id)
+            end
+        else
+            disabled[id] = true
+        end
+    end
+
+    -- A retained library cannot run without one of its required dependencies.
+    -- optionalDependencies only affect ordering and do not participate here.
+    local changed = true
+    while changed do
+        changed = false
+        for id, lib in pairs(info.libs) do
+            if not disabled[id] then
+                for _, dependency in ipairs(lib.dependencies or {}) do
+                    if disabled[dependency] then
+                        disabled[id] = true
+                        changed = true
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    for id in pairs(disabled) do
+        info.libs[id] = nil
+    end
+
+    local lib_order = {}
+    for _, id in ipairs(info.lib_order or {}) do
+        if info.libs[id] then
+            lib_order[#lib_order + 1] = id
+        end
+    end
+    info.lib_order = lib_order
+end
+
+applyOptionalLibrarySelection(Mod.info)
+
 function Mod:init()
     Game:registerEvent("squeak", function(data)
         return Squeak(data.x, data.y, {data.width, data.height, data.polygon})
     end)
     print(Game:locText("Loaded [var:name]!", {name = self.info.name}))
+
+    -- Test static bullet at each battle area's center (UI testing).
+    local TEST_BULLET_SPOTS = {
+        room1 = { 140, 820 }, -- battle area rect (40,720,200,200) center
+        room3 = { 100, 260 }, -- battle area rect (40,120,120,280) center
+    }
+    HookSystem.hook(Map, "onEnter", function(orig, self, ...)
+        local r = orig(self, ...)
+        local spot = TEST_BULLET_SPOTS[self.id]
+        if spot and not self.test_bullet_spawned then
+            self.test_bullet_spawned = true
+            Game.world:spawnBullet("test_static", spot[1], spot[2])
+        end
+        return r
+    end)
 
     if os.getenv("KRISTAL_MOD_SMOKE") == "1" then
         print("KRISTAL_MOD_SMOKE=PASS")
@@ -45,4 +116,3 @@ end
         self.world:showText(line)
         return true
     end)
-

@@ -57,6 +57,13 @@
     // this option is explicitly set to false; else, it's done if this is set to true.
     "setWindowTitleAndIcon": null,
 
+    // Optional content by real library ID; disabled libs are removed before
+    // init, and required dependents follow (UMR follows MGR).
+    "optionalLibraries": {
+        "magical-glass": false,
+        "undertale_monsters_recreation": true
+    },
+
     // Config values for the engine and any libraries you may have.
     // These config values can control chapter-specific features as well.
     "config": {
@@ -107,7 +114,8 @@
             "joystick_scale": 2.5,
             "joystick_radius": 108,
             "joystick_deadzone": 0.35
-        }
+        },
+        // End of config
     },
 
     // Whether or not to enable dev mode. Dev mode enables debug keys and the console.

@@ -13,7 +13,10 @@
 --   patch-android-game-activity <source>
 --   patch-android-loading-touch <source>
 --   set-mod-json-flag <manifest> <key> <true|false>
+--   plan-release-libraries <stage_mod_dir> <plan_file>
 --   zip-dir <output> <source> [prefix]
+
+local Manifest = require("manifest")
 
 local function fail(msg)
     io.stderr:write("build-helper: " .. tostring(msg) .. "\n")
@@ -332,6 +335,18 @@ local function patch_android_loading_touch(args)
     write_text(source, text)
 end
 
+-- Validate manifests and write the library directories that a release package
+-- must omit.  Deletion remains in the calling packager so this exact plan can
+-- be consumed by both POSIX shell and native Windows tooling.
+local function plan_release_libraries(args)
+    local stage_mod_dir, plan_file = args[2], args[3]
+    if not stage_mod_dir or not plan_file or args[4] then
+        fail("plan-release-libraries: expected <stage_mod_dir> <plan_file>")
+    end
+    local ok, err = Manifest.write_release_library_plan(stage_mod_dir, plan_file)
+    if not ok then fail(err) end
+end
+
 -- --- zip-dir (stored entries; LÖVE's physfs reads stored zips fine) --------
 
 -- LÖVE 11 ships LuaJIT, which does not have Lua 5.3+ bitwise operators, so
@@ -378,7 +393,8 @@ local DOS_TIME, DOS_DATE = u16(0), u16((2026 - 1980) * 512 + 1 * 32 + 1)
 -- Recursive file list: find on POSIX (works in Git Bash too), dir /s /b in
 -- cmd — io.popen on Windows LuaJIT always goes through cmd.exe. /a-d restricts
 -- dir to files (dir /s /b otherwise also emits directories, which io.open
--- cannot read).
+-- cannot read). Keep the native Windows path here: Wine's cmd, and some older
+-- cmd integrations, do not reliably enumerate a C:/... path.
 local function file_list(source)
     local popen_cmd
     if love.system.getOS() == "Windows" then
@@ -398,9 +414,13 @@ end
 
 local function zip_dir(args)
     local output, source, prefix = args[2], args[3], args[4] or ""
-    -- Normalize Windows separators: cygpath -m hands us C:/... but `dir /s /b`
-    -- (the file_list implementation on Windows) emits backslashes.
-    source = source:gsub("\\", "/")
+    local source_native = source
+    local windows = love.system.getOS() == "Windows"
+    if windows then
+        source_native = source_native:gsub("/", "\\")
+    end
+    local source_path = source_native:gsub("\\", "/"):gsub("/+$", "")
+    if source_path == "" then fail("zip-dir source is required") end
     prefix = prefix:gsub("^/+", ""):gsub("/+$", "")
 
     -- Prepare output.
@@ -411,11 +431,17 @@ local function zip_dir(args)
     local offset = 0
     local count = 0
 
-    local files = file_list(source)
+    local files = file_list(source_native)
     table.sort(files)
     for _, raw in ipairs(files) do
         local file = raw:gsub("\\", "/") -- dir /s /b uses backslashes
-        local relative = file:sub(#source + 2) -- strip "<source>/"
+        local source_prefix = source_path .. "/"
+        local compare_file = windows and file:lower() or file
+        local compare_prefix = windows and source_prefix:lower() or source_prefix
+        if compare_file:sub(1, #compare_prefix) ~= compare_prefix then
+            fail("file list entry is outside source directory: " .. raw)
+        end
+        local relative = file:sub(#source_prefix + 1)
         if relative ~= "" then
             local skip = false
             if relative:find("__pycache__/", 1, true) then skip = true end
@@ -469,7 +495,7 @@ local function main()
     end
     local command = args[1]
     if not command then
-        fail("missing subcommand (patch-lua-config / patch-mod-manifest / patch-android-* / set-mod-json-flag / zip-dir)")
+        fail("missing subcommand (patch-lua-config / patch-mod-manifest / patch-android-* / set-mod-json-flag / plan-release-libraries / zip-dir)")
     end
     if command == "patch-lua-config" then
         patch_lua_config(args)
@@ -487,6 +513,8 @@ local function main()
         patch_android_loading_touch(args)
     elseif command == "set-mod-json-flag" then
         set_mod_json_flag(args)
+    elseif command == "plan-release-libraries" then
+        plan_release_libraries(args)
     elseif command == "zip-dir" then
         zip_dir(args)
     else

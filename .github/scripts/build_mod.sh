@@ -27,6 +27,8 @@ tar -cf - \
     --exclude='*.git' \
     --exclude='./.github' \
     --exclude='./libraries/*/.github' \
+    --exclude='./.claude' \
+    --exclude='./libraries/*/.claude' \
     --exclude='./.build' \
     --exclude='./dist*' \
     --exclude='./.tools' \
@@ -38,6 +40,7 @@ tar -cf - \
     --exclude='./docs' \
     --exclude='./Makefile' \
     --exclude='./justfile' \
+    --exclude='./gui.cmd' \
     --exclude='./tools' \
     --exclude='./build-helper' \
     --exclude='__pycache__' \
@@ -57,9 +60,9 @@ tar -cf - \
     --exclude='./assets/icon' \
     -C "$ROOT" . | tar -xf - -C "$STAGE_DIR"
 
-rm -rf "$STAGE_DIR/libraries/kristal-object-selector-plus"
-rm -rf "$STAGE_DIR/libraries/terminal-cli"
-rm -rf "$STAGE_DIR/libraries/kristal-debug-tools"
+# The helper applies the complete release policy from library IDs: development
+# tooling, optional-content selections, and required-dependency closure.
+prune_release_optional_libraries "$STAGE_DIR"
 run_helper patch-mod-manifest "$STAGE_DIR/mod.json" false false
 if [ -f "$THRASH_MACHINE_WINDOW_ICON" ]; then
     cp "$THRASH_MACHINE_WINDOW_ICON" "$STAGE_DIR/window_icon.png"

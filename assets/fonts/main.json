@@ -1,0 +1,8 @@
+{
+    "defaultSize": 32,
+
+    "fallbacks": [
+        { "font": "ja_main", "size": 28 },
+        { "font": "fusion_pixel_8px", "size": 32 }
+    ]
+}
