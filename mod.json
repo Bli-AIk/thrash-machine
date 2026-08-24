@@ -57,10 +57,10 @@
     // this option is explicitly set to false; else, it's done if this is set to true.
     "setWindowTitleAndIcon": null,
 
-    // Optional content is selected by actual library ID. Disabled libraries
-    // are removed before library initialization; required dependents follow.
+    // Optional content by real library ID; disabled libs are removed before
+    // init, and required dependents follow (UMR follows MGR).
     "optionalLibraries": {
-        "magical-glass": true,
+        "magical-glass": false,
         "undertale_monsters_recreation": true
     },
 
