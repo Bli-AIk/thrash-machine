@@ -74,4 +74,4 @@ build-mod:
 # Remove build artifacts.
 # zh_hans: 清理构建产物
 clean-build:
-    @{{ if os() == "windows" { "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -LiteralPath '.build','dist' -Recurse -Force -ErrorAction SilentlyContinue\"" } else { "rm -rf .build dist" } }}
+    @{{ if os() == "windows" { "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Remove-Item -LiteralPath '.build','dist' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'dist-*' -Recurse -Force -ErrorAction SilentlyContinue\"" } else { "rm -rf .build dist dist-*" } }}
