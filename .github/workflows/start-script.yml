@@ -57,6 +57,19 @@ jobs:
             if (-not (Test-Path 'ci-test-game.tiled-project')) {
               throw 'thrash-machine.tiled-project was not renamed to ci-test-game.tiled-project'
             }
+            # No tracked file may still mention the template name.
+            & git grep -c thrash-machine
+            if ($LASTEXITCODE -eq 0) {
+              throw 'tracked files still contain thrash-machine'
+            }
           } finally {
             Pop-Location
           }
+      - name: Verify the renamed copy passes the test suite (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y just luajit jq
+          cd "$RUNNER_TEMP/start-script-test"
+          make test
