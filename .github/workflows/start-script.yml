@@ -57,10 +57,22 @@ jobs:
             if (-not (Test-Path 'ci-test-game.tiled-project')) {
               throw 'thrash-machine.tiled-project was not renamed to ci-test-game.tiled-project'
             }
-            # No tracked file may still mention the template name.
-            & git grep -c thrash-machine
+            # No tracked file may still mention the template name in any of
+            # its spellings (thrash-machine / Thrash Machine / THRASH_MACHINE /
+            # thrashmachine ...).
+            & git grep -inE 'thrash.?machine|thrashmachine'
             if ($LASTEXITCODE -eq 0) {
-              throw 'tracked files still contain thrash-machine'
+              throw 'tracked files still contain the template name'
+            }
+            # The only dangling index entry allowed is the renamed tiled
+            # project (mv before git add); anything else must exist untouched.
+            $dangling = @(& git status --porcelain) | Where-Object { $_ -match '^.D ' }
+            $unexpected = $dangling | Where-Object { $_ -notlike '*thrash-machine.tiled-project' }
+            if ($unexpected) {
+              throw "tracked files went missing: $($unexpected -join ', ')"
+            }
+            if ($dangling.Count -gt 1) {
+              throw "more dangling index entries than expected: $($dangling -join ', ')"
             }
           } finally {
             Pop-Location
