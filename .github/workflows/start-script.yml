@@ -1,0 +1,62 @@
+name: Start script
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  start-script:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Run tools/start.ps1 on a temporary copy and verify
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          # Copy the checkout (including .git and submodule .git dirs) into a
+          # temporary directory, so the script mutates a copy, not the checkout.
+          $tmp = Join-Path $env:RUNNER_TEMP 'start-script-test'
+          New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+          tar -cf - -C $PWD --exclude='./.build' --exclude='./dist' --exclude='./.tools' . |
+            tar -xf - -C $tmp
+
+          Push-Location $tmp
+          try {
+            & .\tools\start.ps1 --name 'CI Test Game' --yes
+            if ($LASTEXITCODE -ne 0) {
+              throw "tools/start.ps1 exited with code $LASTEXITCODE"
+            }
+
+            $modJson = Get-Content -Raw mod.json
+            if ($modJson -notmatch '"id"\s*:\s*"ci-test-game"') {
+              throw 'mod.json: id was not renamed to ci-test-game'
+            }
+            if ($modJson -notmatch '"name"\s*:\s*"CI Test Game"') {
+              throw 'mod.json: name was not renamed to CI Test Game'
+            }
+            if ($modJson -notmatch '"version"\s*:\s*"v0.0.0"') {
+              throw 'mod.json: version was not reset to v0.0.0'
+            }
+            if ($modJson -match 'thrash-machine') {
+              throw 'mod.json: template name still present'
+            }
+            $manifest = Get-Content -Raw .release-please-manifest.json
+            if ($manifest -notmatch '"0\.0\.0"') {
+              throw '.release-please-manifest.json was not reset to 0.0.0'
+            }
+            if (-not (Test-Path 'ci-test-game.tiled-project')) {
+              throw 'thrash-machine.tiled-project was not renamed to ci-test-game.tiled-project'
+            }
+          } finally {
+            Pop-Location
+          }
