@@ -81,15 +81,22 @@ try {
                     throw "release library plan is missing development library: $expected"
                 }
             }
-            # Optional UT content packs follow the optionalLibraries selection:
-            # the current mod.json default keeps MGR disabled and UMR follows it
-            # as a required dependent, so the release plan must remove both
-            # (README: release artifacts physically remove disabled libraries).
-            # Selection semantics are covered data-driven in
-            # tests/build_helper_manifest.sh; this pins the tree's defaults.
-            foreach ($excluded in @('MagicalGlassRedux', 'UndertaleMonstersRecreation')) {
-                if ($excluded -notin $entries) {
-                    throw "release library plan does not remove disabled content library: $excluded"
+            # Optional UT content packs follow optionalLibraries. UMR requires
+            # MGR, so it must be removed when either one is disabled.
+            $manifest = [System.IO.File]::ReadAllText((Join-Path $Root 'mod.json'))
+            $mgrEnabled = $manifest -match '(?m)^\s*"magical-glass"\s*:\s*true\s*,?\s*$'
+            $umrEnabled = $manifest -match '(?m)^\s*"undertale_monsters_recreation"\s*:\s*true\s*,?\s*$'
+            $contentPacks = @(
+                @{ Name = 'MagicalGlassRedux'; Included = $mgrEnabled },
+                @{ Name = 'UndertaleMonstersRecreation'; Included = ($mgrEnabled -and $umrEnabled) }
+            )
+            foreach ($pack in $contentPacks) {
+                $removed = $pack.Name -in $entries
+                if ($pack.Included -and $removed) {
+                    throw "release library plan removes enabled content library: $($pack.Name)"
+                }
+                if (-not $pack.Included -and -not $removed) {
+                    throw "release library plan does not remove disabled content library: $($pack.Name)"
                 }
             }
         } finally {

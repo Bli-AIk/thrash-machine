@@ -8,6 +8,7 @@ test-static:
 	sh .github/scripts/static-smoke.sh
 	luajit tests/optional_libraries.lua
 	luajit tests/i18n_item_key_api.lua
+	luajit tests/mgr_light_encounter_prefix.lua
 	sh tests/build_helper_manifest.sh
 	sh tests/refactor_boundaries.sh
 	if command -v pwsh >/dev/null 2>&1; then pwsh -NoProfile -File tests/windows_build.ps1; else printf '%s\n' 'pwsh unavailable: skipping Windows build smoke'; fi
