@@ -38,10 +38,55 @@ ID_INTERP_PATTERN = require("libraries/kristal-i18n/lib")
 KristalDebugTools = require("libraries/kristal-debug-tools/lib")
 
 ---@diagnostic disable-next-line: undefined-global
+LightActionBox = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightActionBox.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightActionButton = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightActionButton.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightArena = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightArena.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightArenaSprite = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightArenaSprite.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightAttackBar = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightAttackBar.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightAttackBox = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightAttackBox.lua")
+
+---@diagnostic disable-next-line: undefined-global
 LIGHT_BATTLE_LAYERS = require("libraries/MagicalGlassRedux/lib")
 
 ---@diagnostic disable-next-line: undefined-global
 LightBattle = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightBattleUI = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightBattleUI.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightBullet = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightBullet.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightDamageNumber = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightDamageNumber.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightEncounter = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightEncounter.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightEnemyBattler = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightEnemyBattler.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightEnemySprite = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightEnemySprite.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightGauge = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightGauge.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightHelpWindow = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightHelpWindow.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightPartyBattler = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightPartyBattler.lua")
 
 ---@diagnostic disable-next-line: undefined-global
 LightRecruit = require("libraries/MagicalGlassRedux/scripts/globals/LightRecruit.lua")
@@ -51,6 +96,24 @@ LIGHT_SHOP_LAYERS = require("libraries/MagicalGlassRedux/lib")
 
 ---@diagnostic disable-next-line: undefined-global
 LightShop = require("libraries/MagicalGlassRedux/scripts/globals/LightShop.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightSoul = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightSoul.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightSpeechBubble = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightSpeechBubble.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightStatusDisplay = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightStatusDisplay.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightTensionBarGlow = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightTensionBarGlow.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightTensionBar = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/UI/LightTensionBar.lua")
+
+---@diagnostic disable-next-line: undefined-global
+LightWave = require("libraries/MagicalGlassRedux/scripts/globals/LightBattle/LightWave.lua")
 
 ---@diagnostic disable-next-line: undefined-global
 MG_EVENT = require("libraries/MagicalGlassRedux/lib")
