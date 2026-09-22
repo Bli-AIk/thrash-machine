@@ -53,6 +53,17 @@ Want to build UT-style light world battles and monster content? MagicalGlassRedu
 git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
 ```
 
+Not ready to commit to a config change? Libraries can be toggled for a single launch, leaving `mod.json` untouched:
+
+```sh
+just libs=mgr run            # this launch includes MGR
+just libs=mgr,umr run -w 3   # both packs, plus the usual debug arguments
+just libs=-umr run           # this launch drops UMR
+just libs=-kristalI18n run   # any library, not just the optional extensions
+```
+
+Name a library either by the `alias` its `lib.json` declares (MGR is `mgr`, UMR is `umr`) or by its full id. No prefix — or a `+` — forces it on; a `-` prefix forces it off. Enabling a library pulls in the libraries it depends on, so `libs=umr` enables MGR as well. An unknown name fails at startup and lists every valid name. The same switch works as an environment variable: `THRASH_MACHINE_OPTIONAL_LIBS=mgr just run`.
+
 ## Quick Start
 
 **1. Get the template**
@@ -109,7 +120,7 @@ $env:KRISTAL_ROOT = "C:\path\to\Kristal"; just run
 
 For a permanent setup, add `KRISTAL_ROOT` to your environment (Windows system settings, Linux shell config).
 
-Debug arguments pass straight to kristal-debug-tools: `just run --encounter` (jump straight into an encounter), `just run --wave 2 --tp 50` (pick the wave and starting TP), `just run --lang zh-hans` (startup language for this run).
+Debug arguments pass straight to kristal-debug-tools: `just run --encounter` (jump straight into an encounter), `just run --wave 2 --tp 50` (pick the wave and starting TP), `just run --lang zh-hans` (startup language for this run). Libraries toggle the same way for a single launch — see `just libs=... run` under "Optional Extensions" above.
 
 Prefer a GUI? Windows users can double-click `gui.cmd` (or `just gui` elsewhere) to open the graphical launcher — run items, debug arguments and chapter config are all visual, and build tasks work there too (see "Packaging → GUI packaging" below).
 

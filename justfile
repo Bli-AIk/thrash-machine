@@ -2,10 +2,22 @@
 # zh_hans: 用本地 Kristal 引擎启动项目（带共享调试工具）
 default: test
 
+# Optional-library override for this launch only; mod.json is never modified.
+# Comma-separated library ids or the alias a lib.json declares; a "-" prefix
+# forces one off. Unknown names are reported with every valid name. Also
+# honoured straight from the environment.
+# e.g. just libs=mgr run          start with MagicalGlassRedux enabled
+#      just libs=mgr,umr run -w 3  both packs, plus the usual debug arguments
+#      just libs=-kristalI18n run  any library, not just the optional pair
+# zh_hans: 仅本次启动生效的子库开关（不改 mod.json）。逗号分隔，可写 lib.json 里声明的
+# zh_hans: alias 或完整 id；"-" 前缀表示强制关闭（要 umr 时会自动带上它依赖的 MGR）。
+# zh_hans: 例：just libs=mgr run / just libs=mgr,umr run -w 3 / just libs=-kristalI18n run
+libs := env("THRASH_MACHINE_OPTIONAL_LIBS", "")
+
 # Run the project with debug launcher arguments.
 # zh_hans: 启动项目，可带调试参数（如 -w 波次、-tp 初始 TP）
 run *args:
-    @just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
+    @THRASH_MACHINE_OPTIONAL_LIBS="{{ libs }}" just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
 
 # Run the debug-tools GUI (end users: auto-downloads/updates release binaries).
 # zh_hans: 启动调试工具图形界面（自动检测并下载最新 release，无需 just/Rust/Node）
