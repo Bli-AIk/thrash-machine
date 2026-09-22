@@ -56,13 +56,15 @@ git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonst
 不想长期改配置？启动时可以临时开关子库，`mod.json` 一个字都不用动：
 
 ```sh
-just libs=mgr run            # 本次启动带上 MGR
-just libs=mgr,umr run -w 3   # 同时开两个包，后面照常跟调试参数
-just libs=-umr run           # 本次启动关掉 UMR
-just libs=-kristalI18n run   # 任何库都能开关，不限于可选拓展
+just run libs=mgr            # 本次启动带上 MGR
+just run libs=mgr,umr -w 3   # 同时开两个包，后面照常跟调试参数
+just run libs=-umr           # 本次启动关掉 UMR
+just run libs=-kristalI18n   # 任何库都能开关，不限于可选拓展
 ```
 
-名字可以写各库 `lib.json` 里声明的 `alias`（MGR 是 `mgr`，UMR 是 `umr`），也可以写完整 id。不带前缀或写 `+` 表示强制打开，前缀 `-` 表示强制关闭；打开某个库时会自动带上它依赖的库（所以 `libs=umr` 会连 MGR 一起打开）。名字写错了启动时会直接报错，并把所有合法名字列出来。也可以用环境变量：`THRASH_MACHINE_OPTIONAL_LIBS=mgr just run`。
+名字可以写各库 `lib.json` 里声明的 `alias`（MGR 是 `mgr`，UMR 是 `umr`），也可以写完整 id。不带前缀或写 `+` 表示强制打开，前缀 `-` 表示强制关闭；打开某个库时会自动带上它依赖的库（所以 `libs=umr` 会连 MGR 一起打开）。名字写错了启动时会直接报错，并把所有合法名字列出来。
+
+写成 `just libs=mgr run`（`libs=` 放在 `run` 前面）或用环境变量 `THRASH_MACHINE_OPTIONAL_LIBS=mgr just run` 也等价——只是 `libs=` 跟在 `run` 后面时由 `run` recipe 自己挑出来，记不住顺序时按上面的写法即可。
 
 ## 快速开始
 
@@ -120,7 +122,7 @@ $env:KRISTAL_ROOT = "C:\path\to\Kristal"; just run
 
 想一劳永逸，就把 `KRISTAL_ROOT` 配进环境变量（Windows 系统设置、Linux shell 配置）。
 
-调试参数直接透传给 kristal-debug-tools：`just run --encounter`（直接进遭遇）、`just run --wave 2 --tp 50`（指定波次和初始 TP）、`just run --lang zh-hans`（选本次启动语言）。子库也能这样临时开关，用法见上文「可选拓展」里的 `just libs=... run`。
+调试参数直接透传给 kristal-debug-tools：`just run --encounter`（直接进遭遇）、`just run --wave 2 --tp 50`（指定波次和初始 TP）、`just run --lang zh-hans`（选本次启动语言）。子库也能这样临时开关，用法见上文「可选拓展」里的 `just run libs=...`。
 
 不想敲命令？GUI 也能用——Windows 双击 `gui.cmd`（其他平台 `just gui`）打开图形化启动器：运行项、调试参数、章节配置都是可视化点选，也能跑构建任务（见下文「打包 → GUI 打包」）。
 
