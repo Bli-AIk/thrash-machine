@@ -10,6 +10,7 @@ test-static:
 	luajit tests/i18n_item_key_api.lua
 	luajit tests/mgr_light_encounter_prefix.lua
 	luajit tests/library_enabled_announce.lua
+	luajit tests/i18n_console_segments.lua
 	luajit libraries/terminal-cli/tests/ansi_color.lua
 	sh tests/build_helper_manifest.sh
 	sh tests/refactor_boundaries.sh
