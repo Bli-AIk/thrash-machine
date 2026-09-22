@@ -5,4 +5,4 @@ The accompanying documentation states that the library may be modified and
 redistributed and requests attribution where possible. This Kristal adapter
 keeps that attribution and changes the layout, coordinate conversion, input
 dispatch, lifecycle handling, and drawing integration for Kristal 0.11.0-dev
-(f62afea63ccab02f468c24ac0d096bd8a2c9aa81).
+(8e592d84065263138d4e92593f0a4ab780d93822).
