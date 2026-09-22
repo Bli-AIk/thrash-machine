@@ -55,10 +55,11 @@ end
 applyOptionalLibrarySelection(Mod.info)
 
 function Mod:init()
+    Mod.logger = Logger("Thrash Machine", ConsoleFormats.GREEN)
     Game:registerEvent("squeak", function(data)
         return Squeak(data.x, data.y, {data.width, data.height, data.polygon})
     end)
-    print(Game:locText("Loaded [var:name]!", {name = self.info.name}))
+    Mod.logger:info("Loaded " .. self.info.name .. "!")
 
     -- Test static bullet at each battle area's center (UI testing).
     local TEST_BULLET_SPOTS = {
