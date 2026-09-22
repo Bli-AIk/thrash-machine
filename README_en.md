@@ -155,7 +155,7 @@ The launcher only downloads the fixed release matching the current engine versio
 
 ### Engine source
 
-Builds pin Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81` (`0.11.0-dev`, shallow-cloned to `.build/Kristal`). To change the source: run `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` in an interactive terminal and pick (local path / remote tag / full commit), or set environment variables:
+Builds pin Kristal `8e592d84065263138d4e92593f0a4ab780d93822` (`0.11.0-dev`, shallow-cloned to `.build/Kristal`). To change the source: run `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` in an interactive terminal and pick (local path / remote tag / full commit), or set environment variables:
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` — source type
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` — local path

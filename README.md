@@ -155,7 +155,7 @@ Windows 双击仓库根目录的 `gui.cmd`（其他平台 `just gui`）打开 kr
 
 ### 引擎来源
 
-构建默认固定 Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`（`0.11.0-dev`，远程浅克隆到 `.build/Kristal`）。想换来源：交互终端里 `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` 按提示选（本地路径 / 远程 tag / 完整 commit），或用环境变量直接指定：
+构建默认固定 Kristal `8e592d84065263138d4e92593f0a4ab780d93822`（`0.11.0-dev`，远程浅克隆到 `.build/Kristal`）。想换来源：交互终端里 `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` 按提示选（本地路径 / 远程 tag / 完整 commit），或用环境变量直接指定：
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` —— 来源类型
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` —— 本地路径
