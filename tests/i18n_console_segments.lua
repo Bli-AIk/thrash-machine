@@ -29,6 +29,12 @@ _G.ACTIVE_LIB = { info = { id = "kristalI18n" } }
 _G.Mod = { info = { id = "thrash-machine", config = {} }, libs = {} }
 _G.Game = {}
 _G.SCREEN_WIDTH = 640
+-- Mirrors src/engine/vars.lua: console markup resolves color names through the
+-- engine's COLORS global, which does not exist outside the engine.
+_G.COLORS = {
+    orange = { 1, 0.625, 0.25, 1 },
+    white = { 1, 1, 1, 1 },
+}
 
 assert(loadfile(ROOT .. "/lib.lua"))()
 
@@ -44,6 +50,20 @@ local function check(name, cond, detail)
         failures = failures + 1
         print("FAIL " .. name .. (detail and (": " .. detail) or ""))
     end
+end
+
+-- Renders a segment array as "<r,g,b,a>text<r,g,b,a>text" so a whole line can be
+-- asserted in one comparison.
+local function describe(segments)
+    local out = {}
+    for _, part in ipairs(segments) do
+        if type(part) == "table" then
+            out[#out + 1] = "<" .. table.concat(part, ",") .. ">"
+        else
+            out[#out + 1] = tostring(part)
+        end
+    end
+    return table.concat(out)
 end
 
 -- Pulls a single flat key out of a lang file. The naive whole-file reader used
@@ -109,26 +129,30 @@ local function refresh(language)
     return console.history
 end
 
--- 1. Chinese: the line is replaced by the localized text, under the same color
---    the "[System]" prefix started with.
+-- 1. Chinese: the "[System] [INFO] " prefix keeps the Logger's own colors
+--    (cyan tag, green level), the message is replaced, and only the library
+--    name is highlighted.
 local zh = refresh("zh_hans")
-check("zh_hans: line was rewritten", zh[3] ~= nil and #zh[3] == 2, tostring(zh[3] and #zh[3]))
-check("zh_hans: one color segment survives", type(zh[3][1]) == "table", type(zh[3][1]))
-check("zh_hans: color is the System cyan", zh[3][1][1] == 0.5 and zh[3][1][2] == 1 and zh[3][1][3] == 1)
 check(
-    "zh_hans: translated",
-    zh[3][2] == "[System] [INFO] 已启用 magical-glass 库。",
-    tostring(zh[3][2])
+    "zh_hans: only the prefix keeps the Logger colors",
+    describe(zh[3]) == "<0.5,1,1,1>[System]<1,1,1,1> <0.5,1,0.5,1>[INFO]<1,1,1,1> "
+        .. "已启用 <1,0.625,0.25,1>magical-glass<1,1,1,1> 库。",
+    describe(zh[3])
 )
-check("zh_hans: second line translated too", zh[4][2] == "[System] [INFO] 已启用 terminal-cli 库。", tostring(zh[4][2]))
+check(
+    "zh_hans: second line translated too",
+    describe(zh[4]):find("已启用 <1,0.625,0.25,1>terminal-cli<1,1,1,1> 库。", 1, true) ~= nil,
+    describe(zh[4])
+)
 
--- 2. English: the template renders back to the exact line the libraries emit,
---    so switching languages cannot silently drop or double the prefix.
+-- 2. English: same shape, and the plain text is exactly what the libraries
+--    emit, so switching languages cannot silently drop or double the prefix.
 local en = refresh("en")
 check(
-    "en: round-trips unchanged",
-    en[3][2] == "[System] [INFO] Enabled library magical-glass.",
-    tostring(en[3][2])
+    "en: highlights the name the same way",
+    describe(en[3]) == "<0.5,1,1,1>[System]<1,1,1,1> <0.5,1,0.5,1>[INFO]<1,1,1,1> "
+        .. "Enabled library <1,0.625,0.25,1>magical-glass<1,1,1,1>.",
+    describe(en[3])
 )
 
 -- 3. The rest of the history is left alone.

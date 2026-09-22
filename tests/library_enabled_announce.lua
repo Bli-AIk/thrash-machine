@@ -24,7 +24,11 @@ local ANNOUNCERS = {
 
 -- Written out rather than assembled from ANNOUNCE: this is the shape the
 -- pattern below is expected to match, not the shape the sources are read with.
-local ENGLISH = "[System] [INFO] Enabled library magical-glass."
+-- The "[System] [INFO] " prefix comes from the engine's Logger; only MESSAGE is
+-- the library's own text, and only MESSAGE is what the translation replaces.
+local PREFIX = "[System] [INFO] "
+local MESSAGE = "Enabled library magical-glass."
+local ENGLISH = PREFIX .. MESSAGE
 
 local failures = 0
 local function check(name, cond, detail)
@@ -69,7 +73,8 @@ if not pattern_literal then
 end
 
 local pattern = assert(loadstring('return "' .. pattern_literal .. '"'))()
-local captured = ENGLISH:match(pattern)
+local prefix, captured = ENGLISH:match(pattern)
+check("captured prefix is the Logger's tag", prefix == PREFIX, tostring(prefix))
 check("captured name is the library id", captured == "magical-glass", tostring(captured))
 
 local en = read_lang("libraries/kristal-i18n/lang/en.json")
@@ -79,16 +84,22 @@ local key = "console_logger_library_enabled"
 check("en.json defines " .. key, en[key] ~= nil)
 check("zh_hans.json defines " .. key, zh[key] ~= nil)
 
+-- The library name is the one highlighted part of the line; the surrounding
+-- text has to stay uncolored, which is why the markup wraps only [var:name].
+local HIGHLIGHT = "[color:orange][var:name][color:reset]"
+
 if en[key] then
-    local rendered = en[key]:gsub("%[var:name%]", "magical-glass")
-    check("english template round-trips to the emitted line", rendered == ENGLISH, rendered)
-    check("english template still matches the pattern", rendered:match(pattern) == "magical-glass")
+    -- The translation replaces only the message, so the template must not carry
+    -- a prefix of its own; strip the markup and it has to be the emitted text.
+    local rendered = en[key]:gsub("%[color:[^%]]*%]", ""):gsub("%[var:name%]", "magical-glass")
+    check("english template round-trips to the emitted message", rendered == MESSAGE, rendered)
+    check("english highlights the name", en[key]:find(HIGHLIGHT, 1, true) ~= nil, en[key])
 end
 
 if zh[key] then
-    -- The other System lines keep the prefix inside the translation, which is
-    -- what makes the whole line render in the System logger's color.
-    check("zh_hans keeps the [System] [INFO] prefix", zh[key]:find("[System] [INFO] ", 1, true) == 1, zh[key])
+    check("zh_hans translates the message", zh[key]:find("已启用 ", 1, true) == 1, zh[key])
+    check("zh_hans leaves the prefix to the Logger", zh[key]:find("[System]", 1, true) == nil, zh[key])
+    check("zh_hans highlights the name", zh[key]:find(HIGHLIGHT, 1, true) ~= nil, zh[key])
     check(
         "zh_hans substitutes the library name",
         zh[key]:gsub("%[var:name%]", "magical-glass"):find("magical-glass", 1, true) ~= nil,
