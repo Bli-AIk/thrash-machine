@@ -4,7 +4,7 @@
 [submodule "libraries/kristal-i18n"]
 	path = libraries/kristal-i18n
 	url = https://github.com/Bli-AIk/kristal-i18n.git
-	branch = feat/mgr
+	branch = main
 [submodule ".emacs"]
 	path = .emacs
 	url = https://github.com/Bli-AIk/kristal-emacs-config.git
