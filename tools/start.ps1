@@ -174,9 +174,12 @@ $template_env_prefix = ($template_id -replace '-', '_').ToUpperInvariant()
 $template_upper_hyphen = $template_id.ToUpperInvariant()
 $template_compact = $template_id -replace '[-_]', ''
 
+# Brace the expansions: "$legacy_id_*" parses as the variable $legacy_id_
+# (underscore is an identifier character), which is empty -- so the pattern
+# collapses to "*" and the guard fires for every project.
 $legacy_aliases_enabled = $true
-if ($old_id -eq $legacy_id -or $old_id -like "$legacy_id-*" -or $old_id -like "$legacy_id_*") { $legacy_aliases_enabled = $false }
-if ($template_id -eq $legacy_id -or $template_id -like "$legacy_id-*" -or $template_id -like "$legacy_id_*") { $legacy_aliases_enabled = $false }
+if ($old_id -eq $legacy_id -or $old_id -like "${legacy_id}-*" -or $old_id -like "${legacy_id}_*") { $legacy_aliases_enabled = $false }
+if ($template_id -eq $legacy_id -or $template_id -like "${legacy_id}-*" -or $template_id -like "${legacy_id}_*") { $legacy_aliases_enabled = $false }
 if (-not $legacy_aliases_enabled) {
     # The full current/template ID handles this derived template name.
     # Disabling the short alias prevents it from being replaced twice.
@@ -253,6 +256,11 @@ $pathPairs = @(
 )
 
 foreach ($rel in $lsOut) {
+    # Root-level paths only: a project rename owns the files named after the
+    # project itself, not whatever happens to contain its name further down
+    # the tree (renaming libraries/depthseffects alongside would just break
+    # the library).
+    if ($rel.Contains('/')) { continue }
     $old_file = Join-Path $project_root $rel
     if (-not (Test-Path -LiteralPath $old_file)) { continue }
 
@@ -288,6 +296,14 @@ Write-Host 'Resetting project version to 0.0.0...'
 $versionPattern = '(?m)^([ \t]*"version"[ \t]*:[ \t]*")[^"]*(".*)$'
 $mod_text = [System.IO.File]::ReadAllText($mod_json)
 $mod_text = Replace-First $mod_text $versionPattern '${1}v0.0.0${2}'
+# The pass above is string-based, so a project whose "name" holds the same text
+# as its "id" (several derived projects do) ends up with both fields set to the
+# slug: the id pair consumes the string before the name pair looks for it.
+# These two fields are the project's identity -- pin them to what was asked for.
+$idPattern = '(?m)^([ \t]*"id"[ \t]*:[ \t]*")[^"]*(".*)$'
+$mod_text = Replace-First $mod_text $idPattern ('${1}' + $project_id.Replace('$', '$$') + '${2}')
+$namePattern = '(?m)^([ \t]*"name"[ \t]*:[ \t]*")[^"]*(".*)$'
+$mod_text = Replace-First $mod_text $namePattern ('${1}' + $project_name.Replace('$', '$$') + '${2}')
 [System.IO.File]::WriteAllText($mod_json, $mod_text)
 
 $manifest_path = Join-Path $project_root '.release-please-manifest.json'

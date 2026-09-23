@@ -1,3 +1,105 @@
+local OPTIONAL_LIBRARY_ENV = "THRASH_MACHINE_OPTIONAL_LIBS"
+
+-- Every name the override accepts, for the error message when one is unknown.
+local function library_names(info)
+    local names = {}
+    for id in pairs(info.libs) do
+        names[#names + 1] = id
+    end
+    table.sort(names)
+    for index, id in ipairs(names) do
+        local alias = info.libs[id].alias
+        if alias then
+            names[index] = id .. " (" .. alias .. ")"
+        end
+    end
+    return table.concat(names, ", ")
+end
+
+-- Names resolve against every library the engine scanned, not just the ones
+-- optionalLibraries lists, so any library can be toggled for a launch.
+local function resolve_library(info, name)
+    if info.libs[name] then
+        return name
+    end
+    for id, lib in pairs(info.libs) do
+        if lib.alias == name then
+            return id
+        end
+    end
+    return nil
+end
+
+-- Launch-time override, e.g. THRASH_MACHINE_OPTIONAL_LIBS="mgr,umr" or "mgr,-umr".
+-- Bare names and "+name" force a library on, "-name" forces it off. Nothing is
+-- persisted: optionalLibraries in mod.json stays the source of truth.
+local function applyOptionalLibraryOverride(info, selection)
+    local spec = os.getenv(OPTIONAL_LIBRARY_ENV)
+    if spec == nil or spec:match("^%s*$") then
+        return
+    end
+
+    -- Dependencies are pulled in only for libraries this override turned on, so
+    -- a library that mod.json leaves off for its own reasons still stays off.
+    local queue = {}
+    local queued = {}
+    local function force_on(id)
+        selection[id] = true
+        if not queued[id] then
+            queued[id] = true
+            queue[#queue + 1] = id
+        end
+    end
+
+    -- Conflicts only consider libraries this override turned off, so a "false"
+    -- inherited from mod.json never blocks enabling something that needs it.
+    local forced_off = {}
+
+    for entry in spec:gmatch("[^,]+") do
+        entry = entry:match("^%s*(.-)%s*$")
+        if entry ~= "" then
+            local on = entry:sub(1, 1) ~= "-"
+            local id = resolve_library(info, on and entry:gsub("^%+", "") or entry:sub(2))
+            if not id then
+                error(OPTIONAL_LIBRARY_ENV .. " names an unknown library: " .. entry ..
+                    "\nvalid names: " .. library_names(info))
+            end
+            if on then
+                force_on(id)
+            else
+                selection[id] = false
+                forced_off[id] = true
+            end
+        end
+    end
+
+    local index = 1
+    while index <= #queue do
+        local id = queue[index]
+        index = index + 1
+        for _, dependency in ipairs((info.libs[id] or {}).dependencies or {}) do
+            if forced_off[dependency] then
+                error(id .. " requires disabled library: " .. dependency)
+            end
+            force_on(dependency)
+        end
+    end
+
+    if #queue == 0 and not next(forced_off) then
+        return
+    end
+    local applied = {}
+    for _, id in ipairs(queue) do
+        applied[#applied + 1] = id .. "=on"
+    end
+    for id in pairs(forced_off) do
+        applied[#applied + 1] = id .. "=off"
+    end
+    table.sort(applied)
+    print("[thrash-machine] " .. OPTIONAL_LIBRARY_ENV .. '="' .. spec .. '" -> ' ..
+        table.concat(applied, ", "))
+end
+
 local function applyOptionalLibrarySelection(info)
     local selection = info.optionalLibraries
     if selection == nil then
@@ -6,6 +108,11 @@ local function applyOptionalLibrarySelection(info)
     if type(selection) ~= "table" then
         error("mod.json optionalLibraries must be an object")
     end
+
+    -- Runs before the disabled set is built, so libraries this override turns
+    -- on are not left behind as disabled. The loop below then validates the
+    -- merged selection exactly as it validates a hand-written optionalLibraries.
+    applyOptionalLibraryOverride(info, selection)
 
     local disabled = {}
     for id, enabled in pairs(selection) do
@@ -55,10 +162,11 @@ end
 applyOptionalLibrarySelection(Mod.info)
 
 function Mod:init()
+    Mod.logger = Logger("Thrash Machine", ConsoleFormats.GREEN)
     Game:registerEvent("squeak", function(data)
         return Squeak(data.x, data.y, {data.width, data.height, data.polygon})
     end)
-    print(Game:locText("Loaded [var:name]!", {name = self.info.name}))
+    Mod.logger:info("Loaded " .. self.info.name .. "!")
 
     -- Test static bullet at each battle area's center (UI testing).
     local TEST_BULLET_SPOTS = {

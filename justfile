@@ -2,10 +2,38 @@
 # zh_hans: 用本地 Kristal 引擎启动项目（带共享调试工具）
 default: test
 
+# Optional-library override for this launch only; mod.json is never modified.
+# Comma-separated library ids or the alias a lib.json declares; a "-" prefix
+# forces one off. Unknown names are reported with every valid name.
+# `just run libs=...` is the spelling to reach for; it is read out of the
+# launcher arguments by the run recipe below. `just libs=... run` and the
+# THRASH_MACHINE_OPTIONAL_LIBS environment variable work too.
+# e.g. just run libs=mgr            start with MagicalGlassRedux enabled
+#      just run libs=mgr,umr -w 3   both packs, plus the usual debug arguments
+#      just run libs=-kristalI18n   any library, not just the optional pair
+# zh_hans: 仅本次启动生效的子库开关（不改 mod.json）。逗号分隔，可写 lib.json 里声明的
+# zh_hans: alias 或完整 id；"-" 前缀表示强制关闭（要 umr 时会自动带上它依赖的 MGR）。
+# zh_hans: 推荐写成 just run libs=mgr（由下面的 run recipe 从启动参数里读出来），
+# zh_hans: 也可以写成 just libs=mgr run，或用环境变量。
+libs := env("THRASH_MACHINE_OPTIONAL_LIBS", "")
+
 # Run the project with debug launcher arguments.
 # zh_hans: 启动项目，可带调试参数（如 -w 波次、-tp 初始 TP）
+# libs= is pulled out of the arguments here rather than left to just's own
+# `name=value` variable syntax, which only applies BEFORE the recipe name —
+# `just run libs=mgr` would otherwise sail through as a stray engine argument.
+# zh_hans: 这里手动从参数里挑出 libs=：just 自己的 name=value 语法只认 recipe 名之前的位置，
+# zh_hans: 写成 just run libs=mgr 的话会被当成普通启动参数透传给引擎而静默失效。
 run *args:
-    @just --justfile libraries/kristal-debug-tools/justfile run {{ args }}
+    @set -- {{ args }}; \
+    libs="{{ libs }}"; rest=""; \
+    for arg in "$@"; do \
+        case "$arg" in \
+            libs=*) libs="${arg#libs=}" ;; \
+            *) rest="$rest $arg" ;; \
+        esac; \
+    done; \
+    THRASH_MACHINE_OPTIONAL_LIBS="$libs" just --justfile libraries/kristal-debug-tools/justfile run $rest
 
 # Run the debug-tools GUI (end users: auto-downloads/updates release binaries).
 # zh_hans: 启动调试工具图形界面（自动检测并下载最新 release，无需 just/Rust/Node）

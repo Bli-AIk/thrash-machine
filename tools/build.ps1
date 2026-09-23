@@ -118,7 +118,7 @@ function Invoke-TMFetchKristalReference {
 }
 
 function Resolve-TMKristal {
-    $pinnedReference = 'f62afea63ccab02f468c24ac0d096bd8a2c9aa81'
+    $pinnedReference = '8e592d84065263138d4e92593f0a4ab780d93822'
     $configuredReference = $env:THRASH_MACHINE_KRISTAL_REF
     $reference = if ($configuredReference) { $configuredReference } else { $pinnedReference }
     $source = $env:THRASH_MACHINE_KRISTAL_SOURCE

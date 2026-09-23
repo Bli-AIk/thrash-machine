@@ -13,6 +13,7 @@
 
 | `kristal`                                                                                                                     | `thrash-machine` |
 | ----------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/8e592d84065263138d4e92593f0a4ab780d93822) (`8e592d8`, 2026-09-21) |                  |
 | [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | v0.2.0 - v0.3.0  |
 | [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23)    | v0.0.0 – v0.1.0  |
 
@@ -51,6 +52,19 @@
 ```sh
 git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
 ```
+
+不想长期改配置？启动时可以临时开关子库，`mod.json` 一个字都不用动：
+
+```sh
+just run libs=mgr            # 本次启动带上 MGR
+just run libs=mgr,umr -w 3   # 同时开两个包，后面照常跟调试参数
+just run libs=-umr           # 本次启动关掉 UMR
+just run libs=-kristalI18n   # 任何库都能开关，不限于可选拓展
+```
+
+名字可以写各库 `lib.json` 里声明的 `alias`（MGR 是 `mgr`，UMR 是 `umr`），也可以写完整 id。不带前缀或写 `+` 表示强制打开，前缀 `-` 表示强制关闭；打开某个库时会自动带上它依赖的库（所以 `libs=umr` 会连 MGR 一起打开）。名字写错了启动时会直接报错，并把所有合法名字列出来。
+
+写成 `just libs=mgr run`（`libs=` 放在 `run` 前面）或用环境变量 `THRASH_MACHINE_OPTIONAL_LIBS=mgr just run` 也等价——只是 `libs=` 跟在 `run` 后面时由 `run` recipe 自己挑出来，记不住顺序时按上面的写法即可。
 
 ## 快速开始
 
@@ -108,7 +122,7 @@ $env:KRISTAL_ROOT = "C:\path\to\Kristal"; just run
 
 想一劳永逸，就把 `KRISTAL_ROOT` 配进环境变量（Windows 系统设置、Linux shell 配置）。
 
-调试参数直接透传给 kristal-debug-tools：`just run --encounter`（直接进遭遇）、`just run --wave 2 --tp 50`（指定波次和初始 TP）、`just run --lang zh-hans`（选本次启动语言）。
+调试参数直接透传给 kristal-debug-tools：`just run --encounter`（直接进遭遇）、`just run --wave 2 --tp 50`（指定波次和初始 TP）、`just run --lang zh-hans`（选本次启动语言）。子库也能这样临时开关，用法见上文「可选拓展」里的 `just run libs=...`。
 
 不想敲命令？GUI 也能用——Windows 双击 `gui.cmd`（其他平台 `just gui`）打开图形化启动器：运行项、调试参数、章节配置都是可视化点选，也能跑构建任务（见下文「打包 → GUI 打包」）。
 
@@ -154,7 +168,7 @@ Windows 双击仓库根目录的 `gui.cmd`（其他平台 `just gui`）打开 kr
 
 ### 引擎来源
 
-构建默认固定 Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`（`0.11.0-dev`，远程浅克隆到 `.build/Kristal`）。想换来源：交互终端里 `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` 按提示选（本地路径 / 远程 tag / 完整 commit），或用环境变量直接指定：
+构建默认使用版本表里固定的 Kristal 提交（远程浅克隆到 `.build/Kristal`）。想换来源：交互终端里 `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` 按提示选（本地路径 / 远程 tag / 完整 commit），或用环境变量直接指定：
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` —— 来源类型
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` —— 本地路径

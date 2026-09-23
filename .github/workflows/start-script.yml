@@ -23,6 +23,10 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
 
+          function Get-RootTracked([string]$Pattern) {
+            @(& git ls-files) | Where-Object { -not $_.Contains('/') -and $_ -like $Pattern }
+          }
+
           # Copy the checkout (including .git and submodule .git dirs) into a
           # temporary directory, so the script mutates a copy, not the checkout.
           $tmp = Join-Path $env:RUNNER_TEMP 'start-script-test'
@@ -32,6 +36,13 @@ jobs:
 
           Push-Location $tmp
           try {
+            # Derived projects do not all carry the template's files -- a
+            # README-only project has no tiled project, release manifest or
+            # changelog -- so note down what this repo actually has and assert
+            # against that instead of against the template's file list.
+            $oldTiled = @(Get-RootTracked '*.tiled-project') | Select-Object -First 1
+            $hadManifest = Test-Path '.release-please-manifest.json'
+
             & .\tools\start.ps1 --name 'CI Test Game' --yes
             if ($LASTEXITCODE -ne 0) {
               throw "tools/start.ps1 exited with code $LASTEXITCODE"
@@ -50,12 +61,14 @@ jobs:
             if ($modJson -match 'thrash-machine') {
               throw 'mod.json: template name still present'
             }
-            $manifest = Get-Content -Raw .release-please-manifest.json
-            if ($manifest -notmatch '"0\.0\.0"') {
-              throw '.release-please-manifest.json was not reset to 0.0.0'
+            if ($hadManifest) {
+              $manifest = Get-Content -Raw .release-please-manifest.json
+              if ($manifest -notmatch '"0\.0\.0"') {
+                throw '.release-please-manifest.json was not reset to 0.0.0'
+              }
             }
-            if (-not (Test-Path 'ci-test-game.tiled-project')) {
-              throw 'thrash-machine.tiled-project was not renamed to ci-test-game.tiled-project'
+            if ($oldTiled -and -not (Test-Path 'ci-test-game.tiled-project')) {
+              throw "$oldTiled was not renamed to ci-test-game.tiled-project"
             }
             # No tracked file may still mention the template name in any of
             # its spellings (thrash-machine / Thrash Machine / THRASH_MACHINE /
@@ -67,8 +80,8 @@ jobs:
             # The only dangling index entry allowed is the renamed tiled
             # project (mv before git add); anything else must exist untouched.
             $dangling = @(& git status --porcelain) | Where-Object { $_ -match '^.D ' }
-            $unexpected = $dangling | Where-Object { $_ -notlike '*thrash-machine.tiled-project' }
-            if ($unexpected) {
+            $unexpected = @($dangling | Where-Object { -not ($oldTiled -and $_.EndsWith($oldTiled)) })
+            if ($unexpected.Count -gt 0) {
               throw "tracked files went missing: $($unexpected -join ', ')"
             }
             if ($dangling.Count -gt 1) {

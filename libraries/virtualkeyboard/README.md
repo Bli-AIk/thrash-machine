@@ -43,7 +43,7 @@ and `c` buttons. A mod can also call `VirtualKeyboard:setVisible(false)` or
 `VirtualKeyboard:toggle()` at runtime. `toggle_key` is disabled by default;
 Android Back is intentionally not used as the control toggle.
 
-The adapter targets Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81`
+The adapter targets Kristal `8e592d84065263138d4e92593f0a4ab780d93822`
 (`0.11.0-dev`). It draws in Kristal's side areas when available, falls back to the
 existing 640x480 game canvas with the same edge spacing, and converts touch
 coordinates through Kristal's game scale and side offsets. It is not an API

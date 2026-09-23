@@ -13,6 +13,7 @@
 
 | `kristal`                                                                                                                     | `thrash-machine` |
 | ----------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/8e592d84065263138d4e92593f0a4ab780d93822) (`8e592d8`, 2026-09-21) |                  |
 | [v0.11.0-dev](https://github.com/KristalTeam/Kristal/commit/f62afea63ccab02f468c24ac0d096bd8a2c9aa81) (`f62afea`, 2026-08-16) | v0.2.0 - v0.3.0  |
 | [v0.10.0](https://github.com/KristalTeam/Kristal/commit/752bc0688ba97ca8a256ba9125b7e05a1ca6edbd) (`752bc068`, 2026-06-23)    | v0.0.0 – v0.1.0  |
 
@@ -51,6 +52,19 @@ Want to build UT-style light world battles and monster content? MagicalGlassRedu
 ```sh
 git submodule update --init libraries/MagicalGlassRedux libraries/UndertaleMonstersRecreation
 ```
+
+Not ready to commit to a config change? Libraries can be toggled for a single launch, leaving `mod.json` untouched:
+
+```sh
+just run libs=mgr            # this launch includes MGR
+just run libs=mgr,umr -w 3   # both packs, plus the usual debug arguments
+just run libs=-umr           # this launch drops UMR
+just run libs=-kristalI18n   # any library, not just the optional extensions
+```
+
+Name a library either by the `alias` its `lib.json` declares (MGR is `mgr`, UMR is `umr`) or by its full id. No prefix — or a `+` — forces it on; a `-` prefix forces it off. Enabling a library pulls in the libraries it depends on, so `libs=umr` enables MGR as well. An unknown name fails at startup and lists every valid name.
+
+Writing `just libs=mgr run` (with `libs=` before the recipe name) or setting `THRASH_MACHINE_OPTIONAL_LIBS=mgr just run` is equivalent — the `run` recipe just reads the `libs=` that follows `run` out of its arguments, so you do not have to remember the order.
 
 ## Quick Start
 
@@ -108,7 +122,7 @@ $env:KRISTAL_ROOT = "C:\path\to\Kristal"; just run
 
 For a permanent setup, add `KRISTAL_ROOT` to your environment (Windows system settings, Linux shell config).
 
-Debug arguments pass straight to kristal-debug-tools: `just run --encounter` (jump straight into an encounter), `just run --wave 2 --tp 50` (pick the wave and starting TP), `just run --lang zh-hans` (startup language for this run).
+Debug arguments pass straight to kristal-debug-tools: `just run --encounter` (jump straight into an encounter), `just run --wave 2 --tp 50` (pick the wave and starting TP), `just run --lang zh-hans` (startup language for this run). Libraries toggle the same way for a single launch — see `just run libs=...` under "Optional Extensions" above.
 
 Prefer a GUI? Windows users can double-click `gui.cmd` (or `just gui` elsewhere) to open the graphical launcher — run items, debug arguments and chapter config are all visual, and build tasks work there too (see "Packaging → GUI packaging" below).
 
@@ -154,7 +168,7 @@ The launcher only downloads the fixed release matching the current engine versio
 
 ### Engine source
 
-Builds pin Kristal `f62afea63ccab02f468c24ac0d096bd8a2c9aa81` (`0.11.0-dev`, shallow-cloned to `.build/Kristal`). To change the source: run `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` in an interactive terminal and pick (local path / remote tag / full commit), or set environment variables:
+Builds pin the Kristal commit recorded in this repo's version table (shallow-cloned to `.build/Kristal`). To change the source: run `THRASH_MACHINE_KRISTAL_SOURCE=ask just build` in an interactive terminal and pick (local path / remote tag / full commit), or set environment variables:
 
 - `THRASH_MACHINE_KRISTAL_SOURCE=local|path|tag|commit` — source type
 - `THRASH_MACHINE_KRISTAL_DIR` / `KRISTAL_ROOT` — local path
