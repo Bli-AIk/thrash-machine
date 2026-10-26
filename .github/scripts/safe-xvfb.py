@@ -46,14 +46,17 @@ def stop(_signum, _frame):
 def desktop_state():
     sockets = {}
     for path in Path('/tmp/.X11-unix').glob('X*'):
-        if path.name[1:].isdigit() and int(path.name[1:]) < 100:
+        suffix = path.name[1:].rstrip('_')
+        if suffix.isdigit() and int(suffix) < 100:
             stat = path.lstat()
             sockets[str(path)] = (stat.st_dev, stat.st_ino)
     pids = set()
     for process in Path('/proc').glob('[0-9]*'):
         try:
             if (process / 'comm').read_text().strip() == 'Xwayland':
-                pids.add(int(process.name))
+                # Include process start time so a reused PID cannot hide a restart.
+                stat = (process / 'stat').read_text().rsplit(')', 1)[1].split()
+                pids.add((int(process.name), stat[19]))
         except (OSError, ProcessLookupError):
             pass
     return sockets, pids
