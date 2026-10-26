@@ -104,6 +104,14 @@ jobs:
           (cd "$PWD" && zip -qr "dist/thrash-machine-$TAG-full-source.zip" . \
             -x '.git*' '.build*' 'dist*' '.tools*' '.worktrees*')
 
+      - name: Verify packaged runtime libraries
+        run: |
+          python3 .github/scripts/verify-package-libraries.py dist/thrash-machine-mod.zip --mod-id thrash-machine
+          python3 .github/scripts/verify-package-libraries.py dist/thrash-machine-release.love --mod-id thrash-machine
+          for apk in dist/*.apk; do
+            [ -f "$apk" ] || continue
+            python3 .github/scripts/verify-package-libraries.py "$apk" --mod-id thrash-machine
+          done
       - name: Generate and verify SHA-256 manifest
         run: |
           .github/scripts/generate_sha256sums.sh dist

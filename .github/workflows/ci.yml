@@ -83,6 +83,8 @@ jobs:
             test -s "$file"
             unzip -t "$file" >/dev/null
           done
+          python3 .github/scripts/verify-package-libraries.py dist/thrash-machine-mod.zip --mod-id thrash-machine
+          python3 .github/scripts/verify-package-libraries.py dist/thrash-machine-release.love --mod-id thrash-machine
           test -s dist-win/thrash-machine-release-win64.zip
           test -s dist-win/thrash-machine-debug-win64.zip
           unzip -t dist-win/thrash-machine-release-win64.zip >/dev/null
@@ -475,6 +477,13 @@ jobs:
             Assert-ArchiveOmits $entries 'mods/thrash-machine/gui.cmd'
           }
           Assert-ArchiveOmits $release 'mods/thrash-machine/libraries/kristal-debug-tools/'
+      - name: Verify libraries inside native Android packages
+        shell: pwsh
+        run: |
+          python .github/scripts/verify-package-libraries.py dist-android-win/thrash-machine-android.apk --mod-id thrash-machine
+          if ($LASTEXITCODE -ne 0) { throw 'Compiled APK library verification failed.' }
+          python .github/scripts/verify-package-libraries.py dist-android-win/thrash-machine-android-wrap.apk --mod-id thrash-machine
+          if ($LASTEXITCODE -ne 0) { throw 'Wrapper APK library verification failed.' }
       - name: Smoke test native task dispatcher cleanup
         shell: pwsh
         run: |
@@ -516,9 +525,11 @@ jobs:
           test -s dist-android-compile/thrash-machine-android.apk
           unzip -t dist-android-compile/thrash-machine-android.apk >/dev/null
           unzip -Z1 dist-android-compile/thrash-machine-android.apk | grep -Fx assets/game.love >/dev/null
+          python3 .github/scripts/verify-package-libraries.py dist-android-compile/thrash-machine-android.apk --mod-id thrash-machine
       - name: Build wrapper Android APK
         run: |
           THRASH_MACHINE_OUTPUT_DIR=dist-android-wrap ./tools/build_android_wrap.sh
           test -s dist-android-wrap/thrash-machine-android-wrap.apk
           unzip -t dist-android-wrap/thrash-machine-android-wrap.apk >/dev/null
           unzip -Z1 dist-android-wrap/thrash-machine-android-wrap.apk | grep -Fx assets/game.love >/dev/null
+          python3 .github/scripts/verify-package-libraries.py dist-android-wrap/thrash-machine-android-wrap.apk --mod-id thrash-machine
