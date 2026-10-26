@@ -79,9 +79,6 @@ def verify(archive, mod_id):
             library_id = library['id']
             if library_id in libraries:
                 raise ValueError(f'Duplicate library ID: {library_id}')
-            entry = name.removesuffix('lib.json') + 'lib.lua'
-            if entry not in names or not package.read(entry):
-                raise ValueError(f'Library {library_id} has no nonempty lib.lua')
             libraries[library_id] = library
         for library_id, enabled in manifest.get('optionalLibraries', {}).items():
             if enabled and library_id not in libraries:

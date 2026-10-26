@@ -177,7 +177,7 @@ Builds pin the Kristal commit recorded in this repo's version table (shallow-clo
 
 ### Automatic releases
 
-GitHub checks that the project packages correctly on every push and merge; after merging a release PR, the Windows x64 package, the .love package and the compiled APK are uploaded to the GitHub Release page automatically. **The wrap APK is not built by default** — when triggering a build manually on GitHub, tick `build_android_wrap` to include it.
+GitHub checks that the project packages correctly on every push and merge; after merging a release PR, the Windows x64 package, the .love package and the compiled APK are uploaded to the GitHub Release page automatically. Tagged releases publish the compiled APK. Use local `just build-android-wrap` or CI test builds for wrapper APKs.
 
 ## Custom Icons (optional)
 
@@ -199,3 +199,28 @@ Write conventional commits (feat/fix drive release-please versions and changelog
 ## License
 
 Repository-authored Lua source and docs are dual-licensed under MIT ([LICENSE-MIT](LICENSE-MIT)) or Apache-2.0 ([LICENSE-APACHE](LICENSE-APACHE)). Kristal and submodule license boundaries: [THIRD_PARTY.md](THIRD_PARTY.md).
+
+### Android release signing and upgrades
+
+Tagged compiled APK releases require four repository secrets:
+`ANDROID_SIGNING_KEYSTORE_BASE64`, `ANDROID_SIGNING_STORE_PASSWORD`,
+`ANDROID_SIGNING_KEY_ALIAS`, and `ANDROID_SIGNING_KEY_PASSWORD`. Set the public
+repository variable `ANDROID_SIGNING_CERT_SHA256` to the signing certificate's
+SHA-256 fingerprint. Each project must use its own persistent keystore; never
+reuse the template's signing key in a derived project. Missing configuration or
+a certificate mismatch stops the Android release before publication.
+
+Release tags must be `vMAJOR.MINOR.PATCH`. The compiled APK uses
+`major * 1000000 + minor * 1000 + patch` as its version code, with minor and patch
+at most 999 and the result within `1..2100000000`. CI checks the APK's certificate,
+package ID, version code, and version name before uploading it. Pull request
+builds retain debug signing and do not access release secrets. Wrapper APKs keep
+the official LÖVE shell's package identity and version, so they are for local
+experiments and tests; tagged releases publish the compiled APK.
+
+Older APK releases used different temporary signing keys. Android cannot install
+a newly signed APK over an installation with another certificate. Export saves
+before uninstalling that old installation, then install the new APK and restore
+them. Future compiled releases signed with the same persistent key can upgrade
+in place. Keep an encrypted offline backup of the keystore, alias, passwords, and
+certificate fingerprint; losing the key prevents updates to existing installs.
