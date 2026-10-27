@@ -177,7 +177,7 @@ Windows 双击仓库根目录的 `gui.cmd`（其他平台 `just gui`）打开 kr
 
 ### 自动发版
 
-每次推送和合并，GitHub 都会自动检查项目能否正常打包；合并发版 PR 之后，Windows x64、.love、编译版 APK 会自动上传到 GitHub Release 页面。**套包版默认不自动构建**，需要时在 GitHub 上手动触发构建并勾选 `build_android_wrap`。
+每次推送和合并，GitHub 都会自动检查项目能否正常打包；合并发版 PR 之后，Windows x64、.love、编译版 APK 会自动上传到 GitHub Release 页面。正式发布只提供编译版 APK；套包版通过本地 `just build-android-wrap` 或 CI 测试构建使用。
 
 ## 自定义图标（可选）
 
@@ -199,3 +199,22 @@ Windows 双击仓库根目录的 `gui.cmd`（其他平台 `just gui`）打开 kr
 ## 许可证
 
 自研 Lua 源码与文档为 MIT / Apache-2.0 双许可（[LICENSE-MIT](LICENSE-MIT) / [LICENSE-APACHE](LICENSE-APACHE)）。Kristal 与各子模块的许可边界见 [THIRD_PARTY.md](THIRD_PARTY.md)。
+
+### Android 发布签名与升级
+
+正式 tag 的编译版 APK 需要四个仓库 Secrets：
+`ANDROID_SIGNING_KEYSTORE_BASE64`、`ANDROID_SIGNING_STORE_PASSWORD`、
+`ANDROID_SIGNING_KEY_ALIAS`、`ANDROID_SIGNING_KEY_PASSWORD`；公开仓库变量
+`ANDROID_SIGNING_CERT_SHA256` 保存签名证书的 SHA-256 指纹。
+每个项目使用自己的长期 keystore，派生项目不能复用模板的签名密钥。
+配置缺失或证书不匹配时，CI 会阻止 Android 发布。
+
+发布 tag 必须为 `vMAJOR.MINOR.PATCH`，编译版 APK 的版本码为
+`major * 1000000 + minor * 1000 + patch`；minor、patch 均不得超过 999，结果需在
+`1..2100000000` 内。上传前会校验证书、包名、版本码和版本名称。
+PR 构建继续使用调试签名，不读取发布 Secrets。套包 APK 保留官方 LÖVE 壳的包名和版本，
+仅用于本地实验和测试；正式 tag 发布编译版 APK。
+
+旧版 APK 使用过不同的临时签名，Android 无法用新证书直接覆盖安装。
+请先导出存档，再卸载旧版、安装新版并恢复存档。此后使用同一长期密钥签名的编译版可以覆盖升级。
+请离线加密备份 keystore、别名、密码和证书指纹；密钥丢失后将无法更新已安装的应用。
