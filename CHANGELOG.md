@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/Bli-AIk/thrash-machine/compare/v0.3.1...v0.3.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* **android:** keep release packages complete and signatures stable ([#21](https://github.com/Bli-AIk/thrash-machine/issues/21)) ([f3d6571](https://github.com/Bli-AIk/thrash-machine/commit/f3d657160c5605d8e01e7d00328cd80f2982e43c))
+
 ## [0.3.1](https://github.com/Bli-AIk/thrash-machine/compare/v0.3.0...v0.3.1) (2026-09-23)
 
 
